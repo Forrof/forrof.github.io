@@ -1,0 +1,8 @@
+title: "forrof’s Lab"
+description: "CTF writeups, experiments, and projects"
+baseurl: ""
+url: "https://forrof.github.io"
+collections:
+  ctf:
+    output: true
+markdown: kramdown
