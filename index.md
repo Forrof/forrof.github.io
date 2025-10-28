@@ -3,9 +3,10 @@ layout: default
 title: Home
 ---
 
-<div class="card">
+
+<div style="text-align: center; margin-bottom: 2rem;">
   <h2>Forrorf</h2>
-  <p>I do forencics and i like cars.</p>
+  <p>I do forensics and I like cars.</p>
 </div>
 
 <div class="card">
