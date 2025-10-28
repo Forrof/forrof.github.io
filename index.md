@@ -4,8 +4,8 @@ title: Home
 ---
 
 <div class="card">
-  <h2>Welcome to forrof’s Lab</h2>
-  <p>A collection of CTF writeups, open-source projects, and cyber experiments.</p>
+  <h2>Forrorf</h2>
+  <p>I do forencics and i like cars.</p>
 </div>
 
 <div class="card">
@@ -14,4 +14,15 @@ title: Home
     <li><a href="/projects/">Projects</a></li>
     <li><a href="/ctf/">CTF Writeups</a></li>
   </ul>
+</div>
+
+<h2>CTF Writeups</h2>
+<div class="grid">
+{% for post in site.ctf reversed %}
+  <div class="card">
+    <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
+    <p>{{ post.excerpt | strip_html | truncate: 100 }}</p>
+    <p class="meta">{{ post.date | date: "%b %d, %Y" }} — {{ post.tags | join: ", " }}</p>
+  </div>
+{% endfor %}
 </div>

@@ -1,5 +1,5 @@
-title: "forrof’s Lab"
-description: "CTF writeups, experiments, and projects"
+title: "forrof’s"
+description: "CTF writeups and projects"
 baseurl: ""
 url: "https://forrof.github.io"
 collections:
