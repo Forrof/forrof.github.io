@@ -18,5 +18,12 @@
 
     {{ content }}
   </div>
+
+<script>
+const cards = document.querySelectorAll('.card');
+cards.forEach((card, i) => {
+  card.style.animationDelay = `${i * 0.1}s`;
+});
+</script>
 </body>
 </html>
