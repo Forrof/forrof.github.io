@@ -1,101 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+PS C:\Users\test\Desktop\forrof-portfolio-final.tar\forrof-portfolio-final\forrof-portfolio> npm run deploy
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+> forrof-portfolio@0.1.0 predeploy
+> npm run build
 
-body {
-  font-family: 'Courier New', Courier, 'Monaco', 'Consolas', monospace;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #000;
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
+> forrof-portfolio@0.1.0 build
+> cross-env NODE_OPTIONS=--localstorage-file=./.localstorage react-scripts build
 
-/* Custom Scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 10px;
-}
+PS C:\Users\test\Desktop\forrof-portfolio-final.tar\forrof-portfolio-final\forrof-portfolio>
+Failed to compile.
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-}
+SyntaxError: C:\Users\test\Desktop\forrof-portfolio-final.tar\forrof-portfolio-final\forrof-portfolio\src\WriteupViewer.jsx: Support for the experimental syntax 'decorators' isn't currently enabled (1:1):
+> 1 | @tailwind base;
+    | ^
+  2 | @tailwind components;
+  3 | @tailwind utilities;
+  4 |
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(75, 85, 99, 0.6);
-  border-radius: 10px;
-  border: 2px solid rgba(0, 0, 0, 0.3);
-}
+Add @babel/plugin-proposal-decorators (https://github.com/babel/babel/tree/main/packages/babel-plugin-proposal-decorators) to the 'plugins' section of your Babel config to enable transformation.
+If you want to leave it as-is, add @babel/plugin-syntax-decorators (https://github.com/babel/babel/tree/main/packages/babel-plugin-syntax-decorators) to the 'plugins' section to enable parsing.
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(107, 114, 128, 0.8);
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 500px;
-  }
-}
-
-@keyframes slideLeft {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.2s ease-out;
-}
-
-.animate-slideUp {
-  animation: slideUp 0.3s ease-out;
-}
-
-.animate-slideDown {
-  animation: slideDown 0.3s ease-out;
-}
-
-.animate-slideLeft {
-  animation: slideLeft 0.3s ease-out;
-}
+If you already added the plugin for this syntax to your config, it's possible that your config isn't being loaded.
+You can re-run Babel with the BABEL_SHOW_CONFIG_FOR environment variable to show the loaded configuration:
+        npx cross-env BABEL_SHOW_CONFIG_FOR=C:\Users\test\Desktop\forrof-portfolio-final.tar\forrof-portfolio-final\forrof-portfolio\src\WriteupViewer.jsx <your build command>
+See https://babeljs.io/docs/configuration#print-effective-configs for more info.
+    at parser.next (<anonymous>)
+    at normalizeFile.next (<anonymous>)
+    at run.next (<anonymous>)
+    at transform.next (<anonymous>)
