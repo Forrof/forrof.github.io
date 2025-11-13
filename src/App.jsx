@@ -163,7 +163,7 @@ const App = () => {
       {/* Image Preview Modal */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm animate-fadeIn"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn"
           onClick={() => setSelectedImage(null)}
         >
           <div className="max-w-4xl max-h-screen flex items-center justify-center p-4">
@@ -179,7 +179,7 @@ const App = () => {
 
       {/* Centered Writeup Modal */}
       {selectedWriteup && selectedWriteup !== '#' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-black bg-opacity-80 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
           <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-[80vw] h-[90vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-700">
@@ -781,7 +781,7 @@ const CategoryBarChart = ({ challenges }) => {
       {categories.map(([category, count]) => (
         <div key={category} className="flex flex-col items-center flex-1">
           <div
-            className="w-2 rounded-t transition-all hover:opacity-80"
+            className="w-4 rounded-t transition-all hover:opacity-80"
             style={{
               height: `${(count / maxCount) * 160}px`,
               backgroundColor: categoryColors[category] || '#4a9eff'
@@ -821,7 +821,7 @@ const PlatformBarChart = ({ challenges }) => {
       {platforms.map(([platform, count]) => (
         <div key={platform} className="flex flex-col items-center flex-1">
           <div
-            className="w-2 rounded-t transition-all hover:opacity-80"
+            className="w-4 rounded-t transition-all hover:opacity-80"
             style={{
               height: `${(count / maxCount) * 160}px`,
               backgroundColor: platformColors[platform] || '#4a9eff'
