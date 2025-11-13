@@ -759,11 +759,12 @@ const PlatformTimelineChart = ({ challenges }) => {
 // Category Bar Chart Component
 const CategoryBarChart = ({ challenges }) => {
   const categoryColors = {
-    'Web': '#4a9eff',
-    'Forensics': '#b896d6',
-    'Binary': '#d994b8',
-    'Crypto': '#d4c49f',
-    'Misc': '#7ec8a3'
+    'Forensics': '#a855f7',
+    'Web': '#eab308',
+    'Binary': '#ef4444',
+    'Reversing': '#06b6d4',
+    'Crypto': '#f59e0b',
+    'Misc': '#10b981'
   };
 
   const categories = useMemo(() => {
@@ -781,7 +782,7 @@ const CategoryBarChart = ({ challenges }) => {
       {categories.map(([category, count]) => (
         <div key={category} className="flex flex-col items-center flex-1">
           <div
-            className="w-4 rounded-t transition-all hover:opacity-80"
+            className="w-6 rounded-t transition-all hover:opacity-80"
             style={{
               height: `${(count / maxCount) * 160}px`,
               backgroundColor: categoryColors[category] || '#4a9eff'
@@ -799,11 +800,11 @@ const CategoryBarChart = ({ challenges }) => {
 // Platform Bar Chart Component
 const PlatformBarChart = ({ challenges }) => {
   const platformColors = {
-    'HackTheBox': '#6dd47d',
-    'CyberDefenders': '#6b8ec9',
-    'CTF': '#d49d6f',
-    'TryHackMe': '#b896d6',
-    'PicoCTF': '#d994b8'
+    'HackTheBox': '#22c55e',
+    'CyberDefenders': '#1e40af',
+    'CTF': '#f97316',
+    'TryHackMe': '#8b5cf6',
+    'PicoCTF': '#ec4899'
   };
 
   const platforms = useMemo(() => {
@@ -821,7 +822,7 @@ const PlatformBarChart = ({ challenges }) => {
       {platforms.map(([platform, count]) => (
         <div key={platform} className="flex flex-col items-center flex-1">
           <div
-            className="w-4 rounded-t transition-all hover:opacity-80"
+            className="w-6 rounded-t transition-all hover:opacity-80"
             style={{
               height: `${(count / maxCount) * 160}px`,
               backgroundColor: platformColors[platform] || '#4a9eff'
