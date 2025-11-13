@@ -163,7 +163,7 @@ const App = () => {
       {/* Image Preview Modal */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-90 backdrop-blur-sm animate-fadeIn"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm animate-fadeIn"
           onClick={() => setSelectedImage(null)}
         >
           <div className="max-w-4xl max-h-screen flex items-center justify-center p-4">
@@ -179,7 +179,7 @@ const App = () => {
 
       {/* Centered Writeup Modal */}
       {selectedWriteup && selectedWriteup !== '#' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-black bg-opacity-80 backdrop-blur-sm animate-fadeIn">
           <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-[80vw] h-[90vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-700">
@@ -759,11 +759,11 @@ const PlatformTimelineChart = ({ challenges }) => {
 // Category Bar Chart Component
 const CategoryBarChart = ({ challenges }) => {
   const categoryColors = {
-    'Web': '#06b6d4',
-    'Forensics': '#8b5cf6',
-    'Binary': '#ec4899',
-    'Crypto': '#f59e0b',
-    'Misc': '#10b981'
+    'Web': '#4a9eff',
+    'Forensics': '#b896d6',
+    'Binary': '#d994b8',
+    'Crypto': '#d4c49f',
+    'Misc': '#7ec8a3'
   };
 
   const categories = useMemo(() => {
@@ -777,19 +777,19 @@ const CategoryBarChart = ({ challenges }) => {
   const maxCount = Math.max(...categories.map(c => c[1]), 1);
 
   return (
-    <div className="flex items-end justify-around h-48 gap-2">
+    <div className="flex items-end justify-around h-48 gap-1">
       {categories.map(([category, count]) => (
         <div key={category} className="flex flex-col items-center flex-1">
           <div
-            className="w-full rounded-t transition-all hover:opacity-80"
+            className="w-2 rounded-t transition-all hover:opacity-80"
             style={{
               height: `${(count / maxCount) * 160}px`,
-              backgroundColor: categoryColors[category] || '#06b6d4'
+              backgroundColor: categoryColors[category] || '#4a9eff'
             }}
             title={`${category}: ${count}`}
           />
-          <div className="text-xs text-gray-300 font-bold mt-2 text-center">{category}</div>
-          <div className="text-sm text-white font-bold">{count}</div>
+          <div className="text-xs text-gray-400 font-bold mt-2 text-center">{category}</div>
+          <div className="text-sm text-gray-300 font-bold">{count}</div>
         </div>
       ))}
     </div>
@@ -799,11 +799,11 @@ const CategoryBarChart = ({ challenges }) => {
 // Platform Bar Chart Component
 const PlatformBarChart = ({ challenges }) => {
   const platformColors = {
-    'HackTheBox': '#22c55e',
-    'CyberDefenders': '#1e40af',
-    'CTF': '#f97316',
-    'TryHackMe': '#8b5cf6',
-    'PicoCTF': '#ec4899'
+    'HackTheBox': '#6dd47d',
+    'CyberDefenders': '#6b8ec9',
+    'CTF': '#d49d6f',
+    'TryHackMe': '#b896d6',
+    'PicoCTF': '#d994b8'
   };
 
   const platforms = useMemo(() => {
@@ -817,19 +817,19 @@ const PlatformBarChart = ({ challenges }) => {
   const maxCount = Math.max(...platforms.map(p => p[1]), 1);
 
   return (
-    <div className="flex items-end justify-around h-48 gap-2">
+    <div className="flex items-end justify-around h-48 gap-1">
       {platforms.map(([platform, count]) => (
         <div key={platform} className="flex flex-col items-center flex-1">
           <div
-            className="w-full rounded-t transition-all hover:opacity-80"
+            className="w-2 rounded-t transition-all hover:opacity-80"
             style={{
               height: `${(count / maxCount) * 160}px`,
-              backgroundColor: platformColors[platform] || '#06b6d4'
+              backgroundColor: platformColors[platform] || '#4a9eff'
             }}
             title={`${platform}: ${count}`}
           />
-          <div className="text-xs text-gray-300 font-bold mt-2 text-center">{platform}</div>
-          <div className="text-sm text-white font-bold">{count}</div>
+          <div className="text-xs text-gray-400 font-bold mt-2 text-center">{platform}</div>
+          <div className="text-sm text-gray-300 font-bold">{count}</div>
         </div>
       ))}
     </div>
