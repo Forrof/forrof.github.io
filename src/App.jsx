@@ -7,6 +7,12 @@ const App = () => {
   const [selectedWriteup, setSelectedWriteup] = useState(null);
   const [expandedPlatform, setExpandedPlatform] = useState(null);
   const [expandedChallenge, setExpandedChallenge] = useState(null);
+  const [showCarEasterEgg, setShowCarEasterEgg] = useState(false);
+
+  const handleCarClick = () => {
+    setShowCarEasterEgg(true);
+    setActiveTab('garage');
+  };
 
   // Sample CTF data - replace with your actual data
   const ctfChallenges = [
@@ -178,6 +184,18 @@ const App = () => {
               >
                 Projects
               </button>
+              {showCarEasterEgg && (
+                <button
+                  onClick={() => setActiveTab('garage')}
+                  className={`px-6 py-2 text-sm font-bold transition-all rounded-lg animate-slideUp ${
+                    activeTab === 'garage'
+                      ? 'bg-white text-black'
+                      : 'bg-gray-800 bg-opacity-50 text-gray-300 hover:bg-gray-700 hover:bg-opacity-70 backdrop-blur-sm'
+                  }`}
+                >
+                  🏎️ Garage
+                </button>
+              )}
             </nav>
           </div>
         </header>
@@ -310,6 +328,23 @@ const App = () => {
                 </div>
               </div>
             </div>
+          ) : activeTab === 'garage' ? (
+            <div>
+              {/* Garage/Car Section */}
+              <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 rounded-xl overflow-hidden p-8 text-center">
+                <h2 className="text-3xl font-bold text-white mb-4">🏎️ The Garage</h2>
+                <p className="text-gray-300 font-bold text-lg mb-6">
+                  You found the secret! Welcome to my automotive corner.
+                </p>
+                <div className="text-gray-400 font-bold">
+                  <p className="mb-4">Content coming soon...</p>
+                  <p className="text-sm">This is where I'll share photos and posts about my car.</p>
+                  <p className="text-xs text-gray-500 mt-6">
+                    Easter egg unlocked! 🎉
+                  </p>
+                </div>
+              </div>
+            </div>
           ) : (
             <div>
               {/* Projects List */}
@@ -377,6 +412,60 @@ const App = () => {
           onClose={() => setSelectedWriteup(null)} 
         />
       )}
+
+      {/* Car Easter Egg - Only show if not already discovered */}
+      {!showCarEasterEgg && <CarEasterEgg onClick={handleCarClick} />}
+    </div>
+  );
+};
+
+// Car Easter Egg Component
+const CarEasterEgg = ({ onClick }) => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    // Random position on screen
+    const randomPosition = () => {
+      const x = Math.random() * (window.innerWidth - 100);
+      const y = Math.random() * (window.innerHeight - 100);
+      setPosition({ x, y });
+      setVisible(true);
+
+      // Hide after 5 seconds if not clicked
+      setTimeout(() => setVisible(false), 5000);
+    };
+
+    // Show car randomly every 15-30 seconds
+    const showInterval = setInterval(() => {
+      randomPosition();
+    }, Math.random() * 15000 + 15000);
+
+    // Show first time after 10 seconds
+    const firstShow = setTimeout(randomPosition, 10000);
+
+    return () => {
+      clearInterval(showInterval);
+      clearTimeout(firstShow);
+    };
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div
+      className="fixed z-50 cursor-pointer animate-bounce"
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        transition: 'opacity 0.5s'
+      }}
+      onClick={onClick}
+      title="Click me! 🤫"
+    >
+      <span className="text-6xl hover:scale-110 transition-transform">
+        🚗
+      </span>
     </div>
   );
 };
