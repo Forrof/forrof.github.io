@@ -37,6 +37,16 @@ const App = () => {
   const ctfChallenges = [
     {
       id: 1,
+      title: "Free Boost",
+      platform: "HackTheBox",
+      difficulty: "Medium",
+      category: "Forensics",
+      description: "Network traffic analysis and PowerShell malware investigation involving Discord token stealer",
+      writeupPath: "/writeups/htb-free-boost.md",
+      date: "Nov 2024"
+    },
+    {
+      id: 2,
       title: "SQL Injection in Login Portal",
       platform: "HackTheBox",
       difficulty: "Medium",
@@ -46,7 +56,7 @@ const App = () => {
       date: "Nov 2024"
     },
     {
-      id: 2,
+      id: 3,
       title: "Buffer Overflow Exploitation",
       platform: "TryHackMe",
       difficulty: "Hard",
@@ -56,7 +66,7 @@ const App = () => {
       date: "Oct 2024"
     },
     {
-      id: 3,
+      id: 4,
       title: "Crypto Challenge - RSA",
       platform: "PicoCTF",
       difficulty: "Easy",
@@ -66,7 +76,7 @@ const App = () => {
       date: "Sep 2024"
     },
     {
-      id: 4,
+      id: 5,
       title: "XSS to Account Takeover",
       platform: "HackTheBox",
       difficulty: "Medium",
