@@ -463,7 +463,7 @@ const CarEasterEgg = ({ onClick }) => {
       onClick={onClick}
       title="Click me! 🤫"
     >
-      <span className="text-6xl hover:scale-110 transition-transform">
+      <span className="text-2xl hover:scale-110 transition-transform">
         🚗
       </span>
     </div>
