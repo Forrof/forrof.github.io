@@ -159,6 +159,25 @@ const App = () => {
         />
       </div>
 
+      {/* Centered Writeup Modal */}
+      {selectedWriteup && selectedWriteup !== '#' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-black bg-opacity-90 border border-gray-700 rounded-xl w-full max-w-3xl max-h-96 overflow-y-auto">
+            <div className="p-6">
+              <button
+                onClick={() => setSelectedWriteup(null)}
+                className="mb-4 px-4 py-2 bg-gray-800 bg-opacity-50 hover:bg-opacity-70 text-white rounded-lg text-sm font-bold float-right"
+              >
+                ✕ Close
+              </button>
+              <div className="clear-both">
+                <WriteupViewer path={selectedWriteup} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col">
         {/* Header */}
@@ -210,16 +229,16 @@ const App = () => {
             <div>
               {/* Statistics */}
               <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* By Category - Timeline Chart */}
+                {/* By Category - Bar Chart */}
                 <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
                   <h3 className="text-lg font-bold text-white mb-4">▸ Challenges by Category</h3>
-                  <CategoryTimelineChart challenges={ctfChallenges} />
+                  <CategoryBarChart challenges={ctfChallenges} />
                 </div>
 
-                {/* By Platform - Timeline Chart */}
+                {/* By Platform - Bar Chart */}
                 <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
                   <h3 className="text-lg font-bold text-white mb-4">▸ Challenges by Platform</h3>
-                  <PlatformTimelineChart challenges={ctfChallenges} />
+                  <PlatformBarChart challenges={ctfChallenges} />
                 </div>
               </div>
 
@@ -686,6 +705,86 @@ const PlatformTimelineChart = ({ challenges }) => {
           </div>
         ))}
       </div>
+    </div>
+  );
+};
+
+// Category Bar Chart Component
+const CategoryBarChart = ({ challenges }) => {
+  const categoryColors = {
+    'Web': '#06b6d4',
+    'Forensics': '#8b5cf6',
+    'Binary': '#ec4899',
+    'Crypto': '#f59e0b',
+    'Misc': '#10b981'
+  };
+
+  const categories = useMemo(() => {
+    const counts = {};
+    challenges.forEach(ch => {
+      counts[ch.category] = (counts[ch.category] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [challenges]);
+
+  const maxCount = Math.max(...categories.map(c => c[1]), 1);
+
+  return (
+    <div className="flex items-end justify-around h-48 gap-2">
+      {categories.map(([category, count]) => (
+        <div key={category} className="flex flex-col items-center flex-1">
+          <div
+            className="w-full rounded-t transition-all hover:opacity-80"
+            style={{
+              height: `${(count / maxCount) * 160}px`,
+              backgroundColor: categoryColors[category] || '#06b6d4'
+            }}
+            title={`${category}: ${count}`}
+          />
+          <div className="text-xs text-gray-300 font-bold mt-2 text-center">{category}</div>
+          <div className="text-sm text-white font-bold">{count}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Platform Bar Chart Component
+const PlatformBarChart = ({ challenges }) => {
+  const platformColors = {
+    'HackTheBox': '#22c55e',
+    'CyberDefenders': '#1e40af',
+    'CTF': '#f97316',
+    'TryHackMe': '#8b5cf6',
+    'PicoCTF': '#ec4899'
+  };
+
+  const platforms = useMemo(() => {
+    const counts = {};
+    challenges.forEach(ch => {
+      counts[ch.platform] = (counts[ch.platform] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [challenges]);
+
+  const maxCount = Math.max(...platforms.map(p => p[1]), 1);
+
+  return (
+    <div className="flex items-end justify-around h-48 gap-2">
+      {platforms.map(([platform, count]) => (
+        <div key={platform} className="flex flex-col items-center flex-1">
+          <div
+            className="w-full rounded-t transition-all hover:opacity-80"
+            style={{
+              height: `${(count / maxCount) * 160}px`,
+              backgroundColor: platformColors[platform] || '#06b6d4'
+            }}
+            title={`${platform}: ${count}`}
+          />
+          <div className="text-xs text-gray-300 font-bold mt-2 text-center">{platform}</div>
+          <div className="text-sm text-white font-bold">{count}</div>
+        </div>
+      ))}
     </div>
   );
 };
