@@ -5,6 +5,7 @@ import WriteupViewer from './WriteupViewer';
 const App = () => {
   const [activeTab, setActiveTab] = useState('ctf');
   const [selectedWriteup, setSelectedWriteup] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [expandedPlatform, setExpandedPlatform] = useState(null);
   const [expandedChallenge, setExpandedChallenge] = useState(null);
   const [showCarEasterEgg, setShowCarEasterEgg] = useState(false);
@@ -159,10 +160,27 @@ const App = () => {
         />
       </div>
 
+      {/* Image Preview Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-90 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="max-w-4xl max-h-screen flex items-center justify-center p-4">
+            <img 
+              src={selectedImage} 
+              alt="Preview" 
+              className="max-w-full max-h-screen rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Centered Writeup Modal */}
       {selectedWriteup && selectedWriteup !== '#' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-full max-w-5xl h-[90vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
+          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-700">
               <h2 className="text-white font-bold text-lg">Writeup</h2>
@@ -205,8 +223,8 @@ const App = () => {
               
               {/* Right - Writeup Content */}
               <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
-                <div className="p-6 max-w-3xl mx-auto">
-                  <WriteupContent path={selectedWriteup} />
+                <div className="p-6 max-w-4xl mx-auto">
+                  <WriteupContent path={selectedWriteup} onImageClick={setSelectedImage} />
                 </div>
               </div>
             </div>
@@ -819,7 +837,7 @@ const PlatformBarChart = ({ challenges }) => {
 };
 
 // Writeup Content Component
-const WriteupContent = ({ path }) => {
+const WriteupContent = ({ path, onImageClick }) => {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -846,7 +864,7 @@ const WriteupContent = ({ path }) => {
     
     // Images first (before other replacements)
     html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, (match, alt, src) => {
-      return `<div class="my-2 flex justify-center"><img src="${src}" alt="${alt}" class="max-w-sm max-h-48 rounded-lg border border-gray-700 object-cover" onerror="this.style.display='none'" /></div>`;
+      return `<div class="my-2 flex justify-center"><img src="${src}" alt="${alt}" class="max-w-sm max-h-48 rounded-lg border border-gray-700 object-cover cursor-pointer hover:opacity-80 transition-opacity" onclick="window.__previewImage && window.__previewImage('${src}')" /></div>`;
     });
     
     html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
@@ -868,6 +886,16 @@ const WriteupContent = ({ path }) => {
     
     return html;
   };
+
+  // Setup global image preview function
+  useEffect(() => {
+    window.__previewImage = (src) => {
+      if (onImageClick) onImageClick(src);
+    };
+    return () => {
+      delete window.__previewImage;
+    };
+  }, [onImageClick]);
 
   return (
     <div>
