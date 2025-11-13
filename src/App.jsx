@@ -161,22 +161,22 @@ const App = () => {
 
       {/* Centered Writeup Modal */}
       {selectedWriteup && selectedWriteup !== '#' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm">
-          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-full max-w-4xl h-[85vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-700">
-              <h2 className="text-white font-bold">Writeup</h2>
+              <h2 className="text-white font-bold text-lg">Writeup</h2>
               <button
                 onClick={() => setSelectedWriteup(null)}
-                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-bold text-sm"
+                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-bold text-sm transition-colors"
               >
                 ✕ Close
               </button>
             </div>
             
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-6">
+            {/* Content with pretty scrollbar */}
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+              <div className="p-8">
                 <WriteupContent path={selectedWriteup} />
               </div>
             </div>
@@ -892,7 +892,7 @@ const CarEasterEgg = ({ onClick }) => {
       onClick={onClick}
       title="Click me! 🤫"
     >
-      <span className="text-2xl hover:scale-110 transition-transform">
+      <span className="text-lg hover:scale-110 transition-transform">
         🚗
       </span>
     </div>
