@@ -224,7 +224,7 @@ const App = () => {
         </header>
 
         {/* Main Content */}
-        <main className={`flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300 ${selectedWriteup ? 'md:w-1/2 md:pr-2' : 'max-w-7xl'}`}>
+        <main className="flex-1 w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           {activeTab === 'ctf' ? (
             <div>
               {/* Statistics */}
