@@ -161,8 +161,8 @@ const App = () => {
 
       {/* Centered Writeup Modal */}
       {selectedWriteup && selectedWriteup !== '#' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-screen h-screen overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-full max-w-5xl h-[90vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-700">
               <h2 className="text-white font-bold text-lg">Writeup</h2>
@@ -205,7 +205,7 @@ const App = () => {
               
               {/* Right - Writeup Content */}
               <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
-                <div className="p-6">
+                <div className="p-6 max-w-3xl mx-auto">
                   <WriteupContent path={selectedWriteup} />
                 </div>
               </div>
@@ -846,11 +846,11 @@ const WriteupContent = ({ path }) => {
     
     // Images first (before other replacements)
     html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, (match, alt, src) => {
-      return `<div class="my-3"><img src="${src}" alt="${alt}" class="w-full max-h-64 rounded-lg border border-gray-700 object-cover" onerror="this.style.display='none'" /></div>`;
+      return `<div class="my-2 flex justify-center"><img src="${src}" alt="${alt}" class="max-w-sm max-h-48 rounded-lg border border-gray-700 object-cover" onerror="this.style.display='none'" /></div>`;
     });
     
     html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-      return `<pre class="bg-gray-900 p-2 rounded text-xs overflow-x-auto border border-gray-700"><code class="text-cyan-400">${code.trim()}</code></pre>`;
+      return `<pre class="bg-gray-900 p-2 rounded text-xs overflow-x-auto border border-gray-700 my-2"><code class="text-cyan-400">${code.trim()}</code></pre>`;
     });
     
     html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-800 px-2 py-1 rounded text-cyan-400 text-xs">$1</code>');
