@@ -8,11 +8,30 @@ const App = () => {
   const [expandedPlatform, setExpandedPlatform] = useState(null);
   const [expandedChallenge, setExpandedChallenge] = useState(null);
   const [showCarEasterEgg, setShowCarEasterEgg] = useState(false);
+  const [githubRepos, setGithubRepos] = useState([]);
+  const [loadingRepos, setLoadingRepos] = useState(false);
 
   const handleCarClick = () => {
     setShowCarEasterEgg(true);
     setActiveTab('garage');
   };
+
+  // Fetch GitHub repos
+  useEffect(() => {
+    if (activeTab === 'projects' && githubRepos.length === 0) {
+      setLoadingRepos(true);
+      fetch('https://api.github.com/users/forrof/repos?sort=updated&per_page=10')
+        .then(res => res.json())
+        .then(data => {
+          setGithubRepos(data);
+          setLoadingRepos(false);
+        })
+        .catch(err => {
+          console.error('Error fetching repos:', err);
+          setLoadingRepos(false);
+        });
+    }
+  }, [activeTab, githubRepos.length]);
 
   // Sample CTF data - replace with your actual data
   const ctfChallenges = [
@@ -55,31 +74,6 @@ const App = () => {
       description: "Stored XSS leading to admin cookie theft",
       writeupPath: "#",
       date: "Aug 2024"
-    }
-  ];
-
-  // Sample projects data
-  const projects = [
-    {
-      id: 1,
-      name: "Network Scanner",
-      description: "Python-based network vulnerability scanner",
-      tech: ["Python", "Scapy", "Nmap"],
-      githubUrl: "https://github.com/forrof/project1"
-    },
-    {
-      id: 2,
-      name: "Password Cracker",
-      description: "Multi-threaded password hash cracking tool",
-      tech: ["Python", "Hashcat", "GPU"],
-      githubUrl: "https://github.com/forrof/project2"
-    },
-    {
-      id: 3,
-      name: "Web Fuzzer",
-      description: "Custom web application fuzzing framework",
-      tech: ["Go", "HTTP", "Concurrency"],
-      githubUrl: "https://github.com/forrof/project3"
     }
   ];
 
@@ -331,17 +325,57 @@ const App = () => {
           ) : activeTab === 'garage' ? (
             <div>
               {/* Garage/Car Section */}
-              <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 rounded-xl overflow-hidden p-8 text-center">
-                <h2 className="text-3xl font-bold text-white mb-4">🏎️ The Garage</h2>
-                <p className="text-gray-300 font-bold text-lg mb-6">
-                  You found the secret! Welcome to my automotive corner.
-                </p>
-                <div className="text-gray-400 font-bold">
-                  <p className="mb-4">Content coming soon...</p>
-                  <p className="text-sm">This is where I'll share photos and posts about my car.</p>
-                  <p className="text-xs text-gray-500 mt-6">
-                    Easter egg unlocked! 🎉
-                  </p>
+              <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 rounded-xl overflow-hidden p-8">
+                <h2 className="text-3xl font-bold text-white mb-8 text-center">🏎️ The Garage</h2>
+                
+                {/* Car Post Template */}
+                <div className="max-w-3xl mx-auto space-y-8">
+                  
+                  {/* Post 1 - Template */}
+                  <div className="bg-gray-900 bg-opacity-50 border border-gray-700 rounded-xl p-6">
+                    {/* Photo Frame */}
+                    <div className="bg-black bg-opacity-60 border-4 border-gray-600 rounded-lg p-2 mb-4">
+                      <div className="aspect-video bg-gray-800 rounded flex items-center justify-center">
+                        <span className="text-gray-500 font-bold text-xl">Photo coming soon...</span>
+                        {/* Replace with: <img src="/garage/car1.jpg" alt="Car" className="w-full h-full object-cover rounded" /> */}
+                      </div>
+                    </div>
+                    
+                    {/* Post Content */}
+                    <div className="space-y-3">
+                      <h3 className="text-xl font-bold text-white">First Post Title</h3>
+                      <p className="text-gray-300 font-bold">
+                        Your text about the car goes here. Share your thoughts, modifications, or adventures!
+                      </p>
+                      
+                      {/* Location Tag */}
+                      <div className="flex items-center gap-2 text-cyan-400 text-sm font-bold pt-2">
+                        <span>📍</span>
+                        <span>Location Name</span>
+                      </div>
+                      
+                      {/* Date */}
+                      <div className="text-gray-500 text-xs font-bold">
+                        Posted: November 2024
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Instructions */}
+                  <div className="bg-gray-900 bg-opacity-30 border border-gray-700 border-opacity-50 rounded-xl p-6 text-center">
+                    <p className="text-gray-400 font-bold text-sm mb-2">
+                      To add photos:
+                    </p>
+                    <ol className="text-gray-500 text-xs font-bold space-y-1 text-left max-w-md mx-auto">
+                      <li>1. Put photos in <code className="bg-gray-800 px-2 py-1 rounded text-cyan-400">public/garage/</code></li>
+                      <li>2. Update this section in <code className="bg-gray-800 px-2 py-1 rounded text-cyan-400">App.jsx</code></li>
+                      <li>3. Replace the placeholder div with an img tag</li>
+                    </ol>
+                    <p className="text-xs text-gray-600 mt-4">
+                      Easter egg unlocked! 🎉
+                    </p>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -353,30 +387,47 @@ const App = () => {
                   <h2 className="text-xl font-bold text-white">▾ Projects</h2>
                 </div>
                 <div className="divide-y divide-gray-700 divide-opacity-50">
-                  {projects.map((project) => (
-                    <div key={project.id} className="px-6 py-4 hover:bg-gray-800 hover:bg-opacity-30 transition-colors">
-                      <h3 className="text-white font-bold text-lg mb-2">{project.name}</h3>
-                      <p className="text-gray-300 font-bold mb-3 text-sm">{project.description}</p>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {project.tech.map((tech, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 text-xs font-bold bg-gray-800 bg-opacity-50 text-gray-300 border border-gray-600 rounded-full"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-cyan-400 hover:text-cyan-300 transition-colors font-bold text-sm"
-                      >
-                        View on GitHub →
-                      </a>
+                  {loadingRepos ? (
+                    <div className="px-6 py-8 text-center text-gray-400 font-bold">
+                      Loading repositories...
                     </div>
-                  ))}
+                  ) : githubRepos.length === 0 ? (
+                    <div className="px-6 py-8 text-center text-gray-400 font-bold">
+                      No repositories found
+                    </div>
+                  ) : (
+                    githubRepos.map((repo) => (
+                      <div key={repo.id} className="px-6 py-4 hover:bg-gray-800 hover:bg-opacity-30 transition-colors">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="text-white font-bold text-lg">{repo.name}</h3>
+                          {repo.stargazers_count > 0 && (
+                            <span className="text-yellow-400 text-sm font-bold">⭐ {repo.stargazers_count}</span>
+                          )}
+                        </div>
+                        <p className="text-gray-300 font-bold mb-3 text-sm">
+                          {repo.description || 'No description provided'}
+                        </p>
+                        <div className="flex flex-wrap gap-2 mb-3 items-center">
+                          {repo.language && (
+                            <span className="px-3 py-1 text-xs font-bold bg-gray-800 bg-opacity-50 text-gray-300 border border-gray-600 rounded-full">
+                              {repo.language}
+                            </span>
+                          )}
+                          <span className="text-gray-500 text-xs font-bold">
+                            Updated {new Date(repo.updated_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <a
+                          href={repo.html_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-cyan-400 hover:text-cyan-300 transition-colors font-bold text-sm"
+                        >
+                          View on GitHub →
+                        </a>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
