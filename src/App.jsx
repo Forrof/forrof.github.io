@@ -284,12 +284,18 @@ const App = () => {
                             <div key={challenge.id} className="border-t border-gray-700 border-opacity-30">
                               {/* Challenge Header */}
                               <div 
-                                className="px-6 py-3 pl-12 cursor-pointer hover:bg-gray-800 hover:bg-opacity-30 transition-colors flex items-center justify-between"
-                                onClick={() => toggleChallenge(challenge.id)}
+                                className="px-6 py-3 pl-12 cursor-pointer hover:bg-gray-800 hover:bg-opacity-30 transition-colors"
+                                onClick={() => {
+                                  if (challenge.writeupPath && challenge.writeupPath !== "#") {
+                                    setSelectedWriteup(challenge.writeupPath);
+                                  } else {
+                                    toggleChallenge(challenge.id);
+                                  }
+                                }}
                               >
                                 <div className="flex items-center gap-3 flex-1">
                                   <span className="text-gray-500 font-bold">
-                                    {expandedChallenge === challenge.id ? '▾' : '▸'}
+                                    {challenge.writeupPath && challenge.writeupPath !== "#" ? '📄' : '▸'}
                                   </span>
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 flex-wrap">
@@ -306,21 +312,11 @@ const App = () => {
                                 </div>
                               </div>
 
-                              {/* Challenge Details (Expanded) */}
-                              {expandedChallenge === challenge.id && (
+                              {/* Challenge Details (Expanded) - Only for challenges without writeup */}
+                              {expandedChallenge === challenge.id && (!challenge.writeupPath || challenge.writeupPath === "#") && (
                                 <div className="px-6 py-3 pl-16 bg-gray-900 bg-opacity-30 border-t border-gray-700 border-opacity-20 animate-slideDown">
                                   <p className="text-gray-300 font-bold mb-3 text-sm">{challenge.description}</p>
-                                  {challenge.writeupPath && challenge.writeupPath !== "#" && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedWriteup(challenge.writeupPath);
-                                      }}
-                                      className="bg-gray-800 bg-opacity-50 text-white px-4 py-2 rounded-lg hover:bg-opacity-70 transition-all font-bold text-sm"
-                                    >
-                                      Read Writeup →
-                                    </button>
-                                  )}
+                                  <span className="text-gray-500 text-xs font-bold">Writeup coming soon...</span>
                                 </div>
                               )}
                             </div>
