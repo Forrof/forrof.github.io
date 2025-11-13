@@ -210,108 +210,16 @@ const App = () => {
             <div>
               {/* Statistics */}
               <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* By Category - Line Chart */}
+                {/* By Category - Timeline Chart */}
                 <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
-                  <h3 className="text-lg font-bold text-white mb-4">▸ By Category</h3>
-                  <div className="relative h-48">
-                    <svg className="w-full h-full" viewBox="0 0 400 180" preserveAspectRatio="none">
-                      {/* Grid lines */}
-                      <line x1="0" y1="36" x2="400" y2="36" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
-                      <line x1="0" y1="72" x2="400" y2="72" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
-                      <line x1="0" y1="108" x2="400" y2="108" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
-                      <line x1="0" y1="144" x2="400" y2="144" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
-                      
-                      {/* Line chart for categories */}
-                      {(() => {
-                        const categories = Object.entries(stats.categories);
-                        const maxCount = Math.max(...categories.map(([_, count]) => count));
-                        const points = categories.map(([_, count], idx) => {
-                          const x = (idx / (categories.length - 1)) * 400;
-                          const y = 180 - ((count / maxCount) * 150);
-                          return `${x},${y}`;
-                        }).join(' ');
-                        return (
-                          <>
-                            <polyline
-                              points={points}
-                              fill="none"
-                              stroke="#06b6d4"
-                              strokeWidth="3"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            {categories.map(([_, count], idx) => {
-                              const x = (idx / (categories.length - 1)) * 400;
-                              const y = 180 - ((count / maxCount) * 150);
-                              return <circle key={idx} cx={x} cy={y} r="4" fill="#06b6d4" />;
-                            })}
-                          </>
-                        );
-                      })()}
-                    </svg>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-3 justify-center">
-                    {Object.entries(stats.categories).map(([category, count]) => (
-                      <div key={category} className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
-                        <span className="text-gray-300 font-bold text-xs">{category}: {count}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <h3 className="text-lg font-bold text-white mb-4">▸ Challenges by Category</h3>
+                  <CategoryTimelineChart challenges={ctfChallenges} />
                 </div>
 
-                {/* By Platform - Line Chart */}
+                {/* By Platform - Timeline Chart */}
                 <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
-                  <h3 className="text-lg font-bold text-white mb-4">▸ By Platform</h3>
-                  <div className="relative h-48">
-                    <svg className="w-full h-full" viewBox="0 0 400 180" preserveAspectRatio="none">
-                      {/* Grid lines */}
-                      <line x1="0" y1="36" x2="400" y2="36" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
-                      <line x1="0" y1="72" x2="400" y2="72" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
-                      <line x1="0" y1="108" x2="400" y2="108" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
-                      <line x1="0" y1="144" x2="400" y2="144" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
-                      
-                      {/* Multiple lines for different platforms */}
-                      {(() => {
-                        const platforms = Object.entries(stats.platforms);
-                        const colors = ['#3b82f6', '#f59e0b', '#ef4444', '#10b981']; // Blue, Orange, Red, Green
-                        const maxCount = Math.max(...platforms.map(([_, count]) => count));
-                        
-                        return platforms.map(([platform, count], platformIdx) => {
-                          const points = Array.from({length: 5}, (_, idx) => {
-                            const x = (idx / 4) * 400;
-                            const variance = Math.sin(platformIdx * idx) * 20;
-                            const y = 180 - ((count / maxCount) * 130) + variance;
-                            return `${x},${Math.max(10, Math.min(170, y))}`;
-                          }).join(' ');
-                          
-                          return (
-                            <g key={platform}>
-                              <polyline
-                                points={points}
-                                fill="none"
-                                stroke={colors[platformIdx % colors.length]}
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </g>
-                          );
-                        });
-                      })()}
-                    </svg>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-3 justify-center">
-                    {Object.entries(stats.platforms).map(([platform, count], idx) => {
-                      const colors = ['bg-blue-500', 'bg-orange-500', 'bg-red-500', 'bg-green-500'];
-                      return (
-                        <div key={platform} className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full ${colors[idx % colors.length]}`}></div>
-                          <span className="text-gray-300 font-bold text-xs">{platform}: {count}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <h3 className="text-lg font-bold text-white mb-4">▸ Challenges by Platform</h3>
+                  <PlatformTimelineChart challenges={ctfChallenges} />
                 </div>
               </div>
 
@@ -534,6 +442,250 @@ const App = () => {
 
       {/* Car Easter Egg - Only show if not already discovered */}
       {!showCarEasterEgg && <CarEasterEgg onClick={handleCarClick} />}
+    </div>
+  );
+};
+
+// Category Timeline Chart Component
+const CategoryTimelineChart = ({ challenges }) => {
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+  
+  const categoryColors = {
+    'Forensics': '#a855f7', // purple
+    'Web': '#eab308',       // yellow
+    'Binary': '#ef4444',    // red (pwn)
+    'Crypto': '#38bdf8'     // sky blue (reversing)
+  };
+
+  // Group by month and category
+  const timelineData = useMemo(() => {
+    const monthCounts = {};
+    
+    challenges.forEach(ch => {
+      const date = new Date(ch.date + ' 2024');
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      
+      if (!monthCounts[monthKey]) monthCounts[monthKey] = {};
+      if (!monthCounts[monthKey][ch.category]) monthCounts[monthKey][ch.category] = 0;
+      monthCounts[monthKey][ch.category]++;
+    });
+
+    return monthCounts;
+  }, [challenges]);
+
+  const months = Object.keys(timelineData).sort((a, b) => new Date(a) - new Date(b));
+  const categories = [...new Set(challenges.map(ch => ch.category))];
+  const maxCount = Math.max(...Object.values(timelineData).flatMap(m => Object.values(m)));
+
+  return (
+    <div className="relative">
+      <div className="h-48 relative">
+        <svg className="w-full h-full" viewBox="0 0 400 180">
+          {/* Grid */}
+          {[0, 1, 2, 3, 4].map(i => (
+            <line key={i} x1="40" y1={36 * i} x2="400" y2={36 * i} stroke="rgba(75,85,99,0.2)" strokeWidth="1"/>
+          ))}
+          
+          {/* Y-axis labels */}
+          {[0, 1, 2, 3, 4, 5].map(i => (
+            <text key={i} x="5" y={180 - (i * 30)} fill="#9ca3af" fontSize="10" fontWeight="bold">{i}</text>
+          ))}
+
+          {/* Lines for each category */}
+          {categories.map(category => {
+            const points = months.map((month, idx) => {
+              const count = timelineData[month][category] || 0;
+              const x = 40 + (idx / (months.length - 1 || 1)) * 360;
+              const y = 180 - ((count / (maxCount || 1)) * 150);
+              return { x, y, count, month, category };
+            });
+
+            const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+            return (
+              <g key={category}>
+                <path
+                  d={pathData}
+                  fill="none"
+                  stroke={categoryColors[category] || '#06b6d4'}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {points.map((point, idx) => (
+                  <circle
+                    key={idx}
+                    cx={point.x}
+                    cy={point.y}
+                    r="4"
+                    fill={categoryColors[category] || '#06b6d4'}
+                    className="cursor-pointer hover:r-6 transition-all"
+                    onMouseEnter={() => setHoveredPoint(point)}
+                    onMouseLeave={() => setHoveredPoint(null)}
+                  />
+                ))}
+              </g>
+            );
+          })}
+
+          {/* X-axis labels */}
+          {months.map((month, idx) => {
+            const x = 40 + (idx / (months.length - 1 || 1)) * 360;
+            return (
+              <text key={idx} x={x} y="175" fill="#9ca3af" fontSize="9" textAnchor="middle" fontWeight="bold">
+                {month.split(' ')[0]}
+              </text>
+            );
+          })}
+        </svg>
+
+        {/* Tooltip */}
+        {hoveredPoint && (
+          <div 
+            className="absolute bg-black bg-opacity-90 border border-gray-600 rounded px-3 py-2 text-xs font-bold pointer-events-none"
+            style={{ 
+              left: `${(hoveredPoint.x / 400) * 100}%`, 
+              top: `${(hoveredPoint.y / 180) * 100}%`,
+              transform: 'translate(-50%, -120%)'
+            }}
+          >
+            <div className="text-white">{hoveredPoint.category}</div>
+            <div className="text-gray-400">{hoveredPoint.month}: {hoveredPoint.count} challenges</div>
+          </div>
+        )}
+      </div>
+      
+      {/* Legend */}
+      <div className="mt-4 flex flex-wrap gap-3 justify-center">
+        {categories.map(category => (
+          <div key={category} className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: categoryColors[category] || '#06b6d4' }}></div>
+            <span className="text-gray-300 font-bold text-xs">{category}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Platform Timeline Chart Component
+const PlatformTimelineChart = ({ challenges }) => {
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+  
+  const platformColors = {
+    'HackTheBox': '#22c55e',      // green
+    'CyberDefenders': '#1e40af',  // dark blue
+    'CTF': '#f97316',             // orange
+    'TryHackMe': '#8b5cf6',       // purple
+    'PicoCTF': '#ec4899'          // pink
+  };
+
+  const timelineData = useMemo(() => {
+    const monthCounts = {};
+    
+    challenges.forEach(ch => {
+      const date = new Date(ch.date + ' 2024');
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      
+      if (!monthCounts[monthKey]) monthCounts[monthKey] = {};
+      if (!monthCounts[monthKey][ch.platform]) monthCounts[monthKey][ch.platform] = 0;
+      monthCounts[monthKey][ch.platform]++;
+    });
+
+    return monthCounts;
+  }, [challenges]);
+
+  const months = Object.keys(timelineData).sort((a, b) => new Date(a) - new Date(b));
+  const platforms = [...new Set(challenges.map(ch => ch.platform))];
+  const maxCount = Math.max(...Object.values(timelineData).flatMap(m => Object.values(m)));
+
+  return (
+    <div className="relative">
+      <div className="h-48 relative">
+        <svg className="w-full h-full" viewBox="0 0 400 180">
+          {/* Grid */}
+          {[0, 1, 2, 3, 4].map(i => (
+            <line key={i} x1="40" y1={36 * i} x2="400" y2={36 * i} stroke="rgba(75,85,99,0.2)" strokeWidth="1"/>
+          ))}
+          
+          {/* Y-axis labels */}
+          {[0, 1, 2, 3, 4, 5].map(i => (
+            <text key={i} x="5" y={180 - (i * 30)} fill="#9ca3af" fontSize="10" fontWeight="bold">{i}</text>
+          ))}
+
+          {/* Lines for each platform */}
+          {platforms.map(platform => {
+            const points = months.map((month, idx) => {
+              const count = timelineData[month][platform] || 0;
+              const x = 40 + (idx / (months.length - 1 || 1)) * 360;
+              const y = 180 - ((count / (maxCount || 1)) * 150);
+              return { x, y, count, month, platform };
+            });
+
+            const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+            return (
+              <g key={platform}>
+                <path
+                  d={pathData}
+                  fill="none"
+                  stroke={platformColors[platform] || '#06b6d4'}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {points.map((point, idx) => (
+                  <circle
+                    key={idx}
+                    cx={point.x}
+                    cy={point.y}
+                    r="4"
+                    fill={platformColors[platform] || '#06b6d4'}
+                    className="cursor-pointer hover:r-6 transition-all"
+                    onMouseEnter={() => setHoveredPoint(point)}
+                    onMouseLeave={() => setHoveredPoint(null)}
+                  />
+                ))}
+              </g>
+            );
+          })}
+
+          {/* X-axis labels */}
+          {months.map((month, idx) => {
+            const x = 40 + (idx / (months.length - 1 || 1)) * 360;
+            return (
+              <text key={idx} x={x} y="175" fill="#9ca3af" fontSize="9" textAnchor="middle" fontWeight="bold">
+                {month.split(' ')[0]}
+              </text>
+            );
+          })}
+        </svg>
+
+        {/* Tooltip */}
+        {hoveredPoint && (
+          <div 
+            className="absolute bg-black bg-opacity-90 border border-gray-600 rounded px-3 py-2 text-xs font-bold pointer-events-none"
+            style={{ 
+              left: `${(hoveredPoint.x / 400) * 100}%`, 
+              top: `${(hoveredPoint.y / 180) * 100}%`,
+              transform: 'translate(-50%, -120%)'
+            }}
+          >
+            <div className="text-white">{hoveredPoint.platform}</div>
+            <div className="text-gray-400">{hoveredPoint.month}: {hoveredPoint.count} challenges</div>
+          </div>
+        )}
+      </div>
+      
+      {/* Legend */}
+      <div className="mt-4 flex flex-wrap gap-3 justify-center">
+        {platforms.map(platform => (
+          <div key={platform} className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: platformColors[platform] || '#06b6d4' }}></div>
+            <span className="text-gray-300 font-bold text-xs">{platform}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

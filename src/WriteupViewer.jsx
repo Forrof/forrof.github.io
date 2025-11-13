@@ -70,15 +70,15 @@ const WriteupViewer = ({ writeupPath, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn">
-      {/* Backdrop */}
+      {/* Backdrop - Only darken right half */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm animate-fadeIn"
+        className="fixed right-0 top-0 w-full md:w-1/2 h-full bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn"
         onClick={onClose}
       ></div>
       
       {/* Modal - Half Screen */}
       <div className="fixed right-0 top-0 h-full w-full md:w-1/2 animate-slideLeft">
-        <div className="relative bg-black bg-opacity-90 backdrop-blur-md border-l border-gray-700 h-full overflow-y-auto custom-scrollbar">
+        <div className="relative bg-black bg-opacity-95 backdrop-blur-md border-l border-gray-700 h-full overflow-y-auto custom-scrollbar">
           {/* Close button */}
           <button
             onClick={onClose}
