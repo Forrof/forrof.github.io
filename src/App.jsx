@@ -452,13 +452,6 @@ const App = () => {
       </div>
 
       {/* Writeup Modal */}
-      {selectedWriteup && (
-        <WriteupViewer 
-          writeupPath={selectedWriteup} 
-          onClose={() => setSelectedWriteup(null)} 
-        />
-      )}
-
       {/* Car Easter Egg - Only show if not already discovered */}
       {!showCarEasterEgg && <CarEasterEgg onClick={handleCarClick} />}
     </div>
