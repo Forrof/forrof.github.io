@@ -163,11 +163,11 @@ const App = () => {
       <div className="relative z-10 flex-1 flex flex-col">
         {/* Header */}
         <header className="pt-8 pb-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start">
             <div className="inline-block bg-black bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-lg mb-6">
-              <h1 className="text-3xl font-bold text-white text-center tracking-wider">forrof's</h1>
+              <h1 className="text-3xl font-bold text-white text-left tracking-wider">forrof's</h1>
             </div>
-            <nav className="flex justify-center space-x-2">
+            <nav className="flex justify-start space-x-2">
               <button
                 onClick={() => setActiveTab('ctf')}
                 className={`px-6 py-2 text-sm font-bold transition-all rounded-lg ${
@@ -207,71 +207,86 @@ const App = () => {
         {/* Main Content */}
         <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-8">
           {activeTab === 'ctf' ? (
-            <div className="flex gap-6 h-full">
-              {/* Left Side - Challenge List */}
-              <div className="w-full md:w-1/2 flex flex-col">
-                <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 rounded-xl p-6 flex-1 overflow-y-auto">
-                  <h2 className="text-2xl font-bold text-white mb-6">▸ CTF Challenges</h2>
-                  <div className="space-y-3">
-                    {Object.entries(challengesByPlatform).map(([platform, challenges]) => (
-                      <div key={platform}>
-                        <button
-                          onClick={() => togglePlatform(platform)}
-                          className="w-full text-left px-4 py-2 bg-gray-800 bg-opacity-50 hover:bg-opacity-70 rounded-lg transition-all text-white font-bold flex items-center gap-2"
-                        >
-                          <span>{expandedPlatform === platform ? '▾' : '▸'}</span>
-                          {platform} ({challenges.length})
-                        </button>
-                        {expandedPlatform === platform && (
-                          <div className="mt-2 ml-4 space-y-2">
-                            {challenges.map(challenge => (
-                              <button
-                                key={challenge.id}
-                                onClick={() => {
-                                  setExpandedChallenge(challenge.id);
-                                  setSelectedWriteup(challenge.writeupPath);
-                                }}
-                                className={`w-full text-left px-4 py-3 rounded-lg transition-all text-sm ${
-                                  expandedChallenge === challenge.id
-                                    ? 'bg-gray-700 border border-gray-500'
-                                    : 'bg-gray-900 bg-opacity-60 border border-gray-700 border-opacity-30 hover:bg-opacity-80'
-                                }`}
-                              >
-                                <div className="text-white font-semibold">{challenge.title}</div>
-                                <div className="flex gap-2 mt-1 flex-wrap">
-                                  <span className={`px-2 py-0.5 text-xs rounded ${getDifficultyColor(challenge.difficulty)}`}>
-                                    {challenge.difficulty}
-                                  </span>
-                                  <span className="text-gray-400 text-xs">{challenge.category}</span>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+            <div className="flex flex-col gap-6">
+              {/* Top - Graphs */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
+                  <h3 className="text-lg font-bold text-white mb-4">▸ Cumulative Challenges</h3>
+                  <CumulativeChallengeChart challenges={ctfChallenges} />
+                </div>
+
+                <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
+                  <h3 className="text-lg font-bold text-white mb-4">▸ Challenges by Platform</h3>
+                  <PlatformTimelineChart challenges={ctfChallenges} />
                 </div>
               </div>
 
-              {/* Right Side - Writeup Viewer or Statistics */}
-              <div className="w-full md:w-1/2 flex flex-col">
-                {selectedWriteup ? (
-                  <WriteupViewer path={selectedWriteup} onClose={() => setSelectedWriteup(null)} />
-                ) : (
-                  <div className="space-y-4">
-                    {/* Statistics */}
-                    <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
-                      <h3 className="text-lg font-bold text-white mb-4">▸ Challenges by Category</h3>
-                      <CategoryTimelineChart challenges={ctfChallenges} />
-                    </div>
-
-                    <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
-                      <h3 className="text-lg font-bold text-white mb-4">▸ Challenges by Platform</h3>
-                      <PlatformTimelineChart challenges={ctfChallenges} />
+              {/* Bottom - Split Screen */}
+              <div className="flex gap-6 h-full">
+                {/* Left Side - Challenge List */}
+                <div className="w-full md:w-1/2 flex flex-col">
+                  <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 rounded-xl p-6 flex-1 overflow-y-auto max-h-96">
+                    <h2 className="text-2xl font-bold text-white mb-6">▸ CTF Challenges</h2>
+                    <div className="space-y-3">
+                      {Object.entries(challengesByPlatform).map(([platform, challenges]) => (
+                        <div key={platform}>
+                          <button
+                            onClick={() => togglePlatform(platform)}
+                            className="w-full text-left px-4 py-2 bg-gray-800 bg-opacity-50 hover:bg-opacity-70 rounded-lg transition-all text-white font-bold flex items-center gap-2"
+                          >
+                            <span>{expandedPlatform === platform ? '▾' : '▸'}</span>
+                            {platform} ({challenges.length})
+                          </button>
+                          {expandedPlatform === platform && (
+                            <div className="mt-2 ml-4 space-y-2">
+                              {challenges.map(challenge => (
+                                <button
+                                  key={challenge.id}
+                                  onClick={() => {
+                                    setExpandedChallenge(challenge.id);
+                                    setSelectedWriteup(challenge.writeupPath);
+                                  }}
+                                  className={`w-full text-left px-4 py-3 rounded-lg transition-all text-sm ${
+                                    expandedChallenge === challenge.id
+                                      ? 'bg-gray-700 border border-gray-500'
+                                      : 'bg-gray-900 bg-opacity-60 border border-gray-700 border-opacity-30 hover:bg-opacity-80'
+                                  }`}
+                                >
+                                  <div className="text-white font-semibold">{challenge.title}</div>
+                                  <div className="flex gap-2 mt-1 flex-wrap">
+                                    <span className={`px-2 py-0.5 text-xs rounded ${getDifficultyColor(challenge.difficulty)}`}>
+                                      {challenge.difficulty}
+                                    </span>
+                                    <span className="text-gray-400 text-xs">{challenge.category}</span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
-                )}
+                </div>
+
+                {/* Right Side - Writeup Viewer */}
+                <div className="w-full md:w-1/2 flex flex-col">
+                  {selectedWriteup && selectedWriteup !== '#' ? (
+                    <>
+                      <button
+                        onClick={() => setSelectedWriteup(null)}
+                        className="mb-4 px-4 py-2 bg-gray-800 bg-opacity-50 hover:bg-opacity-70 text-white rounded-lg text-sm font-bold"
+                      >
+                        ✕ Close
+                      </button>
+                      <WriteupViewer path={selectedWriteup} />
+                    </>
+                  ) : (
+                    <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl text-gray-400 text-center">
+                      Select a challenge to view writeup
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ) : activeTab === 'ctf' ? (
@@ -761,6 +776,107 @@ const PlatformTimelineChart = ({ challenges }) => {
             <span className="text-gray-300 font-bold text-xs">{platform}</span>
           </div>
         ))}
+      </div>
+    </div>
+  );
+};
+
+// Cumulative Challenges Chart Component
+const CumulativeChallengeChart = ({ challenges }) => {
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+
+  const cumulativeData = useMemo(() => {
+    const sorted = [...challenges].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const cumulative = [];
+    let count = 0;
+
+    sorted.forEach(ch => {
+      try {
+        count++;
+        cumulative.push({
+          date: ch.date,
+          count,
+          title: ch.title
+        });
+      } catch (e) {
+        console.error('Error:', ch.date);
+      }
+    });
+
+    return cumulative;
+  }, [challenges]);
+
+  if (cumulativeData.length === 0) return <div className="text-gray-400">No data available</div>;
+
+  const maxCount = Math.max(...cumulativeData.map(d => d.count), 1);
+  const points = cumulativeData.map((d, idx) => ({
+    ...d,
+    x: 40 + (idx / (cumulativeData.length - 1 || 1)) * 360,
+    y: 180 - ((d.count / maxCount) * 150)
+  }));
+
+  const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+  return (
+    <div className="relative">
+      <div className="h-48 relative">
+        <svg className="w-full h-full" viewBox="0 0 400 180">
+          {/* Grid */}
+          {[0, 1, 2, 3, 4].map(i => (
+            <line key={i} x1="40" y1={36 * i} x2="400" y2={36 * i} stroke="rgba(75,85,99,0.2)" strokeWidth="1"/>
+          ))}
+          
+          {/* Y-axis labels */}
+          {[0, 1, 2, 3, 4, 5].map(i => (
+            <text key={i} x="5" y={180 - (i * 30)} fill="#9ca3af" fontSize="10" fontWeight="bold">{i}</text>
+          ))}
+
+          {/* Line */}
+          <path
+            d={pathData}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Points */}
+          {points.map((point, idx) => (
+            <circle
+              key={idx}
+              cx={point.x}
+              cy={point.y}
+              r="4"
+              fill="#3b82f6"
+              className="cursor-pointer hover:r-6 transition-all"
+              onMouseEnter={() => setHoveredPoint(point)}
+              onMouseLeave={() => setHoveredPoint(null)}
+            />
+          ))}
+
+          {/* X-axis labels */}
+          {points.filter((_, i) => i % Math.ceil(points.length / 5) === 0).map((point, idx) => (
+            <text key={idx} x={point.x} y="175" fill="#9ca3af" fontSize="9" textAnchor="middle" fontWeight="bold">
+              {idx}
+            </text>
+          ))}
+        </svg>
+
+        {/* Tooltip */}
+        {hoveredPoint && (
+          <div 
+            className="absolute bg-black bg-opacity-90 border border-gray-600 rounded px-3 py-2 text-xs font-bold pointer-events-none"
+            style={{ 
+              left: `${(hoveredPoint.x / 400) * 100}%`, 
+              top: `${(hoveredPoint.y / 180) * 100}%`,
+              transform: 'translate(-50%, -120%)'
+            }}
+          >
+            <div className="text-white">Challenges: {hoveredPoint.count}</div>
+            <div className="text-gray-400">{hoveredPoint.title}</div>
+          </div>
+        )}
       </div>
     </div>
   );
