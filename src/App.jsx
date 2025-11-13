@@ -205,50 +205,112 @@ const App = () => {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className={`flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300 ${selectedWriteup ? 'md:w-1/2 md:pr-2' : 'max-w-7xl'}`}>
           {activeTab === 'ctf' ? (
             <div>
               {/* Statistics */}
               <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* By Category */}
+                {/* By Category - Line Chart */}
                 <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
                   <h3 className="text-lg font-bold text-white mb-4">▸ By Category</h3>
-                  <div className="space-y-2">
+                  <div className="relative h-48">
+                    <svg className="w-full h-full" viewBox="0 0 400 180" preserveAspectRatio="none">
+                      {/* Grid lines */}
+                      <line x1="0" y1="36" x2="400" y2="36" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
+                      <line x1="0" y1="72" x2="400" y2="72" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
+                      <line x1="0" y1="108" x2="400" y2="108" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
+                      <line x1="0" y1="144" x2="400" y2="144" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
+                      
+                      {/* Line chart for categories */}
+                      {(() => {
+                        const categories = Object.entries(stats.categories);
+                        const maxCount = Math.max(...categories.map(([_, count]) => count));
+                        const points = categories.map(([_, count], idx) => {
+                          const x = (idx / (categories.length - 1)) * 400;
+                          const y = 180 - ((count / maxCount) * 150);
+                          return `${x},${y}`;
+                        }).join(' ');
+                        return (
+                          <>
+                            <polyline
+                              points={points}
+                              fill="none"
+                              stroke="#06b6d4"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            {categories.map(([_, count], idx) => {
+                              const x = (idx / (categories.length - 1)) * 400;
+                              const y = 180 - ((count / maxCount) * 150);
+                              return <circle key={idx} cx={x} cy={y} r="4" fill="#06b6d4" />;
+                            })}
+                          </>
+                        );
+                      })()}
+                    </svg>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-3 justify-center">
                     {Object.entries(stats.categories).map(([category, count]) => (
-                      <div key={category} className="flex items-center justify-between">
-                        <span className="text-gray-300 font-bold">{category}</span>
-                        <div className="flex items-center gap-3">
-                          <div className="bg-gray-800 bg-opacity-50 h-6 rounded-full overflow-hidden" style={{ width: '100px' }}>
-                            <div 
-                              className="bg-cyan-600 h-full transition-all duration-500" 
-                              style={{ width: `${(count / ctfChallenges.length) * 100}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-white font-bold text-sm w-8 text-right">{count}</span>
-                        </div>
+                      <div key={category} className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
+                        <span className="text-gray-300 font-bold text-xs">{category}: {count}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* By Platform */}
+                {/* By Platform - Line Chart */}
                 <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
                   <h3 className="text-lg font-bold text-white mb-4">▸ By Platform</h3>
-                  <div className="space-y-2">
-                    {Object.entries(stats.platforms).map(([platform, count]) => (
-                      <div key={platform} className="flex items-center justify-between">
-                        <span className="text-gray-300 font-bold">{platform}</span>
-                        <div className="flex items-center gap-3">
-                          <div className="bg-gray-800 bg-opacity-50 h-6 rounded-full overflow-hidden" style={{ width: '100px' }}>
-                            <div 
-                              className="bg-cyan-600 h-full transition-all duration-500" 
-                              style={{ width: `${(count / ctfChallenges.length) * 100}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-white font-bold text-sm w-8 text-right">{count}</span>
+                  <div className="relative h-48">
+                    <svg className="w-full h-full" viewBox="0 0 400 180" preserveAspectRatio="none">
+                      {/* Grid lines */}
+                      <line x1="0" y1="36" x2="400" y2="36" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
+                      <line x1="0" y1="72" x2="400" y2="72" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
+                      <line x1="0" y1="108" x2="400" y2="108" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
+                      <line x1="0" y1="144" x2="400" y2="144" stroke="rgba(75,85,99,0.3)" strokeWidth="1"/>
+                      
+                      {/* Multiple lines for different platforms */}
+                      {(() => {
+                        const platforms = Object.entries(stats.platforms);
+                        const colors = ['#3b82f6', '#f59e0b', '#ef4444', '#10b981']; // Blue, Orange, Red, Green
+                        const maxCount = Math.max(...platforms.map(([_, count]) => count));
+                        
+                        return platforms.map(([platform, count], platformIdx) => {
+                          const points = Array.from({length: 5}, (_, idx) => {
+                            const x = (idx / 4) * 400;
+                            const variance = Math.sin(platformIdx * idx) * 20;
+                            const y = 180 - ((count / maxCount) * 130) + variance;
+                            return `${x},${Math.max(10, Math.min(170, y))}`;
+                          }).join(' ');
+                          
+                          return (
+                            <g key={platform}>
+                              <polyline
+                                points={points}
+                                fill="none"
+                                stroke={colors[platformIdx % colors.length]}
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </g>
+                          );
+                        });
+                      })()}
+                    </svg>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-3 justify-center">
+                    {Object.entries(stats.platforms).map(([platform, count], idx) => {
+                      const colors = ['bg-blue-500', 'bg-orange-500', 'bg-red-500', 'bg-green-500'];
+                      return (
+                        <div key={platform} className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${colors[idx % colors.length]}`}></div>
+                          <span className="text-gray-300 font-bold text-xs">{platform}: {count}</span>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>

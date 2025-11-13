@@ -35,7 +35,7 @@ const WriteupViewer = ({ writeupPath, onClose }) => {
     // Inline code
     html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-800 bg-opacity-60 px-2 py-1 rounded text-cyan-400 text-sm">$1</code>');
     
-    // Headers
+    // Headers - White titles
     html = html.replace(/^### (.*$)/gm, '<h3 class="text-lg font-bold text-white mt-6 mb-3">$1</h3>');
     html = html.replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold text-white mt-8 mb-4">$1</h2>');
     html = html.replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold text-white mb-6">$1</h1>');
@@ -43,20 +43,20 @@ const WriteupViewer = ({ writeupPath, onClose }) => {
     // Images
     html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" class="w-full rounded-lg my-4 border border-gray-700" />');
     
-    // Bold
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
+    // Bold - Grey text
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-300">$1</strong>');
     
     // Horizontal rules
     html = html.replace(/^---$/gm, '<hr class="border-gray-700 my-6">');
     
-    // Lists
-    html = html.replace(/^\d+\.\s+(.*)$/gm, '<li class="ml-6 mb-2 text-gray-300 text-sm">$1</li>');
-    html = html.replace(/^[-*]\s+(.*)$/gm, '<li class="ml-6 mb-2 text-gray-300 list-disc text-sm">$1</li>');
+    // Lists - Grey text
+    html = html.replace(/^\d+\.\s+(.*)$/gm, '<li class="ml-6 mb-2 text-gray-400 text-sm">$1</li>');
+    html = html.replace(/^[-*]\s+(.*)$/gm, '<li class="ml-6 mb-2 text-gray-400 list-disc text-sm">$1</li>');
     
-    // Paragraphs
+    // Paragraphs - Grey text
     html = html.split('\n\n').map(para => {
       if (para.startsWith('<') || para.trim() === '') return para;
-      return `<p class="text-gray-300 mb-4 leading-relaxed text-sm">${para}</p>`;
+      return `<p class="text-gray-400 mb-4 leading-relaxed text-sm">${para}</p>`;
     }).join('\n');
     
     return html;
