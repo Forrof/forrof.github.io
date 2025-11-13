@@ -174,10 +174,40 @@ const App = () => {
               </button>
             </div>
             
-            {/* Content with pretty scrollbar */}
-            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
-              <div className="p-8">
-                <WriteupContent path={selectedWriteup} />
+            {/* Content Area with Navigation */}
+            <div className="flex-1 flex overflow-hidden">
+              {/* Left - Challenge List */}
+              <div className="w-48 border-r border-gray-700 overflow-y-auto scrollbar-thin">
+                <div className="p-4">
+                  <h3 className="text-white font-bold text-sm mb-3">Challenges</h3>
+                  <div className="space-y-1">
+                    {Object.entries(challengesByPlatform).map(([platform, challenges]) => (
+                      <div key={platform}>
+                        <div className="text-gray-500 text-xs font-bold px-2 py-1">{platform}</div>
+                        {challenges.map(ch => (
+                          <button
+                            key={ch.id}
+                            onClick={() => setSelectedWriteup(ch.writeupPath)}
+                            className={`w-full text-left px-3 py-2 text-xs rounded transition-colors ${
+                              selectedWriteup === ch.writeupPath
+                                ? 'bg-gray-700 text-white'
+                                : 'text-gray-400 hover:bg-gray-900 hover:text-gray-300'
+                            }`}
+                          >
+                            {ch.title}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Right - Writeup Content */}
+              <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+                <div className="p-6">
+                  <WriteupContent path={selectedWriteup} />
+                </div>
               </div>
             </div>
           </div>
@@ -816,24 +846,24 @@ const WriteupContent = ({ path }) => {
     
     // Images first (before other replacements)
     html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, (match, alt, src) => {
-      return `<div class="my-4"><img src="${src}" alt="${alt}" class="w-full max-h-96 rounded-lg border border-gray-700 object-cover" onerror="this.style.display='none'" /></div>`;
+      return `<div class="my-3"><img src="${src}" alt="${alt}" class="w-full max-h-64 rounded-lg border border-gray-700 object-cover" onerror="this.style.display='none'" /></div>`;
     });
     
     html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-      return `<pre class="bg-gray-900 p-3 rounded text-xs overflow-x-auto border border-gray-700"><code class="text-cyan-400">${code.trim()}</code></pre>`;
+      return `<pre class="bg-gray-900 p-2 rounded text-xs overflow-x-auto border border-gray-700"><code class="text-cyan-400">${code.trim()}</code></pre>`;
     });
     
     html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-800 px-2 py-1 rounded text-cyan-400 text-xs">$1</code>');
-    html = html.replace(/^### (.*$)/gm, '<h3 class="text-lg font-bold text-white mt-4 mb-2">$1</h3>');
-    html = html.replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold text-white mt-6 mb-3">$1</h2>');
-    html = html.replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold text-white mb-4">$1</h1>');
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-300">$1</strong>');
-    html = html.replace(/^\d+\.\s+(.*)$/gm, '<li class="ml-4 text-gray-400 text-sm">$1</li>');
-    html = html.replace(/^[-*]\s+(.*)$/gm, '<li class="ml-4 text-gray-400 text-sm">$1</li>');
+    html = html.replace(/^### (.*$)/gm, '<h3 class="text-sm font-bold text-white mt-3 mb-2">$1</h3>');
+    html = html.replace(/^## (.*$)/gm, '<h2 class="text-base font-bold text-white mt-4 mb-2">$1</h2>');
+    html = html.replace(/^# (.*$)/gm, '<h1 class="text-lg font-bold text-white mb-3">$1</h1>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-300 text-xs">$1</strong>');
+    html = html.replace(/^\d+\.\s+(.*)$/gm, '<li class="ml-4 text-gray-400 text-xs">$1</li>');
+    html = html.replace(/^[-*]\s+(.*)$/gm, '<li class="ml-4 text-gray-400 text-xs">$1</li>');
     
     html = html.split('\n\n').map(para => {
       if (para.startsWith('<') || para.trim() === '') return para;
-      return `<p class="text-gray-400 mb-3 text-sm leading-relaxed">${para}</p>`;
+      return `<p class="text-gray-400 mb-2 text-xs leading-relaxed">${para}</p>`;
     }).join('\n');
     
     return html;
