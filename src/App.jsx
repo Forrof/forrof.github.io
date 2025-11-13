@@ -205,8 +205,76 @@ const App = () => {
         </header>
 
         {/* Main Content */}
-        <main className={`flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300 ${selectedWriteup ? 'md:w-1/2 md:pr-2' : 'max-w-7xl'}`}>
+        <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-8">
           {activeTab === 'ctf' ? (
+            <div className="flex gap-6 h-full">
+              {/* Left Side - Challenge List */}
+              <div className="w-full md:w-1/2 flex flex-col">
+                <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 rounded-xl p-6 flex-1 overflow-y-auto">
+                  <h2 className="text-2xl font-bold text-white mb-6">▸ CTF Challenges</h2>
+                  <div className="space-y-3">
+                    {Object.entries(challengesByPlatform).map(([platform, challenges]) => (
+                      <div key={platform}>
+                        <button
+                          onClick={() => togglePlatform(platform)}
+                          className="w-full text-left px-4 py-2 bg-gray-800 bg-opacity-50 hover:bg-opacity-70 rounded-lg transition-all text-white font-bold flex items-center gap-2"
+                        >
+                          <span>{expandedPlatform === platform ? '▾' : '▸'}</span>
+                          {platform} ({challenges.length})
+                        </button>
+                        {expandedPlatform === platform && (
+                          <div className="mt-2 ml-4 space-y-2">
+                            {challenges.map(challenge => (
+                              <button
+                                key={challenge.id}
+                                onClick={() => {
+                                  setExpandedChallenge(challenge.id);
+                                  setSelectedWriteup(challenge.writeupPath);
+                                }}
+                                className={`w-full text-left px-4 py-3 rounded-lg transition-all text-sm ${
+                                  expandedChallenge === challenge.id
+                                    ? 'bg-gray-700 border border-gray-500'
+                                    : 'bg-gray-900 bg-opacity-60 border border-gray-700 border-opacity-30 hover:bg-opacity-80'
+                                }`}
+                              >
+                                <div className="text-white font-semibold">{challenge.title}</div>
+                                <div className="flex gap-2 mt-1 flex-wrap">
+                                  <span className={`px-2 py-0.5 text-xs rounded ${getDifficultyColor(challenge.difficulty)}`}>
+                                    {challenge.difficulty}
+                                  </span>
+                                  <span className="text-gray-400 text-xs">{challenge.category}</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side - Writeup Viewer or Statistics */}
+              <div className="w-full md:w-1/2 flex flex-col">
+                {selectedWriteup ? (
+                  <WriteupViewer path={selectedWriteup} onClose={() => setSelectedWriteup(null)} />
+                ) : (
+                  <div className="space-y-4">
+                    {/* Statistics */}
+                    <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
+                      <h3 className="text-lg font-bold text-white mb-4">▸ Challenges by Category</h3>
+                      <CategoryTimelineChart challenges={ctfChallenges} />
+                    </div>
+
+                    <div className="bg-black bg-opacity-40 backdrop-blur-sm border border-gray-700 border-opacity-50 p-6 rounded-xl">
+                      <h3 className="text-lg font-bold text-white mb-4">▸ Challenges by Platform</h3>
+                      <PlatformTimelineChart challenges={ctfChallenges} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : activeTab === 'ctf' ? (
             <div>
               {/* Statistics */}
               <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -462,12 +530,16 @@ const CategoryTimelineChart = ({ challenges }) => {
     const monthCounts = {};
     
     challenges.forEach(ch => {
-      const date = new Date(ch.date + ' 2024');
-      const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      
-      if (!monthCounts[monthKey]) monthCounts[monthKey] = {};
-      if (!monthCounts[monthKey][ch.category]) monthCounts[monthKey][ch.category] = 0;
-      monthCounts[monthKey][ch.category]++;
+      try {
+        const date = new Date(ch.date);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        
+        if (!monthCounts[monthKey]) monthCounts[monthKey] = {};
+        if (!monthCounts[monthKey][ch.category]) monthCounts[monthKey][ch.category] = 0;
+        monthCounts[monthKey][ch.category]++;
+      } catch (e) {
+        console.error('Date parsing error:', ch.date);
+      }
     });
 
     return monthCounts;
@@ -584,12 +656,16 @@ const PlatformTimelineChart = ({ challenges }) => {
     const monthCounts = {};
     
     challenges.forEach(ch => {
-      const date = new Date(ch.date + ' 2024');
-      const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      
-      if (!monthCounts[monthKey]) monthCounts[monthKey] = {};
-      if (!monthCounts[monthKey][ch.platform]) monthCounts[monthKey][ch.platform] = 0;
-      monthCounts[monthKey][ch.platform]++;
+      try {
+        const date = new Date(ch.date);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        
+        if (!monthCounts[monthKey]) monthCounts[monthKey] = {};
+        if (!monthCounts[monthKey][ch.platform]) monthCounts[monthKey][ch.platform] = 0;
+        monthCounts[monthKey][ch.platform]++;
+      } catch (e) {
+        console.error('Date parsing error:', ch.date);
+      }
     });
 
     return monthCounts;
