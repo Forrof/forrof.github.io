@@ -179,8 +179,8 @@ const App = () => {
 
       {/* Centered Writeup Modal */}
       {selectedWriteup && selectedWriteup !== '#' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-screen h-[95vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-700">
               <h2 className="text-white font-bold text-lg">Writeup</h2>
@@ -223,7 +223,7 @@ const App = () => {
               
               {/* Right - Writeup Content */}
               <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
-                <div className="p-6 max-w-4xl mx-auto">
+                <div className="p-6 max-w-6xl mx-auto">
                   <WriteupContent path={selectedWriteup} onImageClick={setSelectedImage} />
                 </div>
               </div>
