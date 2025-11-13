@@ -1,30 +1,107 @@
-PS C:\Users\test\Desktop\forrof-portfolio-final.tar\forrof-portfolio-final\forrof-portfolio> npm run deploy
+import React, { useState, useEffect } from 'react';
 
-> forrof-portfolio@0.1.0 predeploy
-> npm run build
+const WriteupViewer = ({ writeupPath, onClose }) => {
+  const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (writeupPath) {
+      setLoading(true);
+      fetch(writeupPath)
+        .then(response => response.text())
+        .then(text => {
+          setContent(text);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error('Error loading writeup:', error);
+          setContent('# Error\n\nCould not load writeup.');
+          setLoading(false);
+        });
+    }
+  }, [writeupPath]);
 
-> forrof-portfolio@0.1.0 build
-> cross-env NODE_OPTIONS=--localstorage-file=./.localstorage react-scripts build
+  // Simple markdown parser for basic formatting
+  const parseMarkdown = (md) => {
+    if (!md) return '';
+    
+    let html = md;
+    
+    // Code blocks
+    html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+      return `<pre class="bg-gray-900 bg-opacity-80 p-4 rounded-lg overflow-x-auto my-4 border border-gray-700"><code class="text-cyan-400 text-sm">${escapeHtml(code.trim())}</code></pre>`;
+    });
+    
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-800 bg-opacity-60 px-2 py-1 rounded text-cyan-400 text-sm">$1</code>');
+    
+    // Headers
+    html = html.replace(/^### (.*$)/gm, '<h3 class="text-lg font-bold text-white mt-6 mb-3">$1</h3>');
+    html = html.replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold text-white mt-8 mb-4">$1</h2>');
+    html = html.replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold text-white mb-6">$1</h1>');
+    
+    // Images
+    html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" class="w-full rounded-lg my-4 border border-gray-700" />');
+    
+    // Bold
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
+    
+    // Horizontal rules
+    html = html.replace(/^---$/gm, '<hr class="border-gray-700 my-6">');
+    
+    // Lists
+    html = html.replace(/^\d+\.\s+(.*)$/gm, '<li class="ml-6 mb-2 text-gray-300 text-sm">$1</li>');
+    html = html.replace(/^[-*]\s+(.*)$/gm, '<li class="ml-6 mb-2 text-gray-300 list-disc text-sm">$1</li>');
+    
+    // Paragraphs
+    html = html.split('\n\n').map(para => {
+      if (para.startsWith('<') || para.trim() === '') return para;
+      return `<p class="text-gray-300 mb-4 leading-relaxed text-sm">${para}</p>`;
+    }).join('\n');
+    
+    return html;
+  };
 
-PS C:\Users\test\Desktop\forrof-portfolio-final.tar\forrof-portfolio-final\forrof-portfolio>
-Failed to compile.
+  const escapeHtml = (text) => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  };
 
-SyntaxError: C:\Users\test\Desktop\forrof-portfolio-final.tar\forrof-portfolio-final\forrof-portfolio\src\WriteupViewer.jsx: Support for the experimental syntax 'decorators' isn't currently enabled (1:1):
-> 1 | @tailwind base;
-    | ^
-  2 | @tailwind components;
-  3 | @tailwind utilities;
-  4 |
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn">
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm animate-fadeIn"
+        onClick={onClose}
+      ></div>
+      
+      {/* Modal - Half Screen */}
+      <div className="fixed right-0 top-0 h-full w-full md:w-1/2 animate-slideLeft">
+        <div className="relative bg-black bg-opacity-90 backdrop-blur-md border-l border-gray-700 h-full overflow-y-auto custom-scrollbar">
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="sticky top-4 right-4 float-right bg-gray-800 bg-opacity-80 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-bold transition-colors z-10 text-sm"
+          >
+            ✕ Close
+          </button>
+          
+          {/* Content */}
+          <div className="p-6 pt-16">
+            {loading ? (
+              <div className="text-center text-gray-400 font-bold text-sm">Loading writeup...</div>
+            ) : (
+              <div 
+                className="writeup-content text-sm"
+                dangerouslySetInnerHTML={{ __html: parseMarkdown(content) }}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-Add @babel/plugin-proposal-decorators (https://github.com/babel/babel/tree/main/packages/babel-plugin-proposal-decorators) to the 'plugins' section of your Babel config to enable transformation.
-If you want to leave it as-is, add @babel/plugin-syntax-decorators (https://github.com/babel/babel/tree/main/packages/babel-plugin-syntax-decorators) to the 'plugins' section to enable parsing.
-
-If you already added the plugin for this syntax to your config, it's possible that your config isn't being loaded.
-You can re-run Babel with the BABEL_SHOW_CONFIG_FOR environment variable to show the loaded configuration:
-        npx cross-env BABEL_SHOW_CONFIG_FOR=C:\Users\test\Desktop\forrof-portfolio-final.tar\forrof-portfolio-final\forrof-portfolio\src\WriteupViewer.jsx <your build command>
-See https://babeljs.io/docs/configuration#print-effective-configs for more info.
-    at parser.next (<anonymous>)
-    at normalizeFile.next (<anonymous>)
-    at run.next (<anonymous>)
-    at transform.next (<anonymous>)
+export default WriteupViewer;
