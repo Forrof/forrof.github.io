@@ -161,17 +161,23 @@ const App = () => {
 
       {/* Centered Writeup Modal */}
       {selectedWriteup && selectedWriteup !== '#' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="bg-black bg-opacity-90 border border-gray-700 rounded-xl w-full max-w-3xl max-h-96 overflow-y-auto">
-            <div className="p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm">
+          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-center p-6 border-b border-gray-700">
+              <h2 className="text-white font-bold">Writeup</h2>
               <button
                 onClick={() => setSelectedWriteup(null)}
-                className="mb-4 px-4 py-2 bg-gray-800 bg-opacity-50 hover:bg-opacity-70 text-white rounded-lg text-sm font-bold float-right"
+                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-bold text-sm"
               >
                 ✕ Close
               </button>
-              <div className="clear-both">
-                <WriteupViewer path={selectedWriteup} />
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-6">
+                <WriteupContent path={selectedWriteup} />
               </div>
             </div>
           </div>
@@ -778,6 +784,66 @@ const PlatformBarChart = ({ challenges }) => {
           <div className="text-sm text-white font-bold">{count}</div>
         </div>
       ))}
+    </div>
+  );
+};
+
+// Writeup Content Component
+const WriteupContent = ({ path }) => {
+  const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (path) {
+      setLoading(true);
+      fetch(path)
+        .then(response => response.text())
+        .then(text => {
+          setContent(text);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error('Error loading writeup:', error);
+          setContent('# Error\n\nCould not load writeup. File may not exist.');
+          setLoading(false);
+        });
+    }
+  }, [path]);
+
+  const parseMarkdown = (md) => {
+    if (!md) return '';
+    let html = md;
+    
+    html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+      return `<pre class="bg-gray-900 p-3 rounded text-xs overflow-x-auto border border-gray-700"><code class="text-cyan-400">${code.trim()}</code></pre>`;
+    });
+    
+    html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-800 px-2 py-1 rounded text-cyan-400 text-xs">$1</code>');
+    html = html.replace(/^### (.*$)/gm, '<h3 class="text-lg font-bold text-white mt-4 mb-2">$1</h3>');
+    html = html.replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold text-white mt-6 mb-3">$1</h2>');
+    html = html.replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold text-white mb-4">$1</h1>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-300">$1</strong>');
+    html = html.replace(/^\d+\.\s+(.*)$/gm, '<li class="ml-4 text-gray-400 text-sm">$1</li>');
+    html = html.replace(/^[-*]\s+(.*)$/gm, '<li class="ml-4 text-gray-400 text-sm">$1</li>');
+    
+    html = html.split('\n\n').map(para => {
+      if (para.startsWith('<') || para.trim() === '') return para;
+      return `<p class="text-gray-400 mb-3 text-sm leading-relaxed">${para}</p>`;
+    }).join('\n');
+    
+    return html;
+  };
+
+  return (
+    <div>
+      {loading ? (
+        <div className="text-gray-400 text-center">Loading...</div>
+      ) : (
+        <div 
+          className="text-sm space-y-3"
+          dangerouslySetInnerHTML={{ __html: parseMarkdown(content) }}
+        />
+      )}
     </div>
   );
 };
