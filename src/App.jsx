@@ -158,6 +158,8 @@ const App = () => {
           glyphSharpness={0.139}
           bg={[0.02936394817380732, 0.06404606269956087, 0.059432583347921675]}
         />
+        {/* Black overlay */}
+        <div className="absolute inset-0 bg-black opacity-20"></div>
       </div>
 
       {/* Image Preview Modal */}
