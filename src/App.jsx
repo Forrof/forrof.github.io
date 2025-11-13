@@ -45,46 +45,6 @@ const App = () => {
       description: "Network traffic analysis and PowerShell malware investigation involving Discord token stealer",
       writeupPath: "/writeups/htb-free-boost.md",
       date: "Nov 2024"
-    },
-    {
-      id: 2,
-      title: "SQL Injection in Login Portal",
-      platform: "HackTheBox",
-      difficulty: "Medium",
-      category: "Web",
-      description: "Exploited SQL injection vulnerability to bypass authentication",
-      writeupPath: "/writeups/sql-injection-login.md",
-      date: "Nov 2024"
-    },
-    {
-      id: 3,
-      title: "Buffer Overflow Exploitation",
-      platform: "TryHackMe",
-      difficulty: "Hard",
-      category: "Binary",
-      description: "Stack-based buffer overflow leading to RCE",
-      writeupPath: "/writeups/buffer-overflow.md",
-      date: "Oct 2024"
-    },
-    {
-      id: 4,
-      title: "Crypto Challenge - RSA",
-      platform: "PicoCTF",
-      difficulty: "Easy",
-      category: "Crypto",
-      description: "Weak RSA key factorization",
-      writeupPath: "#",
-      date: "Sep 2024"
-    },
-    {
-      id: 5,
-      title: "XSS to Account Takeover",
-      platform: "HackTheBox",
-      difficulty: "Medium",
-      category: "Web",
-      description: "Stored XSS leading to admin cookie theft",
-      writeupPath: "#",
-      date: "Aug 2024"
     }
   ];
 
