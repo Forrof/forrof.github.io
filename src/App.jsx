@@ -180,7 +180,7 @@ const App = () => {
       {/* Centered Writeup Modal */}
       {selectedWriteup && selectedWriteup !== '#' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-[80vw] h-[95vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
+          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-[80vw] h-[90vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-700">
               <h2 className="text-white font-bold text-lg">Writeup</h2>
@@ -864,7 +864,7 @@ const WriteupContent = ({ path, onImageClick }) => {
     
     // Images first (before other replacements)
     html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, (match, alt, src) => {
-      return `<div class="my-2 flex justify-center"><img src="${src}" alt="${alt}" class="max-w-sm max-h-48 rounded-lg border border-gray-700 object-cover cursor-pointer hover:opacity-80 transition-opacity" onclick="window.__previewImage && window.__previewImage('${src}')" /></div>`;
+      return `<div class="my-3 flex justify-center"><img src="${src}" alt="${alt}" class="max-w-2xl max-h-80 rounded-lg border border-gray-700 object-cover cursor-pointer hover:opacity-80 transition-opacity" onclick="window.__previewImage && window.__previewImage('${src}')" /></div>`;
     });
     
     html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
