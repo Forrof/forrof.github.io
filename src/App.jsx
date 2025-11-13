@@ -161,8 +161,8 @@ const App = () => {
 
       {/* Centered Writeup Modal */}
       {selectedWriteup && selectedWriteup !== '#' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-full max-w-4xl h-[85vh] overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-black bg-opacity-70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-black bg-opacity-95 border border-gray-700 rounded-xl w-screen h-screen max-w-6xl max-h-screen overflow-hidden flex flex-col animate-slideUp shadow-2xl shadow-black">
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-700">
               <h2 className="text-white font-bold text-lg">Writeup</h2>
@@ -813,6 +813,11 @@ const WriteupContent = ({ path }) => {
   const parseMarkdown = (md) => {
     if (!md) return '';
     let html = md;
+    
+    // Images first (before other replacements)
+    html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, (match, alt, src) => {
+      return `<div class="my-4"><img src="${src}" alt="${alt}" class="w-full max-h-96 rounded-lg border border-gray-700 object-cover" onerror="this.style.display='none'" /></div>`;
+    });
     
     html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
       return `<pre class="bg-gray-900 p-3 rounded text-xs overflow-x-auto border border-gray-700"><code class="text-cyan-400">${code.trim()}</code></pre>`;
