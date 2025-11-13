@@ -784,7 +784,7 @@ const CategoryBarChart = ({ challenges }) => {
       {categories.map(([category, count]) => (
         <div key={category} className="flex flex-col items-center flex-1">
           <div
-            className="w-6 rounded-t transition-all hover:opacity-80"
+            className="w-12 rounded-t transition-all hover:opacity-80"
             style={{
               height: `${(count / maxCount) * 160}px`,
               backgroundColor: categoryColors[category] || '#4a9eff'
@@ -824,7 +824,7 @@ const PlatformBarChart = ({ challenges }) => {
       {platforms.map(([platform, count]) => (
         <div key={platform} className="flex flex-col items-center flex-1">
           <div
-            className="w-6 rounded-t transition-all hover:opacity-80"
+            className="w-12 rounded-t transition-all hover:opacity-80"
             style={{
               height: `${(count / maxCount) * 160}px`,
               backgroundColor: platformColors[platform] || '#4a9eff'
