@@ -106,7 +106,7 @@ const App = () => {
           distortAmp={0.04}
           frequency={14.44}
           zRate={0.015}
-          brightness={0.55}
+          brightness={0.71}
           contrast={1.36}
           seed1={8.514660607759119}
           seed2={5.158276515485413}
