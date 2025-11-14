@@ -106,7 +106,7 @@ const App = () => {
           distortAmp={0.04}
           frequency={14.44}
           zRate={0.015}
-          brightness={0.71}
+          brightness={0.88}
           contrast={1.36}
           seed1={8.514660607759119}
           seed2={5.158276515485413}
@@ -119,7 +119,7 @@ const App = () => {
           bg={[0.054, 0.063, 0.016285288363903815]}
         />
         {/* Black overlay */}
-        //<div className="absolute inset-0 bg-black opacity-40"></div>
+        <div className="absolute inset-0 bg-black opacity-0"></div>
       </div>
 
       {/* Image Preview Modal */}
