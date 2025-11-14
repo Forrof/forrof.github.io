@@ -96,27 +96,27 @@ const App = () => {
       {/* Background */}
       <div className="fixed inset-0 z-0">
         <AsciiNoiseEffect
-          noiseStrength={0.38}
-          noiseScale={0.0005}
-          speed={0.24}
-          cell={7}
+          noiseStrength={0.25}
+          noiseScale={0.004}
+          speed={0.53}
+          cell={30}
           bw={false}
           charset={2}
-          tint={[0.3, 0.6282064862054916, 0.5406094271122793]}
-          distortAmp={1.47}
-          frequency={6.62}
-          zRate={0.039}
-          brightness={1.54}
-          contrast={0.61}
-          seed1={0.0894173933569975}
-          seed2={4.20042963445157}
-          hue={35.2}
-          sat={1.46}
-          gamma={1.3}
-          vignette={0.19}
-          vignetteSoftness={0.41}
-          glyphSharpness={0.139}
-          bg={[0.02936394817380732, 0.06404606269956087, 0.059432583347921675]}
+          tint={[0.3333046747991682, 0.3, 0.7607957494618359]}
+          distortAmp={0.04}
+          frequency={14.44}
+          zRate={0.015}
+          brightness={0.55}
+          contrast={1.36}
+          seed1={8.514660607759119}
+          seed2={5.158276515485413}
+          hue={18.3}
+          sat={0.6}
+          gamma={0.81}
+          vignette={0.14}
+          vignetteSoftness={0.9}
+          glyphSharpness={0.151}
+          bg={[0.054, 0.063, 0.016285288363903815]}
         />
         {/* Black overlay */}
         <div className="absolute inset-0 bg-black opacity-40"></div>
