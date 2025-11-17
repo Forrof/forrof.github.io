@@ -119,7 +119,7 @@ const App = () => {
           bg={[0.054, 0.063, 0.016285288363903815]}
         />
         {/* Black overlay */}
-        <div className="absolute inset-0 bg-black opacity-0"></div>
+        <div className="absolute inset-0 bg-black opacity-20"></div>
       </div>
 
       {/* Image Preview Modal */}
