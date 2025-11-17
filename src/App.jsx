@@ -45,7 +45,17 @@ const App = () => {
       description: "Network traffic analysis and PowerShell malware investigation involving Discord token stealer",
       writeupPath: "/writeups/htb-free-boost.md",
       date: "Nov 2024"
-    }
+    },
+	{
+		id: 2,
+		title: "geometryDash",
+		platform: "CTF",
+		difficulty: "Medium",
+		category: "Forencics",
+		description: "geometrydash",
+		writeupPath: "/writeups/geometrydash.md",
+		date: "Nov 2025"
+	}
   ];
 
   // Group challenges by platform
