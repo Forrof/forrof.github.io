@@ -51,7 +51,7 @@ const App = () => {
 		title: "geometryDash",
 		platform: "CTF",
 		difficulty: "Medium",
-		category: "Forencics",
+		category: "Forensics",
 		description: "geometrydash",
 		writeupPath: "/writeups/geometrydash.md",
 		date: "Nov 2025"
