@@ -1,0 +1,8 @@
+{
+  "name": "Vol2Installer",
+  "description": "A simple installer for Volatility2 that takes care of the dependencies and setup.",
+  "repository": "https://github.com/Forrof/Vol2Installer",
+  "language": "Python",
+  "kind": "original",
+  "order": 3
+}

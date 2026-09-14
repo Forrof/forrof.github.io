@@ -1,0 +1,63 @@
+---
+import '../styles/site.css';
+import MarginArt from '../components/MarginArt.astro';
+import MastheadArt from '../components/MastheadArt.astro';
+interface Props {
+  title?: string;
+  description?: string;
+  section?: 'entries' | 'cves' | 'projects';
+  reading?: boolean;
+  noindex?: boolean;
+}
+const { title, description = 'Technical entries, writeups, public disclosures, and projects by forrof.', section = 'entries', reading = false, noindex = false } = Astro.props;
+const pageTitle = title ? `${title} — forrof` : 'forrof';
+const canonical = new URL(Astro.url.pathname === '/404/' ? '/404.html' : Astro.url.pathname, Astro.site);
+const navigation = [{ label: 'entries', href: '/' }, { label: 'cves', href: '/cves/' }, { label: 'projects', href: '/projects/' }];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111315" />
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={reading ? 'article' : 'website'} />
+    <meta property="og:url" content={canonical} />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <div class="site" id="forrof-site" data-reading={String(reading)} data-motion="off">
+      <a class="ff-skip" href="#main">Skip to content</a>
+      <div class="ff-composition">
+        <MarginArt side="left" />
+        <div class="ff-wrap">
+          <header class="ff-header">
+            <a class="ff-wordmark" href="/" aria-label="forrof, entries">forrof<span aria-hidden="true">_</span></a>
+            <nav class="ff-nav" aria-label="Main navigation">
+              {navigation.map((item) => <a href={item.href} aria-current={section === item.label ? 'page' : undefined}>{item.label}</a>)}
+              <a href="https://github.com/Forrof" target="_blank" rel="noopener noreferrer">github ↗</a>
+            </nav>
+          </header>
+          {!reading && <MastheadArt />}
+          <main id="main"><slot /></main>
+          <footer class="ff-footer">
+            <span><span class="ff-corner" aria-hidden="true">└─ </span>forrof</span>
+            <button class="ff-motion-toggle" data-motion-toggle type="button" aria-pressed="false" hidden>motion: off</button>
+          </footer>
+        </div>
+        <MarginArt side="right" />
+      </div>
+    </div>
+    <script>
+      import { initArt } from '../scripts/art';
+      const root = document.getElementById('forrof-site');
+      if (root) initArt(root);
+    </script>
+  </body>
+</html>

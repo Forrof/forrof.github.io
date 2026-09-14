@@ -1,0 +1,10 @@
+---
+import { irisFrame, knotFrame } from '../lib/art';
+const iris = irisFrame();
+const knot = knotFrame();
+---
+<div class="ff-masthead" aria-hidden="true">
+  <pre class="ff-ascii ff-emblem" data-iris>{iris.map((line, row) => <><span class={Math.abs(row - 12) < 5 ? 'ff-art-front' : 'ff-art-back'}>{line}</span>{row < iris.length - 1 ? '\n' : ''}</>)}</pre>
+  <pre class="ff-ascii ff-ascii-knot" data-knot>{knot.map((line, row) => <><span class={row < 7 ? 'ff-art-back' : row > 16 ? 'ff-art-front' : undefined}>{line}</span>{row < knot.length - 1 ? '\n' : ''}</>)}</pre>
+  <div class="ff-masthead-foot">╱╱╱ &nbsp; <span class="ff-orbit-mark">╳</span> &nbsp; ╱╱╱</div>
+</div>

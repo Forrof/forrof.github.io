@@ -1,0 +1,8 @@
+{
+  "name": "FFind",
+  "description": "Self-hosted static malware analysis for analyst-reviewed YARA and Falcon LogScale detection content.",
+  "repository": "https://github.com/Forrof/FFind",
+  "language": "Python",
+  "kind": "original",
+  "order": 1
+}

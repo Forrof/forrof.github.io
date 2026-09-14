@@ -1,43 +1,32 @@
 {
-  "name": "forrof-portfolio",
-  "version": "0.1.0",
-  "homepage": "https://forrof.github.io",
+  "name": "forrof-archive",
+  "version": "1.0.0",
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1"
+    "@astrojs/markdown-remark": "7.3.1",
+    "@astrojs/sitemap": "3.7.4",
+    "@fontsource-variable/literata": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "astro": "7.3.2",
+    "rehype-autolink-headings": "7.1.0"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.16",
-    "cross-env": "^10.1.0",
-    "gh-pages": "^6.1.0",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.3.6"
+    "@astrojs/check": "0.9.10",
+    "linkedom": "0.18.13",
+    "typescript": "~5.9.3"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "cross-env NODE_OPTIONS=--localstorage-file=./.localstorage react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "dev": "astro dev --host 127.0.0.1",
+    "start": "npm run dev",
+    "check": "astro check",
+    "build": "astro sync --force && astro build",
+    "preview": "astro preview --host 127.0.0.1",
+    "test": "node --test tests/*.test.mjs",
+    "validate": "npm run check && npm run build && npm test"
   }
 }

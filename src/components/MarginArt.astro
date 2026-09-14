@@ -1,0 +1,99 @@
+---
+import { railFrame } from '../lib/art';
+interface Props { side: 'left' | 'right' }
+const { side } = Astro.props;
+---
+{side === 'left' ? (
+<aside class="ff-margin ff-margin-left" aria-hidden="true">
+      <pre class="ff-ascii ff-rail-drawing ff-rail-crown">       ╷
+       │
+    ╲  │  ╱
+     ╲ │ ╱
+   ───╳╳╳───
+  ───╳▓█▓╳───
+   ───╳╳╳───
+     ╱ │ ╲
+    ╱  │  ╲
+       │
+       ╵</pre>
+      <pre class="ff-ascii ff-rail-drawing ff-rail-inlay">    ╭─╲╱─╮
+   ╱ ╭╳╮ ╲
+  ╱ ╱░▓░╲ ╲
+ ┤ ╱░▓█▓░╲ ├
+  ╲ ╲░▓░╱ ╱
+   ╲ ╰╳╯ ╱
+    ╰─╱╲─╯</pre>
+      <pre class="ff-ascii ff-rail-drawing ff-rail-live" data-rail="left">{railFrame(0, 0, true)}</pre>
+      <pre class="ff-ascii ff-rail-drawing ff-rail-inlay">      ╱╲
+     ╱┊┊╲
+    ╱┊╳┊┊╲
+   ╱┊╱╲╲┊┊╲
+   ╲┊╲╱╱┊┊╱
+    ╲┊╳┊┊╱
+     ╲┊┊╱
+      ╲╱
+      ╱╲
+     ╱┊┊╲
+    ╱┊╳┊┊╲
+   ╱┊╱╲╲┊┊╲
+   ╲┊╲╱╱┊┊╱
+    ╲┊╳┊┊╱
+     ╲┊┊╱
+      ╲╱</pre>
+      <pre class="ff-ascii ff-rail-drawing">  ┌─┐     ┌─┐
+  │ ╰──┬──╯ │
+  └──╮ │ ╭──┘
+     ╰─╳─╯
+  ┌──╯ │ ╰──┐
+  │ ╭──┴──╮ │
+  └─┘     └─┘</pre>
+    </aside>
+) : (
+<aside class="ff-margin ff-margin-right" aria-hidden="true">
+      <pre class="ff-ascii ff-rail-drawing">      ┌─┐
+  ┌───┘ └───┐
+  │  ╲   ╱  │
+  │   ╲ ╱   │
+ ─┤    ◇    ├─
+  │   ╱ ╲   │
+  │  ╱   ╲  │
+  └───┐ ┌───┘
+      └─┘</pre>
+      <pre class="ff-ascii ff-rail-drawing ff-rail-inlay">    ╭─────╮
+   ╱ ╲   ╱ ╲
+  ╱   ╲ ╱   ╲
+  │ ╭──╳──╮ │
+  │ │ ░▓░ │ │
+  │ ╰──╳──╯ │
+  ╲   ╱ ╲   ╱
+   ╲ ╱   ╲ ╱
+    ╳─────╳
+   ╱ ╲   ╱ ╲
+  ╱   ╲ ╱   ╲
+  │ ╭──╳──╮ │
+  │ │ ░▓░ │ │
+  │ ╰──╳──╯ │
+  ╲   ╱ ╲   ╱
+   ╲ ╱   ╲ ╱
+    ╰─────╯</pre>
+      <pre class="ff-ascii ff-rail-drawing ff-rail-live" data-rail="right">{railFrame(0, Math.PI * 0.7, false)}</pre>
+      <pre class="ff-ascii ff-rail-drawing ff-rail-inlay">       ╷
+   ╲   ▓   ╱
+    ╲ ░█░ ╱
+     ╳▓█▓╳
+ ──▓███████▓──
+     ╳▓█▓╳
+    ╱ ░█░ ╲
+   ╱   ▓   ╲
+       ╵</pre>
+      <pre class="ff-ascii ff-rail-drawing ff-rail-crown">       ╷
+      ╱╳╲
+     ╱╳▓╳╲
+    ╱╳▓█▓╳╲
+ ──╳▓█████▓╳──
+    ╲╳▓█▓╳╱
+     ╲╳▓╳╱
+      ╲╳╱
+       ╵</pre>
+    </aside>
+)}

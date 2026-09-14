@@ -1,0 +1,16 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import EntryRow from '../components/EntryRow.astro';
+import { publishedEntries, publishedCves } from '../lib/content';
+const entries = await publishedEntries();
+const cves = await publishedCves();
+const items = [
+  ...entries.map(({ id, data }) => ({ ...data, href: `/entries/${id}/` })),
+  ...cves.map(({ data }) => ({ ...data, title: `${data.identifier} — ${data.title}`, type: 'advisory', href: `/cves/${data.identifier.toLowerCase()}/` })),
+].sort((a, b) => b.published.localeCompare(a.published) || a.title.localeCompare(b.title));
+---
+<SiteLayout>
+  <div class="ff-section-head"><h1><span aria-hidden="true">/</span> entries</h1><span class="ff-meta">newest first</span></div>
+  {items.map((item, index) => <EntryRow {...item} index={items.length - index} />)}
+  {items.length === 0 && <p class="ff-empty">Entries will appear here.</p>}
+</SiteLayout>

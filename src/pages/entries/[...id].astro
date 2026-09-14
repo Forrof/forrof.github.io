@@ -1,0 +1,29 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { publishedEntries, fullDate } from '../../lib/content';
+export async function getStaticPaths() {
+  const entries = await publishedEntries();
+  return entries.map((entry, index) => ({ params: { id: entry.id }, props: { entry, newer: entries[index - 1], older: entries[index + 1] } }));
+}
+interface Props { entry: CollectionEntry<'entries'>; newer?: CollectionEntry<'entries'>; older?: CollectionEntry<'entries'> }
+const { entry, newer, older } = Astro.props;
+const { Content } = await render(entry);
+const { title, summary, published, updated, type, tags, platform, difficulty, category } = entry.data;
+---
+<SiteLayout title={title} description={summary} reading>
+  <a class="ff-back" href="/">← all entries</a>
+  <article class="ff-article">
+    <h1>{title}</h1>
+    <div class="ff-byline ff-meta">
+      <span>forrof</span><time datetime={published}>{fullDate(published)}</time><span>[{type}]</span>
+      {updated && <span>updated <time datetime={updated}>{fullDate(updated)}</time></span>}
+    </div>
+    {platform && <div class="ff-tags ff-article-tags"><span>{platform}</span>{category && <span>{category}</span>}{difficulty && <span>{difficulty}</span>}</div>}
+    <div class="ff-prose"><Content /></div>
+    <nav class="ff-article-tail" aria-label="Adjacent entries">
+      {older ? <a href={`/entries/${older.id}/`}>← {older.data.title}</a> : <a href="/">← all entries</a>}
+      {newer ? <a href={`/entries/${newer.id}/`}>{newer.data.title} →</a> : <span class="ff-meta">{tags.join(' · ')}</span>}
+    </nav>
+  </article>
+</SiteLayout>

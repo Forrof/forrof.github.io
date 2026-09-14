@@ -1,0 +1,10 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import EntryRow from '../../components/EntryRow.astro';
+import { publishedCves } from '../../lib/content';
+const cves = await publishedCves();
+---
+<SiteLayout title="cves" section="cves" description="Public vulnerability disclosures credited to forrof.">
+  <div class="ff-section-head"><h1><span aria-hidden="true">/</span> cves</h1><span class="ff-meta">public disclosures</span></div>
+  {cves.length ? cves.map(({ data }, index) => <EntryRow {...data} title={`${data.identifier} — ${data.product}`} href={`/cves/${data.identifier.toLowerCase()}/`} type="advisory" index={cves.length - index} />) : <p class="ff-empty">Advisories will appear here.</p>}
+</SiteLayout>

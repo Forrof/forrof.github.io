@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+import SiteLayout from '../layouts/SiteLayout.astro';
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+---
+<SiteLayout title="projects" section="projects" description="Selected GitHub projects by forrof.">
+  <div class="ff-section-head"><h1><span aria-hidden="true">/</span> projects</h1><span class="ff-meta">selected repositories</span></div>
+  {projects.map(({ data }, index) => <article class="ff-entry">
+    <span class="ff-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+    <div>
+      <div class="ff-title-row">
+        <h2><a href={data.repository} target="_blank" rel="noopener noreferrer">{data.name}</a></h2>
+        <span class="ff-leader" aria-hidden="true"></span><span class="ff-meta">{data.language}</span>
+      </div>
+      {data.description && <p class="ff-summary">{data.description}</p>}
+      {data.kind !== 'original' && <span class="ff-meta">[{data.kind}]</span>}
+      <a class="ff-project-link" href={data.repository} target="_blank" rel="noopener noreferrer">view repository ↗</a>
+    </div>
+  </article>)}
+</SiteLayout>

@@ -8,6 +8,12 @@
 
 # production
 /build
+/dist
+/.astro
+/.localstorage
+/.env
+/.env.*
+!.env.example
 
 # misc
 .DS_Store
