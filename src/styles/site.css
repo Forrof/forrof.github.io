@@ -177,7 +177,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #9eb9f2; outline-offs
 
 .site { font-size: 1rem; }
 .site .ff-prose { font-size: 1.125rem; }
-.site .ff-prose strong { font-weight: 650; }
+.site .ff-prose strong { font-weight: 650; color: var(--ff-subheading); }
 .site .ff-prose h3 { color: var(--ff-subheading); font: 500 1.125rem/1.5 var(--ff-reading); margin: 1.75rem 0 1rem; }
 .site .ff-prose h2 { color: var(--ff-accent); font-size: 1.4375rem; }
 .site .ff-prose :is(h2, h3) .heading-anchor { color: inherit; }
@@ -187,6 +187,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #9eb9f2; outline-offs
 .site .ff-prose a { overflow-wrap: anywhere; }
 .site .ff-prose p a { color: var(--ff-accent); }
 .site .ff-prose img { display: block; max-width: 100%; height: auto; margin: 1.75rem 0; }
+.site .ff-prose img[src="/images/is-freezing-ram-a-thing/FrozonoHacker.png"] { width: 75%; margin-inline: auto; }
 .site .ff-prose .ff-image-caption { margin: -1rem 0 2rem; text-align: center; color: var(--ff-muted); font: 400 .875rem/1.3 var(--ff-mono); }
 .site .ff-prose pre { margin: 1.5rem 0; padding: 1.25rem; border-left: 2px solid var(--ff-accent); border-radius: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .875rem; line-height: 1.7; }
 .site .ff-prose pre code { padding: 0; background: none; font-size: inherit; }

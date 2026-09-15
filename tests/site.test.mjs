@@ -109,6 +109,20 @@ test('every internal page, asset, and heading link resolves in the build', () =>
   }
 });
 
+test('only the freezing-RAM opening image is reduced by 25 percent and centered', () => {
+  const css = readFileSync(new URL('src/styles/site.css', root), 'utf8');
+  const selector = '.site .ff-prose img[src="/images/is-freezing-ram-a-thing/FrozonoHacker.png"]';
+  const rule = css.slice(css.indexOf(selector) + selector.length).match(/^\s*\{([^}]+)\}/)?.[1];
+  assert.ok(rule, 'The image-specific sizing rule exists');
+  assert.match(rule, /width:\s*75%;/);
+  assert.match(rule, /margin-inline:\s*auto;/);
+  assert.match(css, /\.site \.ff-prose img\s*\{[^}]*max-width:\s*100%;[^}]*height:\s*auto;/);
+  const matches = [...documents.entries()].flatMap(([file, document]) => [...document.querySelectorAll(selector)].map((image) => ({ file, image })));
+  assert.equal(matches.length, 1, 'Other article images keep their original sizing');
+  assert.equal(matches[0].file, 'entries/is-freezing-ram-a-thing/index.html');
+  assert.equal(matches[0].image, documents.get(matches[0].file).querySelector('.ff-prose img'));
+});
+
 test('all original evidence images and raw Markdown remain byte-identical', () => {
   const assets = readdirSync(new URL('public/writeups/', root), { recursive: true });
   let images = 0;
@@ -338,4 +352,5 @@ test('article section colors remain distinct and readable on the dark background
   assert.notEqual(token('accent'), token('subheading'));
   assert.match(css, /\.ff-prose h2\s*\{[^}]*color:\s*var\(--ff-accent\)/);
   assert.match(css, /\.ff-prose h3\s*\{[^}]*color:\s*var\(--ff-subheading\)/);
+  assert.match(css, /\.ff-prose strong\s*\{[^}]*font-weight:\s*650;[^}]*color:\s*var\(--ff-subheading\)/);
 });
