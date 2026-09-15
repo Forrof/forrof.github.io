@@ -6,6 +6,7 @@ Implemented the approved design on `codex/redesign`. Public release to `forrof.g
 
 - Static entry index and individual article URLs, CVE archive/detail template, projects, 404, sitemap, and canonical metadata.
 - Original rotating iris/knot and margin artwork, server-rendered fallbacks, remembered pause, reduced-motion handling, and offscreen/background suspension.
+- A monospace disclosure counter sits between the two masthead artworks on wide layouts and beneath them on narrow layouts. Counts are derived from public records, exclude drafts, and remain readable without JavaScript; decorative art stays hidden from assistive technology while the counts are accessible.
 - Locally bundled IBM Plex Mono, IBM Plex Sans, and Literata, with their font licenses.
 - Both original writeups, all ten original PNGs, and the legacy raw Markdown URLs. Body text and code preserved; article metadata moved into frontmatter and Geometry Dash headings moved from H1 to H2.
 - Validated content schemas, writing guide/templates, source-qualified CVE fields, and no public editing endpoint.

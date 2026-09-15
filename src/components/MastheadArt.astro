@@ -1,10 +1,28 @@
 ---
 import { irisFrame, knotFrame } from '../lib/art';
+import { publishedCves } from '../lib/content';
+import { advisoryCounts } from '../lib/advisories';
 const iris = irisFrame();
 const knot = knotFrame();
+const counts = advisoryCounts((await publishedCves()).map(({ data }) => data));
+const number = (value: number) => String(value).padStart(2, '0');
 ---
-<div class="ff-masthead" aria-hidden="true">
-  <pre class="ff-ascii ff-emblem" data-iris>{iris.map((line, row) => <><span class={Math.abs(row - 12) < 5 ? 'ff-art-front' : 'ff-art-back'}>{line}</span>{row < iris.length - 1 ? '\n' : ''}</>)}</pre>
-  <pre class="ff-ascii ff-ascii-knot" data-knot>{knot.map((line, row) => <><span class={row < 7 ? 'ff-art-back' : row > 16 ? 'ff-art-front' : undefined}>{line}</span>{row < knot.length - 1 ? '\n' : ''}</>)}</pre>
-  <div class="ff-masthead-foot">╱╱╱ &nbsp; <span class="ff-orbit-mark">╳</span> &nbsp; ╱╱╱</div>
+<div class="ff-masthead">
+  <pre class="ff-ascii ff-emblem" data-iris aria-hidden="true">{iris.map((line, row) => <><span class={Math.abs(row - 12) < 5 ? 'ff-art-front' : 'ff-art-back'}>{line}</span>{row < iris.length - 1 ? '\n' : ''}</>)}</pre>
+  <div class="ff-disclosure-counter" role="group" aria-label="Public disclosure counts">
+    <p class="ff-counter-heading"><span aria-hidden="true">[ </span>disclosures<span aria-hidden="true"> ]</span></p>
+    <dl class="ff-disclosure-counts">
+      <div class="ff-tally">
+        <dt>CVEs assigned</dt>
+        <dd data-count="assigned">{number(counts.assigned)}</dd>
+      </div>
+      <div class="ff-tally">
+        <dt>pending CVE</dt>
+        <dd data-count="pending">{number(counts.pending)}</dd>
+      </div>
+    </dl>
+    <p class="ff-counter-total"><span data-count="published">{number(counts.published)}</span> published</p>
+  </div>
+  <pre class="ff-ascii ff-ascii-knot" data-knot aria-hidden="true">{knot.map((line, row) => <><span class={row < 7 ? 'ff-art-back' : row > 16 ? 'ff-art-front' : undefined}>{line}</span>{row < knot.length - 1 ? '\n' : ''}</>)}</pre>
+  <div class="ff-masthead-foot" aria-hidden="true">╱╱╱ &nbsp; <span class="ff-orbit-mark">╳</span> &nbsp; ╱╱╱</div>
 </div>

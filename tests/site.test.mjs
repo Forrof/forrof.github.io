@@ -107,6 +107,29 @@ test('approved artwork is server-rendered, decorative, and contains no rejected 
   }
 });
 
+test('artwork counters are accessible, server-rendered, and match the public archive', () => {
+  const rows = [...documents.get('cves/index.html').querySelectorAll('.ff-entry')];
+  const assigned = rows.filter((row) => row.querySelector('.ff-status').textContent.endsWith('CVE assigned')).length;
+  const expected = { assigned, pending: rows.length - assigned, published: rows.length };
+  for (const [file, document] of documents) {
+    const masthead = document.querySelector('.ff-masthead');
+    if (!masthead) {
+      assert.equal(document.querySelector('.ff-disclosure-counter'), null, `${file}: reading pages stay uncluttered`);
+      continue;
+    }
+    const counter = masthead.querySelector('.ff-disclosure-counter');
+    assert.ok(counter, file);
+    assert.equal(counter.getAttribute('role'), 'group');
+    assert.equal(counter.getAttribute('aria-label'), 'Public disclosure counts');
+    assert.equal(counter.closest('[aria-hidden="true"], [hidden]'), null, `${file}: counts must not be decorative`);
+    assert.deepEqual([...counter.querySelectorAll('dt')].map((term) => term.textContent), ['CVEs assigned', 'pending CVE']);
+    for (const [key, value] of Object.entries(expected)) {
+      assert.equal(counter.querySelector(`[data-count="${key}"]`).textContent, String(value).padStart(2, '0'), `${file}: ${key}`);
+    }
+    for (const art of masthead.querySelectorAll('.ff-ascii, .ff-masthead-foot')) assert.equal(art.getAttribute('aria-hidden'), 'true');
+  }
+});
+
 test('published output contains no source templates or private configuration', () => {
   for (const path of ['src', 'docs', 'tests', '.git', '.env', 'package.json', 'node_modules']) assert.equal(existsSync(new URL(path, dist)), false, path);
   const sitemap = readFileSync(new URL('sitemap-0.xml', dist), 'utf8');

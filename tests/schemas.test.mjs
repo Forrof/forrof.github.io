@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { dateSchema, entrySchema, cveSchema, projectSchema } from '../src/lib/schemas.ts';
-import { assignedCve, advisoryStatus } from '../src/lib/advisories.ts';
+import { assignedCve, advisoryStatus, advisoryCounts } from '../src/lib/advisories.ts';
 
 test('dates preserve known precision and reject impossible dates', () => {
   for (const date of ['2024-11', '2025-11', '2024-02-29', '2026-09-14']) assert.equal(dateSchema.parse(date), date);
@@ -47,4 +47,19 @@ test('public GHSAs can await a CVE without inventing an identifier or changing t
   assert.equal(cveSchema.safeParse({ ...pending, cve: 'pending' }).success, false);
   assert.equal(cveSchema.safeParse({ ...pending, verified: '2026-02-30' }).success, false);
   assert.equal(cveSchema.safeParse({ ...pending, identifier: 'CVE-2099-99999', cve: 'CVE-2099-99997' }).success, false);
+});
+
+test('disclosure counts distinguish assigned CVEs, pending advisories, and private drafts', () => {
+  assert.deepEqual(advisoryCounts([]), { assigned: 0, pending: 0, published: 0 });
+  const pending = { identifier: 'GHSA-2345-6789-cfgh' };
+  const records = [
+    { identifier: 'CVE-2099-99999' },
+    { identifier: 'GHSA-2345-6789-cfgj', cve: 'CVE-2099-99998' },
+    pending,
+    { identifier: 'CVE-2099-99997', draft: true },
+    { identifier: 'GHSA-2345-6789-cfgm', draft: true },
+  ];
+  assert.deepEqual(advisoryCounts(records), { assigned: 2, pending: 1, published: 3 });
+  assert.deepEqual(advisoryCounts([{ ...pending, cve: 'CVE-2099-99996' }]), { assigned: 1, pending: 0, published: 1 });
+  assert.deepEqual(advisoryCounts([{ ...pending, draft: true }]), { assigned: 0, pending: 0, published: 0 });
 });

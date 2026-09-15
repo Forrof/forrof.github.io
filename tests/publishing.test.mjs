@@ -70,6 +70,15 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   });
   assert.equal(build.status, 0, build.stdout + build.stderr);
   const output = join(scratch, 'dist');
+  function assertCounters(expected) {
+    for (const page of ['index.html', 'cves/index.html', 'projects/index.html']) {
+      const document = parseHTML(readFileSync(join(output, page), 'utf8')).document;
+      for (const [key, value] of Object.entries(expected)) {
+        assert.equal(Number(document.querySelector(`.ff-disclosure-counter [data-count="${key}"]`).textContent), value, `${page}: ${key}`);
+      }
+    }
+  }
+  assertCounters({ assigned: 1, pending: 1, published: 2 });
   assert.equal(existsSync(join(output, 'entries/test-draft')), false);
   assert.equal(existsSync(join(output, 'cves/cve-2099-99998')), false);
   assert.equal(existsSync(join(output, 'cves/ghsa-2345-6789-cfgj')), false);
@@ -104,6 +113,7 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   writeFileSync(join(scratch, 'src/content/cves/test-pending.md'), pending.replace('identifier:', 'cve: CVE-2099-99997\nidentifier:'));
   const assignmentBuild = spawnSync('npm', ['run', 'build'], { cwd: scratch, encoding: 'utf8', timeout: 60_000, env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' } });
   assert.equal(assignmentBuild.status, 0, assignmentBuild.stdout + assignmentBuild.stderr);
+  assertCounters({ assigned: 2, pending: 0, published: 2 });
   const assignedDetail = parseHTML(readFileSync(join(output, 'cves/ghsa-2345-6789-cfgh/index.html'), 'utf8')).document;
   assert.equal(assignedDetail.querySelector('h1').textContent, 'Synthetic advisory fixture');
   assert.ok(assignedDetail.querySelector('.ff-facts').textContent.includes('CVE-2099-99997'));
@@ -125,6 +135,7 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   unlinkSync(join(scratch, 'src/content/cves/test-pending-draft.md'));
   const rebuild = spawnSync('npm', ['run', 'build'], { cwd: scratch, encoding: 'utf8', timeout: 60_000, env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' } });
   assert.equal(rebuild.status, 0, rebuild.stdout + rebuild.stderr);
+  assertCounters({ assigned: 0, pending: 0, published: 0 });
   assert.equal(existsSync(join(output, 'cves/cve-2099-99999')), false);
   assert.equal(existsSync(join(output, 'cves/ghsa-2345-6789-cfgh')), false);
   assert.doesNotMatch(readFileSync(join(output, 'sitemap-0.xml'), 'utf8'), /cve-2099-99999|ghsa-2345-6789-cfgh/);
