@@ -260,6 +260,29 @@ test('approved verbatim Description excerpts retain their verified wording', () 
   }
 });
 
+test('CVE typography uses the archive monospace without changing regular blog posts', () => {
+  for (const [file, document] of documents) {
+    assert.equal(Boolean(document.querySelector('article.ff-advisory')), /^cves\/[^/]+\/index\.html$/.test(file), file);
+  }
+  const css = readFileSync(new URL('src/styles/site.css', root), 'utf8');
+  assert.match(css, /--ff-reading:\s*"Literata Variable"/);
+  assert.match(css, /\.site \.ff-advisory\s*\{\s*--ff-reading:\s*var\(--ff-mono\)/);
+  assert.match(css, /\.site \.ff-advisory \.ff-prose\s*\{[^}]*font-size:\s*1\.0625rem;\s*line-height:\s*1\.85/);
+  assert.match(css, /\.site \.ff-advisory h1\s*\{[^}]*font-size:\s*clamp\(1\.5rem, 3cqw, 2rem\)/);
+  for (const face of ['400-italic', '700', '700-italic']) assert.ok(css.includes(`@fontsource/ibm-plex-mono/latin-${face}.css`));
+  let bundledFonts = 0;
+  for (const filename of readdirSync(new URL('_astro/', dist)).filter((file) => file.endsWith('.css'))) {
+    const stylesheet = new URL(`_astro/${filename}`, dist);
+    for (const match of readFileSync(stylesheet, 'utf8').matchAll(/url\(([^)]+\.woff2)\)/g)) {
+      const font = match[1].startsWith('/') ? new URL(match[1].slice(1), dist) : new URL(match[1], stylesheet);
+      assert.ok(existsSync(font), `${filename}: font ${match[1]}`);
+      assert.equal(readFileSync(font).subarray(0, 4).toString(), 'wOF2');
+      bundledFonts++;
+    }
+  }
+  assert.ok(bundledFonts > 0, 'Font asset checks must run against the build');
+});
+
 test('article section colors remain distinct and readable on the dark background', () => {
   const css = readFileSync(new URL('src/styles/site.css', root), 'utf8');
   const token = (name) => css.match(new RegExp(`--ff-${name}:\\s*(#[a-fA-F0-9]{6})`))[1];

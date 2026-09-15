@@ -14,7 +14,7 @@ const cve = assignedCve(data);
 ---
 <SiteLayout title={data.title} description={data.summary} section="cves" reading>
   <a class="ff-back" href="/cves/">← all disclosures</a>
-  <article class="ff-article">
+  <article class="ff-article ff-advisory">
     <h1>{data.title}</h1>
     <div class="ff-byline ff-meta"><span>forrof</span><time datetime={data.published}>{fullDate(data.published)}</time><span>[advisory]</span>{data.updated && <span>updated <time datetime={data.updated}>{fullDate(data.updated)}</time></span>}</div>
     <dl class="ff-facts">

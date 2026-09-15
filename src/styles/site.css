@@ -1,5 +1,8 @@
 @import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-400-italic.css";
 @import "@fontsource/ibm-plex-mono/latin-500.css";
+@import "@fontsource/ibm-plex-mono/latin-700.css";
+@import "@fontsource/ibm-plex-mono/latin-700-italic.css";
 @import "@fontsource/ibm-plex-sans/latin-400.css";
 @import "@fontsource/ibm-plex-sans/latin-500.css";
 @import "@fontsource-variable/literata/standard.css";
@@ -207,6 +210,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid #9eb9f2; outline-offs
 .site .ff-emblem .ff-art-front { color: var(--ff-art-bright); }
 .site .ff-emblem .ff-art-back { color: var(--ff-art-mid); }
 .site .ff-prose .ff-reference-list { font: 400 .9375rem/1.7 var(--ff-sans); }
+/* Keep disclosures in the archive's monospace voice; blog prose stays serif. */
+.site .ff-advisory { --ff-reading: var(--ff-mono); }
+.site .ff-advisory h1 { font-size: clamp(1.5rem, 3cqw, 2rem); line-height: 1.4; letter-spacing: -.035em; }
+.site .ff-advisory .ff-prose { font-size: 1.0625rem; line-height: 1.85; }
+.site .ff-advisory .ff-prose strong { font-weight: 700; }
+.site .ff-advisory .ff-prose :is(table, .ff-reference-list) { font-family: var(--ff-reading); }
 @container (max-width: 530px) {
   .site .ff-prose { font-size: 1.0625rem; }
   .site .ff-prose h2 { font-size: 1.3125rem; }
