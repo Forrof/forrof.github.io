@@ -29,6 +29,9 @@ After trying to understand the science behind this, I can explain at a high leve
 
 So, where does RAM store the data? The answer to that is nowhere, really. RAM stores data as electrical charge in capacitors, which represent 1's and 0's depending on whether they have charge or not.
 
+<a href="/images/is-freezing-ram-a-thing/capa.jpg" target="_blank" rel="noopener noreferrer" class="ff-image-link" aria-label="Open full-size image: Capa"><img src="/images/is-freezing-ram-a-thing/capa.jpg" alt="Capa" width="550" height="481" loading="lazy" decoding="async" /></a>
+
+
 A charged and an uncharged capacitor represent two distinguishable states. The memory system interprets those states as binary data.
 
 $$
@@ -75,6 +78,9 @@ where:
 
 In the paper I saw, Halderman and colleagues demonstrated this experimentally in *Lest We Remember*. They found that ordinary DRAM often retained useful information for several seconds at normal temperatures. When cooled, it retained data far longer. At approximately $-50^\circ\text{C}$, fewer than 1% of bits decayed after ten minutes in their reported tests. With liquid nitrogen, one experiment showed only about 0.17% decay after an hour.[^halderman]
 
+<a href="/images/is-freezing-ram-a-thing/Luigui.jpg" target="_blank" rel="noopener noreferrer" class="ff-image-link" aria-label="Open full-size image: Luigui"><img src="/images/is-freezing-ram-a-thing/Luigui.jpg" alt="Luigui" width="800" height="774" loading="lazy" decoding="async" /></a>
+
+
 ---
 
 ## 3. Why cooling makes a difference
@@ -105,6 +111,9 @@ where $E_a$ is an effective activation energy, $k_B$ is Boltzmann's constant, an
 The equations should not be taken as a universal law for every DRAM cell. Real chips contain billions of cells with manufacturing variations, multiple leakage paths, and changing dominant mechanisms.
 
 Basically, what this means is that low temperatures reduce the amount of charge leakage, resulting in capacitors staying charged for longer and retaining more voltage, making the "data" survive longer.
+
+<a href="/images/is-freezing-ram-a-thing/CoolRam.jpg" target="_blank" rel="noopener noreferrer" class="ff-image-link" aria-label="Open full-size image: CoolRam"><img src="/images/is-freezing-ram-a-thing/CoolRam.jpg" alt="CoolRam" width="750" height="751" loading="lazy" decoding="async" /></a>
+
 
 ---
 
@@ -150,6 +159,11 @@ Their test system used **1 GB of DDR3 non-ECC memory**. They compared an uncoole
 | Ice | About $10^\circ\text{C}$ | 99.71% |
 
 The authors also reported recovering TrueCrypt-related encryption material from cooled-memory images.[^gupta]
+
+Photos of the real experiment (Obviously not real):
+![fancoool](/images/is-freezing-ram-a-thing/fancoool.png)
+
+
 
 ---
 

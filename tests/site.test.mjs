@@ -47,7 +47,7 @@ test('the entries page lists the new article while keeping removed posts and CVE
   assert.ok(homepage.querySelector('.ff-disclosure-counter'));
 });
 
-test('the new freezing-RAM entry preserves the supplied writing and renders its images, math, and references', () => {
+test('the freezing-RAM entry preserves the updated writing and renders its images, math, and references', () => {
   const id = 'is-freezing-ram-a-thing';
   const document = documents.get(`entries/${id}/index.html`);
   assert.ok(document);
@@ -55,8 +55,9 @@ test('the new freezing-RAM entry preserves the supplied writing and renders its 
   assert.equal(document.querySelector('.ff-byline time').getAttribute('datetime'), '2026-09-15');
   const markdown = readFileSync(new URL(`src/content/entries/${id}.md`, root), 'utf8').split('---\n').slice(2).join('---\n').trim();
   // Author text is unchanged apart from title metadata, image/caption markup, and disclaimer labels.
-  assert.equal(createHash('sha256').update(markdown).digest('hex'), '4e149b038fc61ad06eaa6399aba2cb18834300370c15c0f42408af070dfcbe5a');
+  assert.equal(createHash('sha256').update(markdown).digest('hex'), '512d3a9e41d86c8aeb8a7695b8cf0daa375fb1d35da22056272a74f28b2a5d4a');
   assert.equal(document.querySelector('.ff-image-caption').textContent, '^|me fr');
+  assert.ok(document.querySelector('.ff-prose').textContent.includes('Photos of the real experiment (Obviously not real):'));
   const expectedMath = [...markdown.matchAll(/\$\$([\s\S]*?)\$\$|\$([^$\n]+)\$/g)].map((match) => (match[1] ?? match[2]).trim());
   const renderedMath = [...document.querySelectorAll('.katex annotation[encoding="application/x-tex"]')].map((element) => element.textContent.trim());
   assert.deepEqual(renderedMath, expectedMath);
@@ -68,7 +69,12 @@ test('the new freezing-RAM entry preserves the supplied writing and renders its 
   const images = [
     ['FrozonoHacker.png', 1254, 1254, '388cfa3b6c46eea3784b80246a63099cf86ff3dc2c9a1f5b4ed56f46e580bf03'],
     ['BrainBoom.jpg', 1000, 562, '3278b5f3cb9409b0fd6b04c0eaaca8ac25b39f485ad04745adcc11d007bde35b'],
+    ['capa.jpg', 550, 481, '8f9fee62791fd4cf49b9521044983c6e86ae51d5cd3c0790787300a899c14fcc'],
+    ['Luigui.jpg', 800, 774, '766b4adaf372ae3c8dc752c6efb03621f1c35fa00f22452143db7c4bfe226e4c'],
+    ['CoolRam.jpg', 750, 751, '95d6072f628792e39fad6f7dbc53180374fd2940bf6c87ff6f38b035c1115269'],
+    ['fancoool.png', 1448, 1086, '18accd2c4c43e072fc9e8602b96ea92cbec4563ce0e0ba4e99f2eea23610aa86'],
   ];
+  assert.deepEqual([...document.querySelectorAll('.ff-prose img')].map((image) => image.getAttribute('src')), images.map(([name]) => `/images/${id}/${name}`));
   for (const [name, width, height, digest] of images) {
     const path = `images/${id}/${name}`;
     const image = document.querySelector(`.ff-prose img[src="/${path}"]`);
