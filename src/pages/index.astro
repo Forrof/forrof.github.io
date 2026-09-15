@@ -2,11 +2,12 @@
 import SiteLayout from '../layouts/SiteLayout.astro';
 import EntryRow from '../components/EntryRow.astro';
 import { publishedEntries, publishedCves } from '../lib/content';
+import { advisoryLabel, advisoryStatus } from '../lib/advisories';
 const entries = await publishedEntries();
 const cves = await publishedCves();
 const items = [
   ...entries.map(({ id, data }) => ({ ...data, href: `/entries/${id}/` })),
-  ...cves.map(({ data }) => ({ ...data, title: `${data.identifier} — ${data.title}`, type: 'advisory', href: `/cves/${data.identifier.toLowerCase()}/` })),
+  ...cves.map(({ data }) => ({ ...data, title: `${advisoryLabel(data)} — ${data.title}`, status: advisoryStatus(data), type: 'advisory', href: `/cves/${data.identifier.toLowerCase()}/` })),
 ].sort((a, b) => b.published.localeCompare(a.published) || a.title.localeCompare(b.title));
 ---
 <SiteLayout>

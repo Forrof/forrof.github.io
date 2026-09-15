@@ -1,4 +1,5 @@
 import { getCollection } from 'astro:content';
+import { assignedCve } from './advisories';
 
 export const displayDate = (date: string) => date.split('-').join(' / ');
 export const fullDate = (date: string) => new Intl.DateTimeFormat('en', {
@@ -13,6 +14,8 @@ export async function publishedEntries() {
 export async function publishedCves() {
   const cves = await getCollection('cves', ({ data }) => !data.draft);
   const identifiers = cves.map(({ data }) => data.identifier);
-  if (new Set(identifiers).size !== identifiers.length) throw new Error('Each CVE identifier must have exactly one advisory.');
+  if (new Set(identifiers).size !== identifiers.length) throw new Error('Each advisory identifier must have exactly one record.');
+  const assigned = cves.map(({ data }) => assignedCve(data)).filter(Boolean);
+  if (new Set(assigned).size !== assigned.length) throw new Error('Each assigned CVE must have exactly one advisory.');
   return cves.sort((a, b) => b.data.published.localeCompare(a.data.published) || a.id.localeCompare(b.id));
 }

@@ -23,7 +23,7 @@ Astro 7 starts its development server in the background. Use `npx astro dev stop
 ## Write
 
 - Entries: `src/content/entries/*.md`.
-- CVEs: `src/content/cves/*.md`; empty until verified records are supplied.
+- CVEs and public advisories awaiting a CVE: `src/content/cves/*.md`.
 - Selected projects: `src/content/projects/*.json`.
 - Images: `public/writeups/<entry>/` or `public/images/<entry>/`.
 

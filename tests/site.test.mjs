@@ -116,3 +116,35 @@ test('published output contains no source templates or private configuration', (
   assert.ok(styles.includes('.woff2'));
   assert.doesNotMatch(styles, /fonts\.googleapis|fonts\.gstatic/);
 });
+
+test('the seven verified public advisories have credited details and visible CVE status', () => {
+  const verified = [
+    ['goshs-labs/goshs', 'GHSA-2q29-798w-6qcp'],
+    ['patriksimek/vm2', 'GHSA-98xx-8mx4-x7cm'],
+    ['patriksimek/vm2', 'GHSA-h85j-hv3c-qfgq'],
+    ['patriksimek/vm2', 'GHSA-46pr-c5wc-xffx'],
+    ['patriksimek/vm2', 'GHSA-6w8r-xxw2-g3hx'],
+    ['doobidoo/mcp-memory-service', 'GHSA-5p27-64mv-pr73'],
+    ['flytohub/flyto-core', 'GHSA-wmwj-g59x-c8px'],
+  ];
+  const sitemap = readFileSync(new URL('sitemap-0.xml', dist), 'utf8');
+  for (const [repository, identifier] of verified) {
+    const route = `/cves/${identifier.toLowerCase()}/`;
+    const detail = documents.get(`${route.slice(1)}index.html`);
+    assert.ok(detail, identifier);
+    const source = `https://github.com/${repository}/security/advisories/${identifier}`;
+    assert.ok(detail.querySelector(`.ff-facts a[href="${source}"]`), identifier);
+    assert.ok(detail.querySelector(`.ff-reference-list a[href="${source}"]`), identifier);
+    assert.ok(detail.querySelector('.ff-byline').textContent.includes('forrof'), identifier);
+    assert.ok(detail.querySelector('.ff-facts time'), identifier);
+    const assigned = detail.querySelector('h1').textContent.startsWith('CVE-');
+    const status = assigned ? 'CVE assigned' : 'CVE not yet assigned';
+    assert.ok(detail.querySelector('.ff-facts').textContent.includes(status), identifier);
+    for (const page of ['index.html', 'cves/index.html']) {
+      const row = documents.get(page).querySelector(`a[href="${route}"]`)?.closest('.ff-entry');
+      assert.equal(row?.querySelector('.ff-status')?.textContent, `Status: ${status}`, `${page}: ${identifier}`);
+    }
+    assert.ok(sitemap.includes(`https://forrof.github.io${route}`), identifier);
+  }
+  assert.ok(documents.get('cves/ghsa-2q29-798w-6qcp/index.html').querySelector('#version-note'));
+});

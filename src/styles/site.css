@@ -90,13 +90,14 @@ a:focus-visible, button:focus-visible { outline: 2px solid #9eb9f2; outline-offs
     .site .ff-leader { flex: 1; border-bottom: 1px dotted var(--ff-line); min-width: 20px; }
     .site .ff-title-row time { white-space: nowrap; }
     .site .ff-summary { font: 400 1.0625rem/1.65 var(--ff-sans); color: var(--ff-muted); margin: 13px 0 14px; max-width: 610px; }
-    .site .ff-tags { display: flex; flex-wrap: wrap; gap: 5px 17px; color: var(--ff-muted); font-size: 0.75rem; }
+    .site .ff-tags { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px 17px; color: var(--ff-muted); font-size: 0.75rem; }
     .site .ff-tags .ff-type { color: var(--ff-accent); }
+    .site .ff-tags .ff-status { color: var(--ff-ink); font-size: .875rem; }
     .site .ff-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; border-top: 1px solid var(--ff-line); margin-top: 48px; padding-top: 18px; font: 400 0.75rem/1.6 var(--ff-mono); color: var(--ff-muted); }
     .site .ff-corner { color: var(--ff-accent); }
     .site .ff-back { display: inline-block; padding: 28px 0 23px; color: var(--ff-muted); font-size: 0.8125rem; }
     .site .ff-article { max-width: 730px; }
-    .site .ff-article h1 { font: 500 clamp(28px, 5vw, 38px)/1.3 var(--ff-reading); letter-spacing: -0.8px; margin: 0 0 13px; }
+    .site .ff-article h1 { font: 500 clamp(28px, 5vw, 38px)/1.3 var(--ff-reading); letter-spacing: -0.8px; margin: 0 0 13px; overflow-wrap: anywhere; }
     .site .ff-article .ff-byline { display: flex; flex-wrap: wrap; gap: 5px 14px; padding-bottom: 23px; margin-bottom: 27px; border-bottom: 1px solid var(--ff-line); }
     .site .ff-prose { font: 400 1.125rem/1.8 var(--ff-reading); overflow-wrap: break-word; }
     .site .ff-prose p { margin-bottom: 20px; }

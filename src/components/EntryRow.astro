@@ -1,7 +1,7 @@
 ---
 import { displayDate } from '../lib/content';
-interface Props { title: string; href: string; summary: string; published: string; type: string; tags: string[]; index: number }
-const { title, href, summary, published, type, tags, index } = Astro.props;
+interface Props { title: string; href: string; summary: string; published: string; type: string; tags: string[]; index: number; status?: string }
+const { title, href, summary, published, type, tags, index, status } = Astro.props;
 ---
 <article class="ff-entry">
   <span class="ff-index" aria-hidden="true">{String(index).padStart(2, '0')}</span>
@@ -12,6 +12,6 @@ const { title, href, summary, published, type, tags, index } = Astro.props;
       <time class="ff-meta" datetime={published}>{displayDate(published)}</time>
     </div>
     <p class="ff-summary">{summary}</p>
-    <div class="ff-tags"><span class="ff-type">[{type}]</span>{tags.map((tag) => <span>{tag}</span>)}</div>
+    <div class="ff-tags"><span class="ff-type">[{type}]</span>{status && <span class="ff-status">Status: {status}</span>}{tags.map((tag) => <span>{tag}</span>)}</div>
   </div>
 </article>

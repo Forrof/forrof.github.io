@@ -22,9 +22,15 @@ Set `draft: true` to exclude a record from all generated pages and indexes, incl
 
 **A draft flag does not make source private.** This is a public repository. Never commit private research, embargoed findings, tokens, or confidential images. Keep those in a separate private directory/repository. Everything in `public/` is copied to the public site, even if no page links to it. Underscore-prefixed content filenames are also excluded by the loader, not made private.
 
-## Credited CVEs
+## Credited CVEs and public advisories
 
 Copy `docs/templates/cve.md` into `src/content/cves/` and replace every placeholder. The route comes from `identifier`, such as `/cves/<lowercase-identifier>/`. Do not create a record without a verified public credit source. Required metadata includes affected/fixed versions and at least one named reference. Use source-qualified severity only when verified; omit it otherwise. Use `unknown` or `not published` for genuinely unavailable version details rather than guessing.
+
+`identifier` accepts either an assigned `CVE-YYYY-NNNN` or a public `GHSA-xxxx-xxxx-xxxx`. Before committing, verify the advisory is accessible without authentication and credits forrof, then record that check's date in `verified`. Never add private or embargoed advisories, even as drafts.
+
+For a GHSA without a CVE, omit `cve`; the index and detail page display **CVE not yet assigned**. This describes the verified state, not a promise that a CVE request has been submitted. Once an assignment is publicly confirmed, add `cve: CVE-YYYY-NNNN` and refresh `verified`. Keep the original GHSA `identifier` unchanged: the existing URL remains stable while the displayed identifier and status update. Records whose original `identifier` is already a CVE do not need a separate `cve` field.
+
+If source fields disagree, preserve the discrepancy in a clear note instead of inventing a corrected version range. Public metadata and status are checked when edited, not refreshed automatically.
 
 The advisory automatically appears in both the CVE archive and the main entry index. The template supplies technical-body headings; the page adds references and the optional disclosure timeline.
 

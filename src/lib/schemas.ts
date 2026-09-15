@@ -25,9 +25,15 @@ export const entrySchema = z.object({
     difficulty: z.string().optional(),
   });
 
+const cveIdentifier = z.string().regex(/^CVE-\d{4}-\d{4,}$/);
+const ghsaIdentifier = z.string().regex(/^GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}$/);
+
 export const cveSchema = z.object({
     ...shared,
-    identifier: z.string().regex(/^CVE-\d{4}-\d{4,}$/),
+    // Keep this identifier stable so assigning a CVE does not change an existing GHSA URL.
+    identifier: z.union([cveIdentifier, ghsaIdentifier]),
+    cve: cveIdentifier.optional(),
+    verified: dateSchema.optional(),
     product: z.string().min(1),
     creditSource: z.url({ protocol: /^https?$/ }),
     affected: z.string().min(1),
@@ -35,7 +41,8 @@ export const cveSchema = z.object({
     references: z.array(z.object({ label: z.string().min(1), url: z.url({ protocol: /^https?$/ }) })).min(1),
     timeline: z.array(z.object({ date: dateSchema, event: z.string().min(1) })).default([]),
     severity: z.object({ label: z.string().min(1), source: z.url({ protocol: /^https?$/ }), system: z.string().min(1) }).optional(),
-  });
+  }).refine((data) => !data.identifier.startsWith('CVE-') || !data.cve || data.identifier === data.cve,
+    { message: 'An advisory cannot have conflicting CVE identifiers', path: ['cve'] });
 
 export const projectSchema = z.object({
     name: z.string().min(1),

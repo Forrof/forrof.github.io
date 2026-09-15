@@ -1,4 +1,4 @@
-# Implementation handoff — 14 September 2026
+# Implementation handoff — updated 15 September 2026
 
 Implemented the approved design on `codex/redesign`. Public release to `forrof.github.io` was authorized on 14 September 2026. The **Validate and publish** workflow records deployment status for the release commit.
 
@@ -13,14 +13,14 @@ Implemented the approved design on `codex/redesign`. Public release to `forrof.g
 
 ## Validation
 
-`npm run validate` checks types, builds the site, and runs 16 tests. Coverage includes the real animation controller, reduced motion, saved pause, internal links/assets/anchors, original image bytes and article code, schemas, and public output boundaries. A separate temporary build verifies draft exclusion and a complete advisory using clearly synthetic fixtures. Caches are project-local, release builds force a fresh content sync, and a regression check confirms that temporary builds cannot alter the production content cache. Removing an advisory is also checked across successive builds.
+`npm run validate` checks types, builds the site, and runs the test suite. Coverage includes the real animation controller, reduced motion, saved pause, internal links/assets/anchors, original image bytes and article code, schemas, and public output boundaries. A separate temporary build verifies draft exclusion and complete advisories using clearly synthetic fixtures, including a GHSA transitioning from unassigned to an assigned CVE without changing its URL. Caches are project-local, release builds force a fresh content sync, and a regression check confirms that temporary builds cannot alter the production content cache. Removing the last advisory is also checked across successive builds.
 
-The current site contains six generated HTML pages and no CVE detail records. Astro prints an expected empty-collection warning for CVEs. Dependency audit reports no known vulnerabilities at implementation time. The local entry, article, projects, and CVE routes returned HTTP 200.
+The site now includes seven public GHSA records, bringing the total to thirteen generated HTML pages. On 15 September 2026, all seven advisory pages and repository advisory API endpoints returned HTTP 200 without authentication, with published state, reporter credit for forrof, and no assigned CVE. Each record has a verification date, linked source, reported affected/fixed versions, and source-qualified severity. The conflicting affected versions in the goshs advisory are explicitly noted. No private advisories or exploit reproductions were added.
 
 Browser-based responsive/keyboard QA was not performed in this implementation turn. The inline design was reviewed previously; the production page uses its responsive layout rules. Visual review of the actual build is still useful before publication.
 
 ## Publication
 
-Publication uses GitHub Actions from `main`, preserving the legacy `gh-pages` branch for rollback. The README documents future publication and rollback. Exact CVE identifiers and public attribution sources are still needed before publishing advisory records.
+Publication uses GitHub Actions from `main`, preserving the legacy `gh-pages` branch for rollback. The README documents future publication and rollback. Public GHSAs without CVEs display “CVE not yet assigned”; later assignments can be added without changing their public URLs. Status is verified at editing time, not updated automatically.
 
 The old React application, modal renderer, shader background, and Tailwind/CRA configuration were removed from the active branch. They remain recoverable from Git history; original writeup assets were not removed.

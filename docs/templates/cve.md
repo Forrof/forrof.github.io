@@ -2,7 +2,10 @@
 title: Replace with the issue title
 summary: Replace with a concise description.
 published: "YYYY-MM-DD"
-identifier: CVE-YYYY-NNNN
+identifier: GHSA-xxxx-xxxx-xxxx
+verified: "YYYY-MM-DD"
+# Omit cve until an assignment is publicly confirmed. Keep identifier unchanged later.
+# cve: CVE-YYYY-NNNN
 product: Replace with the affected product
 creditSource: https://example.com/replace-with-public-credit
 affected: Replace with sourced affected versions
