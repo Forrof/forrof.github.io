@@ -38,6 +38,15 @@ test('all public routes render complete HTML without relying on JavaScript', () 
   assert.equal(documents.get('404.html').querySelector('meta[name="robots"]').content, 'noindex');
 });
 
+test('the entries page lists only entries and keeps advisories in the CVE archive', () => {
+  const links = [...homepage.querySelectorAll('.ff-entry h2 a')];
+  assert.ok(links.length > 0);
+  for (const link of links) assert.ok(link.getAttribute('href').startsWith('/entries/'));
+  assert.equal(homepage.querySelector('main a[href^="/cves/"], main .ff-status'), null);
+  assert.ok(homepage.querySelector('nav a[href="/cves/"]'));
+  assert.ok(homepage.querySelector('.ff-disclosure-counter'));
+});
+
 test('every internal page, asset, and heading link resolves in the build', () => {
   for (const [file, doc] of documents) {
     const base = new URL(file === 'index.html' ? '/' : file.replace(/index\.html$/, ''), 'https://forrof.github.io/');
@@ -173,11 +182,10 @@ test('the seven verified public advisories have credited details and visible CVE
     const assigned = [...detail.querySelectorAll('.ff-facts dt')].some((term) => term.textContent === 'CVE');
     const status = assigned ? 'Confirmed, published, CVE assigned' : 'Confirmed, published, waiting for CVE';
     assert.ok(detail.querySelector('.ff-facts').textContent.includes(status), identifier);
-    for (const page of ['index.html', 'cves/index.html']) {
-      const row = documents.get(page).querySelector(`a[href="${route}"]`)?.closest('.ff-entry');
-      assert.equal(row?.querySelector('h2')?.textContent, title, `${page}: title for ${identifier}`);
-      assert.equal(row?.querySelector('.ff-status')?.textContent, `Status: ${status}`, `${page}: ${identifier}`);
-    }
+    const row = documents.get('cves/index.html').querySelector(`a[href="${route}"]`)?.closest('.ff-entry');
+    assert.equal(row?.querySelector('h2')?.textContent, title, `CVE archive: title for ${identifier}`);
+    assert.equal(row?.querySelector('.ff-status')?.textContent, `Status: ${status}`, `CVE archive: ${identifier}`);
+    assert.equal(homepage.querySelector(`a[href="${route}"]`), null, `Entries exclude ${identifier}`);
     assert.ok(sitemap.includes(`https://forrof.github.io${route}`), identifier);
   }
   assert.ok(documents.get('cves/ghsa-2q29-798w-6qcp/index.html').querySelector('#version-note'));

@@ -38,7 +38,7 @@ If source fields disagree, preserve the discrepancy in a clear note instead of i
 
 The artwork's disclosure counter is calculated from published records on each build: assigned CVEs, advisories still pending a CVE, and the total published. Drafts never contribute. Adding a publicly confirmed `cve` moves that record from pending to assigned after the next publication; no counter values need manual editing.
 
-The advisory automatically appears in both the CVE archive and the main entry index. The template supplies technical-body headings; the page adds references and the optional disclosure timeline.
+The advisory automatically appears in the CVE archive only. The main entry index lists entries and writeups, while retaining the shared disclosure counter in its artwork. The template supplies technical-body headings; the page adds references and the optional disclosure timeline.
 
 ## GitHub projects
 

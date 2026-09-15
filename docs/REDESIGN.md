@@ -31,7 +31,7 @@ The header contains `forrof`, `entries`, `cves`, `projects`, and an external `gi
 | `/projects/` | Curated GitHub repositories with useful summaries and repository links. |
 | `/projects/<slug>/` | Optional project explanation when there is enough original content to justify a page. Simple repository entries link directly to GitHub. |
 
-CTF writeups belong to the entry collection and carry a `writeup` type plus platform, category, and difficulty metadata. They do not require another top-level archive at launch. CVE advisories may appear as linked items in the entry index, generated from their canonical CVE records rather than duplicated text. Default homepage sorting uses original publication dates.
+CTF writeups belong to the entry collection and carry a `writeup` type plus platform, category, and difficulty metadata. They do not require another top-level archive at launch. CVE advisories appear only in the CVE archive, not in the entry index. The shared artwork retains its disclosure counter on both pages. Default homepage sorting uses original publication dates.
 
 ## Visual system
 

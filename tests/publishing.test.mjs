@@ -78,7 +78,16 @@ PUBLIC_ADVISORY_FIXTURE_BODY
       }
     }
   }
+  function assertEntriesOnly() {
+    const document = parseHTML(readFileSync(join(output, 'index.html'), 'utf8')).document;
+    const links = [...document.querySelectorAll('main .ff-entry h2 a')];
+    assert.ok(links.length > 0, 'Existing entries remain visible');
+    for (const link of links) assert.ok(link.getAttribute('href').startsWith('/entries/'));
+    assert.equal(document.querySelector('main a[href^="/cves/"], main .ff-status'), null);
+    assert.doesNotMatch(document.querySelector('main').textContent, /Synthetic advisory fixture|Private draft fixture|DRAFT_FIXTURE_MUST_NEVER_RENDER/);
+  }
   assertCounters({ assigned: 1, pending: 1, published: 2 });
+  assertEntriesOnly();
   assert.equal(existsSync(join(output, 'entries/test-draft')), false);
   assert.equal(existsSync(join(output, 'cves/cve-2099-99998')), false);
   assert.equal(existsSync(join(output, 'cves/ghsa-2345-6789-cfgj')), false);
@@ -94,7 +103,7 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   assert.ok(pendingDetail.querySelector('.ff-facts').textContent.includes('GHSA-2345-6789-cfgh'));
   assert.ok(pendingDetail.querySelector('.ff-facts').textContent.includes('Confirmed, published, waiting for CVE'));
   assert.ok(pendingDetail.querySelector('.ff-facts time[datetime="2026-09-15"]'));
-  for (const page of ['index.html', 'cves/index.html', 'sitemap-0.xml']) {
+  for (const page of ['cves/index.html', 'sitemap-0.xml']) {
     const text = readFileSync(join(output, page), 'utf8');
     assert.ok(text.includes('/cves/cve-2099-99999/'), page);
     assert.ok(text.includes('/cves/ghsa-2345-6789-cfgh/'), page);
@@ -114,18 +123,17 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   const assignmentBuild = spawnSync('npm', ['run', 'build'], { cwd: scratch, encoding: 'utf8', timeout: 60_000, env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' } });
   assert.equal(assignmentBuild.status, 0, assignmentBuild.stdout + assignmentBuild.stderr);
   assertCounters({ assigned: 2, pending: 0, published: 2 });
+  assertEntriesOnly();
   const assignedDetail = parseHTML(readFileSync(join(output, 'cves/ghsa-2345-6789-cfgh/index.html'), 'utf8')).document;
   assert.equal(assignedDetail.querySelector('h1').textContent, 'Synthetic advisory fixture');
   assert.ok(assignedDetail.querySelector('.ff-facts').textContent.includes('CVE-2099-99997'));
   assert.ok(assignedDetail.querySelector('.ff-facts').textContent.includes('GHSA-2345-6789-cfgh'));
   assert.ok(assignedDetail.querySelector('.ff-facts').textContent.includes('Confirmed, published, CVE assigned'));
   assert.doesNotMatch(assignedDetail.querySelector('main').textContent, /waiting for CVE/);
-  for (const page of ['index.html', 'cves/index.html']) {
-    const document = parseHTML(readFileSync(join(output, page), 'utf8')).document;
-    const row = document.querySelector('a[href="/cves/ghsa-2345-6789-cfgh/"]').closest('.ff-entry');
-    assert.equal(row.querySelector('h2').textContent, 'Synthetic advisory fixture');
-    assert.equal(row.querySelector('.ff-status').textContent, 'Status: Confirmed, published, CVE assigned');
-  }
+  const archive = parseHTML(readFileSync(join(output, 'cves/index.html'), 'utf8')).document;
+  const assignedRow = archive.querySelector('a[href="/cves/ghsa-2345-6789-cfgh/"]').closest('.ff-entry');
+  assert.equal(assignedRow.querySelector('h2').textContent, 'Synthetic advisory fixture');
+  assert.equal(assignedRow.querySelector('.ff-status').textContent, 'Status: Confirmed, published, CVE assigned');
   assert.deepEqual(cacheSnapshot(), originalCache, 'Assignment build must not modify the parent content cache');
 
   // Deleting the last advisory must also remove it from subsequent releases.
@@ -136,6 +144,7 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   const rebuild = spawnSync('npm', ['run', 'build'], { cwd: scratch, encoding: 'utf8', timeout: 60_000, env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' } });
   assert.equal(rebuild.status, 0, rebuild.stdout + rebuild.stderr);
   assertCounters({ assigned: 0, pending: 0, published: 0 });
+  assertEntriesOnly();
   assert.equal(existsSync(join(output, 'cves/cve-2099-99999')), false);
   assert.equal(existsSync(join(output, 'cves/ghsa-2345-6789-cfgh')), false);
   assert.doesNotMatch(readFileSync(join(output, 'sitemap-0.xml'), 'utf8'), /cve-2099-99999|ghsa-2345-6789-cfgh/);

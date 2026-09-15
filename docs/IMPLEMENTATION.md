@@ -4,7 +4,7 @@ Implemented the approved design on `codex/redesign`. Public release to `forrof.g
 
 ## Included
 
-- Static entry index and individual article URLs, CVE archive/detail template, projects, 404, sitemap, and canonical metadata.
+- Static entry index and individual article URLs, separate CVE archive/detail template, projects, 404, sitemap, and canonical metadata. The entry index contains only entries and writeups; advisories remain exclusively in the CVE archive.
 - Original rotating iris/knot and margin artwork, server-rendered fallbacks, remembered pause, reduced-motion handling, and offscreen/background suspension.
 - A monospace disclosure counter sits between the two masthead artworks on wide layouts and beneath them on narrow layouts. Counts are derived from public records, exclude drafts, and remain readable without JavaScript; decorative art stays hidden from assistive technology while the counts are accessible.
 - Locally bundled IBM Plex Mono, IBM Plex Sans, and Literata, with their font licenses.
