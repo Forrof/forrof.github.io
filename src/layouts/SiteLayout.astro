@@ -2,6 +2,7 @@
 import '../styles/site.css';
 import MarginArt from '../components/MarginArt.astro';
 import MastheadArt from '../components/MastheadArt.astro';
+import RadioStrip from '../components/RadioStrip.astro';
 interface Props {
   title?: string;
   description?: string;
@@ -46,6 +47,7 @@ const navigation = [{ label: 'entries', href: '/' }, { label: 'cves', href: '/cv
           </header>
           {!reading && <MastheadArt />}
           <main id="main"><slot /></main>
+          {!noindex && <RadioStrip />}
           <footer class="ff-footer">
             <span><span class="ff-corner" aria-hidden="true">└─ </span>forrof</span>
             <button class="ff-motion-toggle" data-motion-toggle type="button" aria-pressed="false" hidden>motion: off</button>
@@ -56,8 +58,12 @@ const navigation = [{ label: 'entries', href: '/' }, { label: 'cves', href: '/cv
     </div>
     <script>
       import { initArt } from '../scripts/art';
+      import { initRadio } from '../scripts/radio';
       const root = document.getElementById('forrof-site');
-      if (root) initArt(root);
+      if (root) {
+        initArt(root);
+        root.querySelectorAll<HTMLElement>('[data-radio]').forEach(initRadio);
+      }
     </script>
   </body>
 </html>

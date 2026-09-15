@@ -21,6 +21,19 @@ test('a clean build excludes drafts and renders a complete credited advisory fro
   for (const path of ['src', 'public', 'astro.config.mjs', 'package.json', 'tsconfig.json']) cpSync(join(repository, path), join(scratch, path), { recursive: true });
   symlinkSync(join(repository, 'node_modules'), join(scratch, 'node_modules'), 'dir');
 
+  // Exercise the configured radio without publishing sample music to the real site.
+  const radioTracks = [
+    { title: 'First <test> track', artist: 'Fixture artist', src: '/audio/test-first.wav' },
+    { title: 'Second test track', artist: 'Fixture artist', src: '/audio/test-second.wav' },
+  ];
+  writeFileSync(join(scratch, 'src/data/radio.json'), JSON.stringify(radioTracks));
+  const silence = Buffer.alloc(124, 128);
+  silence.write('RIFF', 0); silence.writeUInt32LE(116, 4); silence.write('WAVEfmt ', 8);
+  silence.writeUInt32LE(16, 16); silence.writeUInt16LE(1, 20); silence.writeUInt16LE(1, 22);
+  silence.writeUInt32LE(8000, 24); silence.writeUInt32LE(8000, 28); silence.writeUInt16LE(1, 32); silence.writeUInt16LE(8, 34);
+  silence.write('data', 36); silence.writeUInt32LE(80, 40);
+  for (const track of radioTracks) writeFileSync(join(scratch, 'public', track.src.slice(1)), silence);
+
   // Isolate the collection so the final rebuild also exercises removing its last record.
   for (const file of readdirSync(join(scratch, 'src/content/cves'))) {
     if (file.endsWith('.md')) unlinkSync(join(scratch, 'src/content/cves', file));
@@ -83,6 +96,24 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   });
   assert.equal(build.status, 0, build.stdout + build.stderr);
   const output = join(scratch, 'dist');
+  for (const page of ['index.html', 'cves/index.html', 'projects/index.html', 'entries/test-newer-entry/index.html']) {
+    const document = parseHTML(readFileSync(join(output, page), 'utf8')).document;
+    const radio = document.querySelector('[data-radio]');
+    assert.ok(radio, `${page}: configured radio renders`);
+    assert.equal(radio.nextElementSibling.tagName, 'FOOTER');
+    assert.equal(radio.hidden, true, 'Controls require enhancement before becoming interactive');
+    assert.equal(radio.querySelector('[data-radio-title]').textContent, radioTracks[0].title);
+    assert.equal(radio.querySelector('[data-radio-title] test'), null, 'Track text is escaped');
+    const audio = radio.querySelector('audio');
+    assert.equal(audio.hasAttribute('src'), false);
+    assert.equal(audio.hasAttribute('autoplay'), false);
+    assert.equal(audio.getAttribute('preload'), 'none');
+    assert.equal(radio.querySelector('[data-radio-list]').hidden, true);
+    assert.deepEqual([...radio.querySelectorAll('[data-radio-choice]')].map((button) => button.dataset.src), radioTracks.map((track) => track.src));
+    for (const slider of radio.querySelectorAll('input[type="range"]')) assert.ok(slider.getAttribute('aria-label'));
+  }
+  assert.equal(parseHTML(readFileSync(join(output, '404.html'), 'utf8')).document.querySelector('[data-radio]'), null);
+  for (const track of radioTracks) assert.deepEqual(readFileSync(join(output, track.src.slice(1))), silence);
   function assertCounters(expected) {
     for (const page of ['index.html', 'cves/index.html', 'projects/index.html']) {
       const document = parseHTML(readFileSync(join(output, page), 'utf8')).document;

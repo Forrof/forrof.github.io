@@ -48,6 +48,22 @@ The advisory automatically appears in the CVE archive only. The main entry index
 
 Add one JSON file to `src/content/projects/`, following an existing file. Set `kind` to `original`, `fork`, or `contribution` accurately. `order` controls placement. Descriptions are optional: leave them out when none is verified. Project information is intentionally committed, so the site does not depend on the GitHub API being available when a visitor arrives.
 
+## Radio tracks
+
+Put audio you own or have permission to publish in `public/audio/`. Prefer MP3 for broad playback support. Use simple filenames with letters, numbers, dots, hyphens, or underscores (no spaces).
+
+Then add its title, artist, and public path to `src/data/radio.json`, in playback order:
+
+```json
+[
+  { "title": "Track title", "artist": "Artist name", "src": "/audio/track-name.mp3" }
+]
+```
+
+The playlist is currently empty (`[]`), so the radio is omitted from every page. Once configured, it appears above the footer on entries, CVEs, and projects. Adding files alone does not list them; add their metadata too. Missing or empty files and invalid paths fail the build. Never put private audio under `public/`: it is publicly accessible even when unlisted.
+
+The custom controls provide play/pause, seeking, volume, and a track list opened by clicking the title. Audio has no source until the visitor presses Play: no autoplay, background fetch, external embeds, or saved playback state. After that opt-in, playback advances through the queue and stops at the last track. Selecting another track while paused does not start it. Ordinary page navigation stops playback; returning to a page never resumes it automatically. Decorative bars move only during playback and respect the site's motion setting and reduced-motion preference.
+
 ## Check and publish
 
 ```sh
