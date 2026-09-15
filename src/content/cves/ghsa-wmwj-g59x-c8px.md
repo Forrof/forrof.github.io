@@ -23,6 +23,14 @@ tags: [flyto-core, authorization]
 
 Dynamically selected child modules do not consistently pass through the same authorization checks as ordinary execution. This breaks the module allowlist and dangerous-permission boundary enforced elsewhere in the application.
 
+### Technical details
+
+The advisory identifies `BaseModule.run()` as the shared policy entry point. It checks the module's identity, declared permissions, and plugin context before dispatching the implementation. An execution path that directly invokes an implementation bypasses that authorization boundary.
+
+Top-level admission is not sufficient when an allowed module can select child modules dynamically. Each child must undergo the same checks as a directly requested module. Otherwise, a restrictive outer policy can fail to constrain the work that happens underneath it.
+
+The report distinguishes this from an authentication failure: the caller already has an API token. The missing boundary is the authorization that should restrict that caller's permitted operations. Regression coverage must therefore include nested execution under both ordinary and restrictive policies.
+
 ## Affected configuration
 
 The report concerns reachable Execution API deployments where a caller has a valid bearer token but is intentionally restricted to safe modules. Authentication is required; possession of an API token should not imply unrestricted host access.
@@ -38,3 +46,13 @@ The report also describes filesystem effects outside the workflow's configured s
 ## Remediation
 
 The maintainer lists 2.31.1 as the patched release for versions from 2.2.2 onward. The report recommends a mandatory authorization path for every child-module invocation, recursive policy checks for embedded module selections, and regression tests covering indirect execution paths.
+
+### Suggested patch
+
+The advisory supplies this replacement at the child-dispatch call site:
+
+```python
+return await instance.run()
+```
+
+This is a call-site fragment, not a standalone program. It routes the existing module instance through the mandatory policy checks. The report also recommends validating embedded module selections at API and workflow boundaries, plus registry-wide checks that prevent new dispatchers from skipping the guarded path.

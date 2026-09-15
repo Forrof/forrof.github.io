@@ -32,6 +32,8 @@ For a confirmed, published GHSA without a CVE, omit `cve`; the index and detail 
 
 Use the advisory's descriptive `title` for page and list headings. GHSA and CVE identifiers belong in the facts panel, not the heading. Add the sourced overview, affected configuration, impact and limitations, and remediation in the Markdown body; retain the public advisory link for attribution. Do not copy runnable exploit code or step-by-step exploitation instructions into these summaries.
 
+Put `### Technical details` beneath `## Overview` for the non-operational root-cause explanation. Article H2 headings use the blue accent and H3 subheadings use the violet token. Defensive code belongs under remediation or workarounds, with a language-tagged fence and clear attribution: distinguish a source-provided patch fragment from an illustrative hardening example, and state important limitations.
+
 If source fields disagree, preserve the discrepancy in a clear note instead of inventing a corrected version range. Public metadata and status are checked when edited, not refreshed automatically.
 
 The artwork's disclosure counter is calculated from published records on each build: assigned CVEs, advisories still pending a CVE, and the total published. Drafts never contribute. Adding a publicly confirmed `cve` moves that record from pending to assigned after the next publication; no counter values need manual editing.

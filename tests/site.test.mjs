@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { relative } from 'node:path';
 import { parseHTML } from 'linkedom';
+import { Script } from 'node:vm';
 
 const dist = new URL('../dist/', import.meta.url);
 const root = new URL('../', import.meta.url);
@@ -164,7 +165,11 @@ test('the seven verified public advisories have credited details and visible CVE
     assert.doesNotMatch(title, /GHSA-|CVE-\d/);
     assert.ok(detail.querySelector('title').textContent.startsWith(title));
     assert.doesNotMatch(detail.querySelector('title').textContent, /GHSA-/);
-    for (const heading of ['overview', 'affected-configuration', 'impact', 'remediation']) assert.ok(detail.getElementById(heading), `${identifier}: ${heading}`);
+    for (const heading of ['overview', 'technical-details', 'affected-configuration', 'impact', 'remediation']) assert.ok(detail.getElementById(heading), `${identifier}: ${heading}`);
+    const sections = [...detail.querySelectorAll('.ff-prose h2, .ff-prose h3')].map((heading) => heading.id);
+    assert.equal(detail.getElementById('technical-details').tagName, 'H3');
+    assert.ok(sections.indexOf('technical-details') > sections.indexOf('overview'));
+    assert.ok(sections.indexOf('technical-details') < sections.indexOf('affected-configuration'));
     const assigned = [...detail.querySelectorAll('.ff-facts dt')].some((term) => term.textContent === 'CVE');
     const status = assigned ? 'Confirmed, published, CVE assigned' : 'Confirmed, published, waiting for CVE';
     assert.ok(detail.querySelector('.ff-facts').textContent.includes(status), identifier);
@@ -180,4 +185,39 @@ test('the seven verified public advisories have credited details and visible CVE
   const oauth = documents.get('cves/ghsa-5p27-64mv-pr73/index.html');
   assert.ok(oauth.querySelector('#workarounds'));
   assert.match(oauth.querySelector('.ff-prose').textContent, /OAuth is disabled by default/);
+});
+
+test('defensive code examples render intact without being executed', () => {
+  const vm2Pages = ['ghsa-98xx-8mx4-x7cm', 'ghsa-h85j-hv3c-qfgq', 'ghsa-46pr-c5wc-xffx', 'ghsa-6w8r-xxw2-g3hx'];
+  for (const id of vm2Pages) {
+    const document = documents.get(`cves/${id}/index.html`);
+    assert.ok(document.getElementById('defensive-configuration-example'));
+    const code = document.querySelector('.ff-prose pre code').textContent;
+    assert.match(code, /require: false/);
+    assert.match(code, /nesting: false/);
+    assert.doesNotThrow(() => new Script(code), `${id}: syntax check only`);
+    assert.ok(document.querySelector('a[href="https://github.com/patriksimek/vm2"]'));
+  }
+  const oauth = documents.get('cves/ghsa-5p27-64mv-pr73/index.html');
+  assert.equal(oauth.querySelector('.ff-prose pre code').textContent.trim(), 'MCP_OAUTH_ENABLED=false');
+  const flyto = documents.get('cves/ghsa-wmwj-g59x-c8px/index.html');
+  assert.ok(flyto.getElementById('suggested-patch'));
+  assert.equal(flyto.querySelector('.ff-prose pre code').textContent.trim(), 'return await instance.run()');
+  const goshs = documents.get('cves/ghsa-2q29-798w-6qcp/index.html');
+  assert.ok(goshs.getElementById('defensive-code-example'));
+  assert.match(goshs.querySelector('.ff-prose pre code').textContent, /os\.O_WRONLY\|os\.O_CREATE\|os\.O_EXCL/);
+});
+
+test('article section colors remain distinct and readable on the dark background', () => {
+  const css = readFileSync(new URL('src/styles/site.css', root), 'utf8');
+  const token = (name) => css.match(new RegExp(`--ff-${name}:\\s*(#[a-fA-F0-9]{6})`))[1];
+  const luminance = (hex) => {
+    const channels = hex.slice(1).match(/../g).map((channel) => parseInt(channel, 16) / 255).map((value) => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4);
+    return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+  };
+  const background = luminance(token('bg'));
+  for (const name of ['accent', 'subheading']) assert.ok((luminance(token(name)) + .05) / (background + .05) >= 4.5, name);
+  assert.notEqual(token('accent'), token('subheading'));
+  assert.match(css, /\.ff-prose h2\s*\{[^}]*color:\s*var\(--ff-accent\)/);
+  assert.match(css, /\.ff-prose h3\s*\{[^}]*color:\s*var\(--ff-subheading\)/);
 });

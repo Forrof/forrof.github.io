@@ -10,6 +10,7 @@ Implemented the approved design on `codex/redesign`. Public release to `forrof.g
 - Locally bundled IBM Plex Mono, IBM Plex Sans, and Literata, with their font licenses.
 - Both original writeups, all ten original PNGs, and the legacy raw Markdown URLs. Body text and code preserved; article metadata moved into frontmatter and Geometry Dash headings moved from H1 to H2.
 - Validated content schemas, writing guide/templates, source-qualified CVE fields, and no public editing endpoint.
+- Advisory overviews include nested technical explanations. Section headings use blue and subheadings violet, with tested text contrast and print colors. Code examples are limited to defensive configuration and remediation; source-provided patch fragments are distinguished from illustrative hardening snippets.
 - GitHub Actions validation and deployment configuration restricted to `main`, with pinned action revisions. Existing `gh-pages` remains the rollback copy.
 
 ## Validation

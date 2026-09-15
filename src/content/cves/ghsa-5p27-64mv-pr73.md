@@ -23,6 +23,14 @@ tags: [mcp, oauth, authorization]
 
 The token flow fails to enforce the registered client type, allowed grants, and authentication method consistently. Public-client secret handling also violates the intended distinction between public and confidential clients.
 
+### Technical details
+
+The report describes inconsistent enforcement across client registration and token issuance. A client's stored registration must define which grants it may use and how it authenticates; token issuance should not reinterpret those constraints from caller-supplied data.
+
+The fix addresses three related policy requirements: public clients must not receive confidential-client secrets, grants must be authorized by the stored registration, and the client's registered authentication method must be respected. Enforcing the owner's API-key check in a different authorization flow does not compensate for missing checks here.
+
+A related storage issue represented an empty secret as a hash rather than as the absence of a secret. The report distinguishes this misleading representation from an authentication bypass: the comparison still rejected empty input. Both the enforcement and representation problems were corrected together.
+
 ## Affected configuration
 
 Exposure requires enabling the OAuth server while leaving dynamic client registration open. **OAuth is disabled by default**, so a default installation is not affected.
@@ -45,3 +53,13 @@ If upgrading is temporarily impossible, the advisory recommends either:
 - Set `MCP_OAUTH_ENABLED=false` and use API-key authentication.
 
 The report states that the registration-key protection was verified.
+
+### Defensive configuration example
+
+The advisory's OAuth-disable workaround can be expressed in deployment environment configuration as:
+
+```dotenv
+MCP_OAUTH_ENABLED=false
+```
+
+Apply the setting through the service's normal configuration and restart procedure, and use its API-key authentication path. This disables OAuth-dependent access; it is an operational workaround, not the 11.8.2 code fix.
