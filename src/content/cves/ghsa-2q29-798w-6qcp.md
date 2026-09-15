@@ -1,7 +1,8 @@
 ---
-title: goshs — TFTP file protection bypass
+title: goshs TFTP ignores --no-delete, allowing unauthenticated overwrite and truncation of existing files
 summary: The TFTP service can modify existing files despite the server's deletion-protection setting.
 published: "2026-08-23"
+updated: "2026-09-15"
 identifier: GHSA-2q29-798w-6qcp
 verified: "2026-09-15"
 product: goshs
@@ -20,12 +21,26 @@ tags: [goshs, tftp]
 
 ## Overview
 
-The TFTP service does not consistently honor the server's file-protection policy. Existing files can be overwritten or truncated even when deletion protection is enabled.
+The TFTP service does not enforce the server's deletion-protection policy consistently. Its file-opening behavior permits destructive writes to existing files despite the operator enabling that protection.
+
+## Affected configuration
+
+The reported exposure concerns deployments with TFTP and deletion protection enabled, where network controls do not restrict access to the TFTP service. Other protocols may share the same upload directory.
+
+## Impact
+
+Files inside that directory can lose their original contents or be replaced. This threatens integrity and availability, including data served through other protocols.
+
+The report does not demonstrate disclosure of confidential information, traversal outside the configured root, or direct command execution. Any subsequent execution would depend on another component consuming a modified file.
 
 ## Remediation
 
-The advisory identifies v2.1.6 as the patched release.
+The advisory identifies v2.1.6 as the patched release. Operators should review exposure of the TFTP service and avoid relying on deletion protection in affected versions.
 
 ## Version note
 
-The published affected-version field lists **1.2.4 and 1.2.5**, while the advisory body describes **2.1.5**. These source values conflict; the affected range has not been silently corrected here. Consult the maintainer's advisory for clarification.
+The affected-version field lists **1.2.4 and 1.2.5**, but the report discusses **2.1.5**. The conflicting range is preserved pending maintainer clarification.
+
+## Severity note
+
+GitHub's metadata rates this **High / 7.5**; the report proposes **Critical / 9.1**. The facts panel uses the metadata rating, not the reporter's assessment.

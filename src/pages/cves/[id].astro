@@ -2,7 +2,7 @@
 import { render, type CollectionEntry } from 'astro:content';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import { publishedCves, fullDate } from '../../lib/content';
-import { advisoryLabel, advisoryStatus } from '../../lib/advisories';
+import { assignedCve, advisoryStatus } from '../../lib/advisories';
 export async function getStaticPaths() {
   return (await publishedCves()).map((entry) => ({ params: { id: entry.data.identifier.toLowerCase() }, props: { entry } }));
 }
@@ -10,15 +10,16 @@ interface Props { entry: CollectionEntry<'cves'> }
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const data = entry.data;
+const cve = assignedCve(data);
 ---
-<SiteLayout title={`${advisoryLabel(data)} — ${data.title}`} description={data.summary} section="cves" reading>
+<SiteLayout title={data.title} description={data.summary} section="cves" reading>
   <a class="ff-back" href="/cves/">← all disclosures</a>
   <article class="ff-article">
-    <h1>{advisoryLabel(data)}</h1>
+    <h1>{data.title}</h1>
     <div class="ff-byline ff-meta"><span>forrof</span><time datetime={data.published}>{fullDate(data.published)}</time><span>[advisory]</span>{data.updated && <span>updated <time datetime={data.updated}>{fullDate(data.updated)}</time></span>}</div>
-    <div class="ff-prose"><p>{data.title}</p></div>
     <dl class="ff-facts">
       <dt>Status</dt><dd>{advisoryStatus(data)}</dd>
+      {cve && <><dt>CVE</dt><dd>{cve}</dd></>}
       {data.identifier.startsWith('GHSA-') && <><dt>Advisory</dt><dd><a href={data.creditSource}>{data.identifier} ↗</a></dd></>}
       <dt>Product</dt><dd>{data.product}</dd>
       <dt>Affected</dt><dd>{data.affected}</dd>

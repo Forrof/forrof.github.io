@@ -74,39 +74,47 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   assert.equal(existsSync(join(output, 'cves/cve-2099-99998')), false);
   assert.equal(existsSync(join(output, 'cves/ghsa-2345-6789-cfgj')), false);
   const detail = parseHTML(readFileSync(join(output, 'cves/cve-2099-99999/index.html'), 'utf8')).document;
-  assert.equal(detail.querySelector('h1').textContent, 'CVE-2099-99999');
+  assert.equal(detail.querySelector('h1').textContent, 'Synthetic advisory fixture');
+  assert.ok(detail.querySelector('.ff-facts').textContent.includes('CVE-2099-99999'));
   for (const value of ['PUBLIC_ADVISORY_FIXTURE_BODY', 'Fixture report', 'Test severity', 'Test version', 'Test fix']) assert.ok(detail.querySelector('main').textContent.includes(value));
   assert.ok(detail.querySelector('a[href="https://example.invalid/credit"]'));
   assert.ok(detail.querySelector('a[href="#technical-explanation"]'));
-  assert.ok(detail.querySelector('.ff-facts').textContent.includes('CVE assigned'));
+  assert.ok(detail.querySelector('.ff-facts').textContent.includes('Confirmed, published, CVE assigned'));
   const pendingDetail = parseHTML(readFileSync(join(output, 'cves/ghsa-2345-6789-cfgh/index.html'), 'utf8')).document;
-  assert.equal(pendingDetail.querySelector('h1').textContent, 'GHSA-2345-6789-cfgh');
-  assert.ok(pendingDetail.querySelector('.ff-facts').textContent.includes('CVE not yet assigned'));
+  assert.equal(pendingDetail.querySelector('h1').textContent, 'Synthetic advisory fixture');
+  assert.ok(pendingDetail.querySelector('.ff-facts').textContent.includes('GHSA-2345-6789-cfgh'));
+  assert.ok(pendingDetail.querySelector('.ff-facts').textContent.includes('Confirmed, published, waiting for CVE'));
   assert.ok(pendingDetail.querySelector('.ff-facts time[datetime="2026-09-15"]'));
   for (const page of ['index.html', 'cves/index.html', 'sitemap-0.xml']) {
     const text = readFileSync(join(output, page), 'utf8');
     assert.ok(text.includes('/cves/cve-2099-99999/'), page);
     assert.ok(text.includes('/cves/ghsa-2345-6789-cfgh/'), page);
     assert.doesNotMatch(text, /test-draft|cve-2099-99998|ghsa-2345-6789-cfgj|DRAFT_FIXTURE_MUST_NEVER_RENDER|DRAFT_CVE_MUST_NEVER_RENDER/);
-    if (page.endsWith('.html')) assert.ok(text.includes('CVE not yet assigned'), page);
+    if (page.endsWith('.html')) {
+      assert.ok(text.includes('Confirmed, published, waiting for CVE'), page);
+      const document = parseHTML(text).document;
+      const title = document.querySelector('a[href="/cves/ghsa-2345-6789-cfgh/"]');
+      assert.equal(title.textContent, 'Synthetic advisory fixture');
+    }
   }
   assert.equal(existsSync(join(repository, 'dist/cves/cve-2099-99999')), false);
   assert.deepEqual(cacheSnapshot(), originalCache, 'Fixture build must not modify the parent content cache');
 
-  // A later assignment changes the label/status, not the existing public URL.
+  // A later assignment updates the facts/status, not the title or existing URL.
   writeFileSync(join(scratch, 'src/content/cves/test-pending.md'), pending.replace('identifier:', 'cve: CVE-2099-99997\nidentifier:'));
   const assignmentBuild = spawnSync('npm', ['run', 'build'], { cwd: scratch, encoding: 'utf8', timeout: 60_000, env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' } });
   assert.equal(assignmentBuild.status, 0, assignmentBuild.stdout + assignmentBuild.stderr);
   const assignedDetail = parseHTML(readFileSync(join(output, 'cves/ghsa-2345-6789-cfgh/index.html'), 'utf8')).document;
-  assert.equal(assignedDetail.querySelector('h1').textContent, 'CVE-2099-99997');
+  assert.equal(assignedDetail.querySelector('h1').textContent, 'Synthetic advisory fixture');
+  assert.ok(assignedDetail.querySelector('.ff-facts').textContent.includes('CVE-2099-99997'));
   assert.ok(assignedDetail.querySelector('.ff-facts').textContent.includes('GHSA-2345-6789-cfgh'));
-  assert.ok(assignedDetail.querySelector('.ff-facts').textContent.includes('CVE assigned'));
-  assert.doesNotMatch(assignedDetail.querySelector('main').textContent, /CVE not yet assigned/);
+  assert.ok(assignedDetail.querySelector('.ff-facts').textContent.includes('Confirmed, published, CVE assigned'));
+  assert.doesNotMatch(assignedDetail.querySelector('main').textContent, /waiting for CVE/);
   for (const page of ['index.html', 'cves/index.html']) {
     const document = parseHTML(readFileSync(join(output, page), 'utf8')).document;
     const row = document.querySelector('a[href="/cves/ghsa-2345-6789-cfgh/"]').closest('.ff-entry');
-    assert.ok(row.textContent.includes('CVE-2099-99997'));
-    assert.equal(row.querySelector('.ff-status').textContent, 'Status: CVE assigned');
+    assert.equal(row.querySelector('h2').textContent, 'Synthetic advisory fixture');
+    assert.equal(row.querySelector('.ff-status').textContent, 'Status: Confirmed, published, CVE assigned');
   }
   assert.deepEqual(cacheSnapshot(), originalCache, 'Assignment build must not modify the parent content cache');
 

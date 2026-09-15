@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { dateSchema, entrySchema, cveSchema, projectSchema } from '../src/lib/schemas.ts';
-import { assignedCve, advisoryLabel, advisoryStatus } from '../src/lib/advisories.ts';
+import { assignedCve, advisoryStatus } from '../src/lib/advisories.ts';
 
 test('dates preserve known precision and reject impossible dates', () => {
   for (const date of ['2024-11', '2025-11', '2024-02-29', '2026-09-14']) assert.equal(dateSchema.parse(date), date);
@@ -37,13 +37,12 @@ test('public GHSAs can await a CVE without inventing an identifier or changing t
   const pending = { title: 'Fixture', summary: 'Synthetic record', published: '2026-09-15', identifier: 'GHSA-2345-6789-cfgh', verified: '2026-09-15', product: 'Fixture', creditSource: 'https://example.invalid/credit', affected: 'Test', fixed: 'Test', references: [{ label: 'Fixture', url: 'https://example.invalid/advisory' }] };
   assert.equal(cveSchema.safeParse(pending).success, true);
   assert.equal(assignedCve(pending), undefined);
-  assert.equal(advisoryLabel(pending), pending.identifier);
-  assert.equal(advisoryStatus(pending), 'CVE not yet assigned');
+  assert.equal(advisoryStatus(pending), 'Confirmed, published, waiting for CVE');
   const assigned = cveSchema.parse({ ...pending, cve: 'CVE-2099-99997' });
   assert.equal(assigned.identifier, pending.identifier);
-  assert.equal(advisoryLabel(assigned), 'CVE-2099-99997');
-  assert.equal(advisoryStatus(assigned), 'CVE assigned');
-  assert.equal(advisoryStatus({ identifier: 'CVE-2099-99999' }), 'CVE assigned');
+  assert.equal(assignedCve(assigned), 'CVE-2099-99997');
+  assert.equal(advisoryStatus(assigned), 'Confirmed, published, CVE assigned');
+  assert.equal(advisoryStatus({ identifier: 'CVE-2099-99999' }), 'Confirmed, published, CVE assigned');
   for (const identifier of ['GHSA-invalid', 'GHSA-0000-0000-0000', 'CVE-pending']) assert.equal(cveSchema.safeParse({ ...pending, identifier }).success, false);
   assert.equal(cveSchema.safeParse({ ...pending, cve: 'pending' }).success, false);
   assert.equal(cveSchema.safeParse({ ...pending, verified: '2026-02-30' }).success, false);

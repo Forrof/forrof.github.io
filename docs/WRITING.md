@@ -28,7 +28,9 @@ Copy `docs/templates/cve.md` into `src/content/cves/` and replace every placehol
 
 `identifier` accepts either an assigned `CVE-YYYY-NNNN` or a public `GHSA-xxxx-xxxx-xxxx`. Before committing, verify the advisory is accessible without authentication and credits forrof, then record that check's date in `verified`. Never add private or embargoed advisories, even as drafts.
 
-For a GHSA without a CVE, omit `cve`; the index and detail page display **CVE not yet assigned**. This describes the verified state, not a promise that a CVE request has been submitted. Once an assignment is publicly confirmed, add `cve: CVE-YYYY-NNNN` and refresh `verified`. Keep the original GHSA `identifier` unchanged: the existing URL remains stable while the displayed identifier and status update. Records whose original `identifier` is already a CVE do not need a separate `cve` field.
+For a confirmed, published GHSA without a CVE, omit `cve`; the index and detail page display **Confirmed, published, waiting for CVE**. This wording records the current absence of an assignment, not a guarantee of allocation. Once an assignment is publicly confirmed, add `cve: CVE-YYYY-NNNN` and refresh `verified`. Keep the original GHSA `identifier` unchanged: the existing URL remains stable while the detail facts and status update. Records whose original `identifier` is already a CVE do not need a separate `cve` field.
+
+Use the advisory's descriptive `title` for page and list headings. GHSA and CVE identifiers belong in the facts panel, not the heading. Add the sourced overview, affected configuration, impact and limitations, and remediation in the Markdown body; retain the public advisory link for attribution. Do not copy runnable exploit code or step-by-step exploitation instructions into these summaries.
 
 If source fields disagree, preserve the discrepancy in a clear note instead of inventing a corrected version range. Public metadata and status are checked when edited, not refreshed automatically.
 

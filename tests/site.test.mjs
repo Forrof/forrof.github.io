@@ -137,14 +137,24 @@ test('the seven verified public advisories have credited details and visible CVE
     assert.ok(detail.querySelector(`.ff-reference-list a[href="${source}"]`), identifier);
     assert.ok(detail.querySelector('.ff-byline').textContent.includes('forrof'), identifier);
     assert.ok(detail.querySelector('.ff-facts time'), identifier);
-    const assigned = detail.querySelector('h1').textContent.startsWith('CVE-');
-    const status = assigned ? 'CVE assigned' : 'CVE not yet assigned';
+    const title = detail.querySelector('h1').textContent;
+    assert.doesNotMatch(title, /GHSA-|CVE-\d/);
+    assert.ok(detail.querySelector('title').textContent.startsWith(title));
+    assert.doesNotMatch(detail.querySelector('title').textContent, /GHSA-/);
+    for (const heading of ['overview', 'affected-configuration', 'impact', 'remediation']) assert.ok(detail.getElementById(heading), `${identifier}: ${heading}`);
+    const assigned = [...detail.querySelectorAll('.ff-facts dt')].some((term) => term.textContent === 'CVE');
+    const status = assigned ? 'Confirmed, published, CVE assigned' : 'Confirmed, published, waiting for CVE';
     assert.ok(detail.querySelector('.ff-facts').textContent.includes(status), identifier);
     for (const page of ['index.html', 'cves/index.html']) {
       const row = documents.get(page).querySelector(`a[href="${route}"]`)?.closest('.ff-entry');
+      assert.equal(row?.querySelector('h2')?.textContent, title, `${page}: title for ${identifier}`);
       assert.equal(row?.querySelector('.ff-status')?.textContent, `Status: ${status}`, `${page}: ${identifier}`);
     }
     assert.ok(sitemap.includes(`https://forrof.github.io${route}`), identifier);
   }
   assert.ok(documents.get('cves/ghsa-2q29-798w-6qcp/index.html').querySelector('#version-note'));
+  assert.ok(documents.get('cves/ghsa-2q29-798w-6qcp/index.html').querySelector('#severity-note'));
+  const oauth = documents.get('cves/ghsa-5p27-64mv-pr73/index.html');
+  assert.ok(oauth.querySelector('#workarounds'));
+  assert.match(oauth.querySelector('.ff-prose').textContent, /OAuth is disabled by default/);
 });
