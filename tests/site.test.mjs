@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { relative } from 'node:path';
 import { parseHTML } from 'linkedom';
-import { Script } from 'node:vm';
+import { createHash } from 'node:crypto';
 
 const dist = new URL('../dist/', import.meta.url);
 const root = new URL('../', import.meta.url);
@@ -174,11 +174,18 @@ test('the seven verified public advisories have credited details and visible CVE
     assert.doesNotMatch(title, /GHSA-|CVE-\d/);
     assert.ok(detail.querySelector('title').textContent.startsWith(title));
     assert.doesNotMatch(detail.querySelector('title').textContent, /GHSA-/);
-    for (const heading of ['overview', 'technical-details', 'affected-configuration', 'impact', 'remediation']) assert.ok(detail.getElementById(heading), `${identifier}: ${heading}`);
+    for (const heading of ['description', 'impact']) assert.ok(detail.getElementById(heading), `${identifier}: ${heading}`);
     const sections = [...detail.querySelectorAll('.ff-prose h2, .ff-prose h3')].map((heading) => heading.id);
-    assert.equal(detail.getElementById('technical-details').tagName, 'H3');
-    assert.ok(sections.indexOf('technical-details') > sections.indexOf('overview'));
-    assert.ok(sections.indexOf('technical-details') < sections.indexOf('affected-configuration'));
+    assert.equal(detail.getElementById('description').tagName, 'H2');
+    assert.equal(detail.getElementById('impact').tagName, 'H3');
+    assert.ok(sections.indexOf('impact') > sections.indexOf('description'));
+    assert.ok(detail.querySelector(`.ff-prose blockquote a[href="${source}"]`));
+    assert.match(detail.querySelector('.ff-prose blockquote').textContent, /reproduced verbatim.*Exploit and reproduction details are omitted/);
+    assert.equal(detail.querySelector('#poc'), null);
+    if (repository !== 'doobidoo/mcp-memory-service') {
+      assert.equal(detail.getElementById('summary').tagName, 'H3');
+      assert.equal(detail.getElementById('details').tagName, 'H3');
+    }
     const assigned = [...detail.querySelectorAll('.ff-facts dt')].some((term) => term.textContent === 'CVE');
     const status = assigned ? 'Confirmed, published, CVE assigned' : 'Confirmed, published, waiting for CVE';
     assert.ok(detail.querySelector('.ff-facts').textContent.includes(status), identifier);
@@ -192,28 +199,65 @@ test('the seven verified public advisories have credited details and visible CVE
   assert.ok(documents.get('cves/ghsa-2q29-798w-6qcp/index.html').querySelector('#severity-note'));
   const oauth = documents.get('cves/ghsa-5p27-64mv-pr73/index.html');
   assert.ok(oauth.querySelector('#workarounds'));
-  assert.match(oauth.querySelector('.ff-prose').textContent, /OAuth is disabled by default/);
+  assert.match(oauth.querySelector('.ff-prose').textContent, /OAuth is off by default/);
+  assert.ok(oauth.querySelector('#patches'));
+  assert.ok(oauth.querySelector('#precondition-and-what-it-means-for-severity'));
 });
 
-test('defensive code examples render intact without being executed', () => {
-  const vm2Pages = ['ghsa-98xx-8mx4-x7cm', 'ghsa-h85j-hv3c-qfgq', 'ghsa-46pr-c5wc-xffx', 'ghsa-6w8r-xxw2-g3hx'];
-  for (const id of vm2Pages) {
-    const document = documents.get(`cves/${id}/index.html`);
-    assert.ok(document.getElementById('defensive-configuration-example'));
-    const code = document.querySelector('.ff-prose pre code').textContent;
-    assert.match(code, /require: false/);
-    assert.match(code, /nesting: false/);
-    assert.doesNotThrow(() => new Script(code), `${id}: syntax check only`);
-    assert.ok(document.querySelector('a[href="https://github.com/patriksimek/vm2"]'));
+test('source explanation and remediation snippets render intact as static code', () => {
+  for (const file of readdirSync(new URL('src/content/cves/', root)).filter((file) => file.endsWith('.md'))) {
+    const source = readFileSync(new URL(`src/content/cves/${file}`, root), 'utf8');
+    const expected = [...source.matchAll(/```\w+\n([\s\S]*?)```/g)].map((match) => match[1].trim());
+    const document = documents.get(`cves/${file.replace('.md', '')}/index.html`);
+    const actual = [...document.querySelectorAll('.ff-prose pre code')].map((block) => block.textContent.trim());
+    assert.deepEqual(actual, expected, file);
+    assert.equal(document.querySelector('.ff-prose script'), null, file);
+    assert.equal(document.querySelector('#defensive-configuration-example'), null, 'No added examples presented as source text');
   }
-  const oauth = documents.get('cves/ghsa-5p27-64mv-pr73/index.html');
-  assert.equal(oauth.querySelector('.ff-prose pre code').textContent.trim(), 'MCP_OAUTH_ENABLED=false');
   const flyto = documents.get('cves/ghsa-wmwj-g59x-c8px/index.html');
-  assert.ok(flyto.getElementById('suggested-patch'));
+  assert.ok(flyto.getElementById('suggested-remediation'));
   assert.equal(flyto.querySelector('.ff-prose pre code').textContent.trim(), 'return await instance.run()');
-  const goshs = documents.get('cves/ghsa-2q29-798w-6qcp/index.html');
-  assert.ok(goshs.getElementById('defensive-code-example'));
-  assert.match(goshs.querySelector('.ff-prose pre code').textContent, /os\.O_WRONLY\|os\.O_CREATE\|os\.O_EXCL/);
+});
+
+
+test('approved verbatim Description excerpts retain their verified wording', () => {
+  // Checked against the public repository advisory API on 2026-09-15.
+  // These snapshots cover selected safe passages, not the omitted full descriptions.
+  const verified = [
+    [
+      "ghsa-2q29-798w-6qcp",
+      "2e87dbfddaabbe11d3137619d195ef1bef491132e8f41aab193b943f0d1ae20d"
+    ],
+    [
+      "ghsa-46pr-c5wc-xffx",
+      "93cd574241fd57e7e514a4b33497dcad600ba8473d3d8695099dbf13232f428a"
+    ],
+    [
+      "ghsa-5p27-64mv-pr73",
+      "93898fbd88196540ead08a77f506c6feb58fc6c4032832d5474da2fe59f24a68"
+    ],
+    [
+      "ghsa-6w8r-xxw2-g3hx",
+      "4f25b42729463a3ffde8afa3572b31af2c083cccf5fb3f731c7e4555320bc410"
+    ],
+    [
+      "ghsa-98xx-8mx4-x7cm",
+      "793ec8485eb22a4ae65ab7bbcaf3bb86aa53dbb8307668de822835e4f4a95633"
+    ],
+    [
+      "ghsa-h85j-hv3c-qfgq",
+      "e03154e54493446bb2f1f72bd67a7949b3469233a0893e65ff41010072bb2396"
+    ],
+    [
+      "ghsa-wmwj-g59x-c8px",
+      "271c9f3fe94bdc8ebeba134cc695f30b9b2a681cb9f6287b362d5601e2155d74"
+    ]
+  ];
+  for (const [id, digest] of verified) {
+    const markdown = readFileSync(new URL('src/content/cves/' + id + '.md', root), 'utf8');
+    const description = markdown.slice(markdown.indexOf('## Description')).split('\n## Version note')[0].trim();
+    assert.equal(createHash('sha256').update(description).digest('hex'), digest, id);
+  }
 });
 
 test('article section colors remain distinct and readable on the dark background', () => {

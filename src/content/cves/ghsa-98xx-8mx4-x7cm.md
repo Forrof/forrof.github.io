@@ -21,45 +21,36 @@ references:
 tags: [vm2, sandbox, tls]
 ---
 
-## Overview
+## Description
 
-NodeVM's read-only wrapper does not isolate the state changed by host TLS functions. Sandboxed code can influence certificate trust for subsequent connections made outside the sandbox, even though the module object itself appears protected.
+> Selected passages from the [GitHub Description](https://github.com/patriksimek/vm2/security/advisories/GHSA-98xx-8mx4-x7cm), reproduced verbatim. Exploit and reproduction details are omitted. Attribution is shown as forrof.
 
-### Technical details
+### Summary
 
-The report identifies the default builtin loader in `lib/builtin.js` as the boundary. It exposes host modules through a recursive read-only bridge. That bridge prevents ordinary property assignment, but callable exports still act on the state owned by their host implementation.
+vm2 3.11.6 exposes the host `tls` module to a `NodeVM` when that builtin is explicitly allowed. Although the module object is wrapped as read-only, its functions still execute against process-wide host state.
 
-For TLS, this includes default certificate-authority configuration shared by later connections in the host's Node.js thread. Immutability of the exported JavaScript object does not make the underlying trust configuration local to a sandbox. Security review must therefore consider side effects and shared state, not only whether a module can be modified.
+This crosses the intended sandbox boundary. An attacker can make host HTTPS clients trust an attacker-controlled CA, enabling credential theft and response tampering when the attacker can influence a subsequent destination or network path. Replacing the list also removes the normal trust roots, disrupting unrelated host TLS traffic.
 
-The distinction also explains the scope of the finding: clients that supply their own CA configuration do not rely on that default store. The report describes a host trust-decision change, not a general file-access or command-execution capability.
+### Details
 
-## Affected configuration
+The vulnerable boundary is the default builtin loader in `lib/builtin.js`. Builtins that are not classified as dangerous are exposed through a recursive read-only bridge:
 
-The report concerns NodeVM configurations exposing TLS-related builtins on Node.js runtimes with mutable default certificate-authority settings. This is a boundary around shared host state, not merely permission to make network requests from a sandbox.
-
-## Impact
-
-- Host connections may accept certificates they would previously have rejected.
-- Credentials and response integrity are at risk when an adversary can also influence a connection's destination or network path.
-- Removing normal trust roots can break unrelated TLS connections.
-
-The report demonstrates a change in host certificate acceptance, not direct file access or command execution. Connections with their own explicit CA configuration are outside this particular default-store effect; cached sessions may remain unchanged.
-
-## Remediation
-
-Upgrade affected vm2 3.11.3–3.11.6 deployments to the maintainer's patched release, 3.11.7. Review which host capabilities are exposed to untrusted code: a read-only module wrapper is not equivalent to isolating process-wide security settings.
-
-### Defensive configuration example
-
-For workloads that need neither module imports nor nested VMs, this example uses the restrictive options documented by vm2:
-
-```javascript
-const { NodeVM } = require('vm2');
-
-const sandbox = new NodeVM({
-  require: false,
-  nesting: false,
-});
+```js
+builtins.set(key, special ? special : vm => vm.readonly(hostRequire(key)));
 ```
 
-This is a hardening example, not the maintainer's patch or a guarantee of isolation. Upgrade affected versions; use a separate process or stronger boundary where the threat model requires it.
+The read-only wrapper prevents ordinary property assignment through the sandbox proxy.
+
+### Impact
+
+This is an improper sandbox authorization boundary around a process-wide TLS security setting.
+
+An attacker who can submit code to a `NodeVM` configured with the `tls` and `url` builtins can:
+
+- replace the CAs used by subsequent host-side HTTPS and TLS clients;
+- make the host authenticate services presenting certificates signed by the attacker;
+- intercept host credentials, API tokens, session data, request bodies, and responses when the attacker can influence DNS, routing, a proxy, or a later request destination;
+- modify trusted responses, including configuration, webhook, update, identity, and package-retrieval traffic;
+- remove the normal trusted roots and cause unrelated host TLS connections to fail.
+
+The attacker does not obtain a direct file or command-execution primitive from this PoC. The critical impact is control of the host process's authentication trust decision, outside the sandbox's authority. Connections that explicitly provide their own CA list are not affected, and already cached TLS sessions may remain unchanged.

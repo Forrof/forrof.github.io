@@ -19,45 +19,82 @@ references:
 tags: [goshs, tftp]
 ---
 
-## Overview
+## Description
 
-The TFTP service does not enforce the server's deletion-protection policy consistently. Its file-opening behavior permits destructive writes to existing files despite the operator enabling that protection.
+> Selected passages from the [GitHub Description](https://github.com/goshs-labs/goshs/security/advisories/GHSA-2q29-798w-6qcp), reproduced verbatim. Exploit and reproduction details are omitted. Attribution is shown as forrof.
 
-### Technical details
+### Summary
 
-The report traces the problem to policy propagation in `tftpserver/tftpserver.go`. The global no-delete option exists, but the TFTP server's state and initialization do not carry it through alongside the read-only and upload-only settings. HTTP and WebDAV enforce the intended distinction; TFTP does not apply the same rule.
+The TFTP server in goshs 2.1.5 does not enforce the global `--no-delete`
+security option.
 
-Permission to create a new upload and permission to replace existing content are separate decisions. Checking that a path stays inside the upload root addresses location, not whether a destructive write is authorized. A file operation with truncation semantics can therefore violate the no-delete policy without escaping that root.
+Severity: **Critical — CVSS v3.1 9.1**
 
-The report recommends enforcing the policy at the actual file-open operation. Checking whether a file exists and opening it later would leave a race between the check and the write.
+### Details
 
-## Affected configuration
+goshs exposes multiple file-transfer protocols over a shared webroot or upload
+directory. The `--no-delete` option is intended to allow new uploads while
+preventing deletion, truncation, replacement, or rename of existing content.
+The current HTTP and WebDAV paths enforce this distinction, but the TFTP path
+does not.
 
-The reported exposure concerns deployments with TFTP and deletion protection enabled, where network controls do not restrict access to the TFTP service. Other protocols may share the same upload directory.
+The relevant source is `tftpserver/tftpserver.go`.
 
-## Impact
-
-Files inside that directory can lose their original contents or be replaced. This threatens integrity and availability, including data served through other protocols.
-
-The report does not demonstrate disclosure of confidential information, traversal outside the configured root, or direct command execution. Any subsequent execution would depend on another component consuming a modified file.
-
-## Remediation
-
-The advisory identifies v2.1.6 as the patched release. Operators should review exposure of the TFTP service and avoid relying on deletion protection in affected versions.
-
-### Defensive code example
-
-When no-delete protection applies, an exclusive-create operation preserves an existing target:
+`TFTPServer` stores the read-only and upload-only policy flags, but has no field
+for the global no-delete state:
 
 ```go
-file, err := os.OpenFile(
-    path,
-    os.O_WRONLY|os.O_CREATE|os.O_EXCL,
-    0o600,
-)
+type TFTPServer struct {
+    IP         string
+    Port       int
+    Root       string
+    UploadRoot string
+    ReadOnly   bool
+    UploadOnly bool
+    // No NoDelete field
+}
 ```
 
-This illustrates the report's remediation, not a complete server patch. Keep the existing path validation, propagate the policy into TFTP state, handle `err` before using `file`, and reject an existing target without modifying it. File permissions must also follow the application's policy.
+`NewTFTPServer` copies `opts.ReadOnly` and `opts.UploadOnly`, but does not copy
+`opts.NoDelete`:
+
+```go
+return &TFTPServer{
+    IP:         opts.IP,
+    Port:       opts.TFTPPort,
+    Root:       opts.Webroot,
+    UploadRoot: uploadRoot,
+    ReadOnly:   opts.ReadOnly,
+    UploadOnly: opts.UploadOnly,
+}
+```
+
+The global option does exist in `options/options.go` and is populated by the
+`--no-delete` command-line flag, so the omission is specific to propagation
+into the TFTP server.
+
+Path traversal is not required. The target remains inside the configured upload
+root. The vulnerability is the conversion of permission to create a new file
+into permission to destroy or replace an existing file despite
+`--no-delete`.
+
+Suggested remediation is to propagate `opts.NoDelete` into `TFTPServer` and,
+when enabled, open new uploads using an atomic exclusive-create operation. If
+the target exists, the server should return TFTP ERROR code 2 without opening
+or modifying it. A separate existence check followed by a normal create would
+be race-prone.
+
+### Impact
+
+This is an improper-access-control vulnerability affecting goshs deployments
+that enable both TFTP and `--no-delete` and expose the TFTP UDP port to an
+attacker not blocked by an IP whitelist or external network policy.
+
+The directly demonstrated impact is complete integrity and availability loss
+for targeted files. Direct confidentiality loss, path traversal, writes outside
+the configured root, and direct command execution were not demonstrated.
+Secondary code execution is possible only if another trusted component later
+loads or executes an attacker-replaced file.
 
 ## Version note
 

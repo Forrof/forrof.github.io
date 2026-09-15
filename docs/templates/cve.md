@@ -18,8 +18,12 @@ tags: []
 draft: true
 ---
 
-## Overview
+## Description
 
-## Technical details
+<!-- Copy safe source passages verbatim, preserve section headings as H3, and link the source. Clearly label any omissions. -->
 
-## Remediation
+### Summary
+
+### Details
+
+### Impact

@@ -21,48 +21,35 @@ references:
 tags: [vm2, sandbox, crypto]
 ---
 
-## Overview
+## Description
 
-The crypto integration exposes a native-loading capability with the authority of the Node.js host process. Wrapping the module as read-only does not confine the effects of its callable functions.
+> Selected passages from the [GitHub Description](https://github.com/patriksimek/vm2/security/advisories/GHSA-46pr-c5wc-xffx), reproduced verbatim. Exploit and reproduction details are omitted. Attribution is shown as forrof.
 
-### Technical details
+### Summary
 
-The report locates the boundary in the generic builtin loader. Builtins without a dedicated security wrapper are imported in the host realm and exposed through a recursive read-only proxy. Calls are still delegated to the original implementation with host authority.
+vm2 3.11.6 exposes the host `crypto` module to a `NodeVM` when that single builtin is allowed. The module is presented through a read-only bridge, but its functions still execute with host-process authority.
 
-Cryptographic modules combine ordinary operations, such as hashing, with capabilities backed by native runtime facilities. Permission to use the former should not automatically grant unrestricted access to the latter. A wrapper that controls JavaScript property writes does not mediate every effect of a native function.
+The exploit requires only the `crypto` builtin. It does not require `fs`, `process`, `module`, `child_process`, `worker_threads`, `vm`, `inspector`, unrestricted builtins, or vm2 nesting.
 
-For package-based workloads, the security review must cover both JavaScript behavior and the package resources accessible to the host. Denying selected JavaScript APIs is not equivalent to placing the workload in a separate operating-system process.
+### Details
 
-## Affected configuration
+The vulnerable boundary is the generic builtin loader. Builtins that are not specially wrapped or classified as dangerous are imported in the host realm and exposed through a recursive read-only proxy:
 
-The report concerns plugin and code-running platforms that evaluate untrusted packages in NodeVM while exposing the crypto builtin. The security boundary includes package contents as well as JavaScript: language-level restrictions cannot contain native code executing inside the host.
-
-## Impact
-
-Native execution occurs with the host account's operating-system privileges, outside vm2's JavaScript and module restrictions. The resulting exposure includes:
-
-- Application secrets and files accessible to that account.
-- Modification of application data and other writable resources.
-- Access to services available from the host.
-- Loss of isolation between tenants, or disruption of the host process.
-
-The advisory distinguishes this from simply allowing normal cryptographic operations inside a sandbox: those operations should not confer arbitrary host execution.
-
-## Remediation
-
-Upgrade affected vm2 3.11.3–3.11.6 installations to 3.11.7, the maintainer's patched release. Review builtin permissions and native host capabilities exposed to untrusted packages; read-only wrappers alone do not supply process isolation.
-
-### Defensive configuration example
-
-When the application does not require module imports or nested VMs, the following documented configuration disables them:
-
-```javascript
-const { NodeVM } = require('vm2');
-
-const sandbox = new NodeVM({
-  require: false,
-  nesting: false,
-});
+```js
+builtins.set(key, special ? special : vm => vm.readonly(hostRequire(key)));
 ```
 
-This is an additional restriction, not the upstream patch. It can break workloads that depend on imports, and it does not replace upgrading or selecting an appropriately strong isolation boundary.
+Read-only prevents sandbox code from assigning properties on the module object. It does not reduce the authority of callable exports. Calls are forwarded to the original host function with bridge values converted back to host values.
+
+### Impact
+
+This is a sandbox escape to arbitrary native code execution. The code runs with the operating-system identity and privileges of the Node.js host process, outside all vm2 language and module restrictions.
+
+- reads application secrets, environment variables, credentials, and files available to the host user;
+- modifies application data or executable files and establishes persistence;
+- accesses internal services using the host's network identity;
+- steals other tenants' data from the same process;
+- terminates or corrupts the host process; and
+- executes arbitrary operating-system actions permitted to the host account.
+
+The realistic affected workflow is a plugin, automation, notebook, or multi-tenant code runner that stores attacker-supplied package contents on disk and runs the package's JavaScript in `NodeVM` while allowing `crypto`. The attacker does not need the sandbox to expose a file-write or command-execution module.

@@ -19,47 +19,33 @@ references:
 tags: [mcp, oauth, authorization]
 ---
 
-## Overview
+## Description
 
-The token flow fails to enforce the registered client type, allowed grants, and authentication method consistently. Public-client secret handling also violates the intended distinction between public and confidential clients.
+> Selected passages from the [GitHub Description](https://github.com/doobidoo/mcp-memory-service/security/advisories/GHSA-5p27-64mv-pr73), reproduced verbatim. Exploit and reproduction details are omitted. Attribution is shown as forrof.
 
-### Technical details
+### Impact
 
-The report describes inconsistent enforcement across client registration and token issuance. A client's stored registration must define which grants it may use and how it authenticates; token issuance should not reinterpret those constraints from caller-supplied data.
+When the OAuth 2.1 authorization server is enabled (`MCP_OAUTH_ENABLED=true`) and Dynamic Client Registration is left open (`MCP_DCR_REGISTRATION_KEY` unset, which is the default), an unauthenticated attacker can obtain a bearer token with `read write` scope and use it to read and write memories without possessing the owner's API key.
 
-The fix addresses three related policy requirements: public clients must not receive confidential-client secrets, grants must be authorized by the stored registration, and the client's registered authentication method must be respected. Enforcing the owner's API-key check in a different authorization flow does not compensate for missing checks here.
+The intended authorization-code flow is not affected: it correctly requires the owner's API key at `/oauth/authorize` and correctly reads the auth method off the stored client. The bypass goes around that flow entirely rather than through it.
 
-A related storage issue represented an empty secret as a hash rather than as the absence of a secret. The report distinguishes this misleading representation from an authentication bypass: the comparison still rejected empty input. Both the enforcement and representation problems were corrected together.
+A fourth, related weakness was found while fixing this: `store_client()` hashed an empty secret, so a secretless client was persisted as `sha256$e3b0c442...` (the SHA-256 of the empty string) and looked like a client that has one. Authentication still failed, because the constant-time comparison rejects empty input, but the stored representation was misleading. It is corrected in the same change.
 
-## Affected configuration
+### Precondition, and what it means for severity
 
-Exposure requires enabling the OAuth server while leaving dynamic client registration open. **OAuth is disabled by default**, so a default installation is not affected.
+OAuth is **off by default** (`OAUTH_ENABLED = safe_get_bool_env('MCP_OAUTH_ENABLED', False)`), so a default installation is not affected. Affected deployments are those that enabled the OAuth server — which is the documented path for remote MCP access from claude.ai. Once OAuth is enabled with open registration, the attack is deterministic and needs no prior access, credentials, or user interaction, which is what the CVSS vector reflects.
 
-The affected range begins at 10.20.0, when the owner's API-key authorization gate was introduced. Earlier OAuth behavior existed, but not that gate to bypass.
+### Patches
 
-## Impact
+Fixed in 11.8.2. The `client_credentials` grant now reads the stored client and rejects it unless the grant is registered and the authentication method is not `none`; registration issues no secret to a public client; and an empty secret is no longer hashed at rest.
 
-Unauthorized clients can gain read/write access to stored memories without the owner's API key. The normal authorization-code flow is not itself broken; the issue is a separate token-grant path that fails to enforce equivalent restrictions.
+### Workarounds
 
-## Remediation
+For deployments that cannot upgrade immediately, either of these closes the entry point:
 
-Version 11.8.2 enforces stored grant and authentication settings, stops issuing secrets to public clients, and corrects empty-secret storage. The related storage inconsistency was not independently sufficient to authenticate an empty secret.
+- Set `MCP_DCR_REGISTRATION_KEY` to a strong random value. Unauthenticated registration then returns HTTP 401, so an attacker cannot obtain a client at all. This was verified by the reporter.
+- Set `MCP_OAUTH_ENABLED=false` and use API-key authentication instead.
 
-## Workarounds
+### Affected versions
 
-If upgrading is temporarily impossible, the advisory recommends either:
-
-- Protect registration with a strong random `MCP_DCR_REGISTRATION_KEY`.
-- Set `MCP_OAUTH_ENABLED=false` and use API-key authentication.
-
-The report states that the registration-key protection was verified.
-
-### Defensive configuration example
-
-The advisory's OAuth-disable workaround can be expressed in deployment environment configuration as:
-
-```dotenv
-MCP_OAUTH_ENABLED=false
-```
-
-Apply the setting through the service's normal configuration and restart procedure, and use its API-key authentication path. This disables OAuth-dependent access; it is an operational workaround, not the 11.8.2 code fix.
+10.20.0 and later. The vulnerable token behavior dates back to the introduction of the OAuth layer in 7.0.0, but the owner API-key gate that this bypasses landed in 10.20.0, so earlier versions had no such gate to bypass.

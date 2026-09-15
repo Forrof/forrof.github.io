@@ -19,40 +19,41 @@ references:
 tags: [flyto-core, authorization]
 ---
 
-## Overview
+## Description
 
-Dynamically selected child modules do not consistently pass through the same authorization checks as ordinary execution. This breaks the module allowlist and dangerous-permission boundary enforced elsewhere in the application.
+> Selected passages from the [GitHub Description](https://github.com/flytohub/flyto-core/security/advisories/GHSA-wmwj-g59x-c8px), reproduced verbatim. Exploit and reproduction details are omitted. Attribution is shown as forrof.
 
-### Technical details
+### Summary
 
-The advisory identifies `BaseModule.run()` as the shared policy entry point. It checks the module's identity, declared permissions, and plugin context before dispatching the implementation. An execution path that directly invokes an implementation bypasses that authorization boundary.
+An authenticated Execution API caller can execute an otherwise denied module through the allowed `verify.spec` module.
 
-Top-level admission is not sufficient when an allowed module can select child modules dynamically. Each child must undergo the same checks as a directly requested module. Otherwise, a restrictive outer policy can fail to constrain the work that happens underneath it.
+### Details
 
-The report distinguishes this from an authentication failure: the caller already has an API token. The missing boundary is the authorization that should restrict that caller's permitted operations. Regression coverage must therefore include nested execution under both ordinary and restrictive policies.
+The policy enforcement point is `BaseModule.run()` in `src/core/modules/base.py`. Before dispatching a module, it calls `enforce_module_policy()` with the module identifier, declared permissions, and plugin identity.
 
-## Affected configuration
+This is a sibling omission in the same general class as an earlier nested-module policy fix. The current testing/warroom nested-step runner correctly uses `instance.run()`, but `verify.spec` still uses `instance.execute()`. The tested current release and current source retain this omitted call site.
 
-The report concerns reachable Execution API deployments where a caller has a valid bearer token but is intentionally restricted to safe modules. Authentication is required; possession of an API token should not imply unrestricted host access.
+### Impact
 
-An exclusively local API whose token is held only by fully trusted host administrators has narrower practical exposure.
+This is an authorization and protection-mechanism bypass leading to arbitrary command execution. A caller who has only the Execution API bearer token, but was intentionally restricted to safe modules, can escape that module policy and execute commands with the privileges of the Flyto process.
 
-## Impact
+An attacker could:
 
-The policy bypass can lead to command execution with the Flyto service account's privileges. Consequences include exposure of service secrets and workflow data, modification of writable resources, and service disruption.
+- read service credentials, API keys, configuration, and workflow data available to the process;
+- modify application code, workflows, stored data, and writable configuration;
+- destroy files or stop the service;
+- make network connections and pivot using the service's network access;
+- persist through writable startup files or application components; and
+- bypass `FLYTO_SANDBOX_DIR` for filesystem effects performed by the command.
 
-The report also describes filesystem effects outside the workflow's configured sandbox directory. These effects remain bounded by the operating-system permissions of the service account, not by the intended module policy.
+The attacker needs a valid Execution API bearer token and a reachable Execution API. No additional dangerous-permission grant, user interaction, or private-network setting is needed. Deployments that keep the API exclusively local and give the token only to fully trusted host administrators have a narrower practical exposure.
 
-## Remediation
+### Suggested remediation
 
-The maintainer lists 2.31.1 as the patched release for versions from 2.2.2 onward. The report recommends a mandatory authorization path for every child-module invocation, recursive policy checks for embedded module selections, and regression tests covering indirect execution paths.
-
-### Suggested patch
-
-The advisory supplies this replacement at the child-dispatch call site:
+Route dynamically selected child modules through the same mandatory policy entry point:
 
 ```python
 return await instance.run()
 ```
 
-This is a call-site fragment, not a standalone program. It routes the existing module instance through the mandatory policy checks. The report also recommends validating embedded module selections at API and workflow boundaries, plus registry-wide checks that prevent new dispatchers from skipping the guarded path.
+As defense in depth, recursively inspect module identifiers embedded in `verify.spec` rulesets at the REST Execution API and workflow boundaries, applying both the module filter and declared-permission checks before execution. A registry-wide regression test should also fail whenever code dynamically selects a module and invokes `execute()` directly instead of the policy-gated dispatcher.

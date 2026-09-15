@@ -21,45 +21,37 @@ references:
 tags: [vm2, sandbox, sqlite]
 ---
 
-## Overview
+## Description
 
-The SQLite integration retains native extension capabilities belonging to the host process. Making the module read-only does not remove those capabilities or constrain their effects to the JavaScript sandbox.
+> Selected passages from the [GitHub Description](https://github.com/patriksimek/vm2/security/advisories/GHSA-6w8r-xxw2-g3hx), reproduced verbatim. Exploit and reproduction details are omitted. Attribution is shown as forrof.
 
-### Technical details
+### Summary
 
-The report identifies a boundary spanning the builtin inventory, resolver, runtime loader, and generic wrapper. Those components must agree on the identity of an allowed module. Inconsistent handling of builtin names makes it harder to ensure that resolution and execution enforce the same policy.
+vm2 3.11.6 exposes Node.js's host `node:sqlite` module to `NodeVM` code when that builtin is allowed explicitly or through `builtin: ['*']`. The module is wrapped as read-only, but callable methods retain host-process authority.
 
-The resulting module is the real host implementation exposed through `vm.readonly()`, rather than a separate SQLite service confined to the sandbox. That wrapper restricts property assignment; it does not automatically remove native functionality from the module's callable interfaces.
+SQLite loads the library into the Node.js host process and invokes its native extension entry point. This gives the untrusted plugin arbitrary native code execution outside the sandbox.
 
-The important security distinction is between database operations and host-process extension authority. Native code loaded into the Node.js process operates beyond JavaScript proxy restrictions, so permission to use a database cannot safely stand in for permission to use every capability its native integration exposes.
+### Details
 
-Defensive review must address both consistent module policy and the capabilities returned by an allowed module. The presence of a read-only proxy alone is not evidence that the native boundary has been contained.
+The vulnerable boundary spans the builtin inventory, resolver, runtime loader, and generic read-only wrapper.
 
-## Affected configuration
+The default builtin loader imports the real module in the host realm and exposes it through `vm.readonly()`:
 
-The advisory describes untrusted plugin or package workloads evaluated in NodeVM with the SQLite builtin available, either individually or through a broad builtin policy. Typical examples include automation platforms, notebooks, build services, and multi-tenant code runners.
-
-## Impact
-
-Native code can execute under the identity and privileges of the Node.js process. This exceeds the intended authority of a plugin and bypasses vm2's language-level restrictions.
-
-Host-accessible secrets, files, and internal services may be exposed. Writable application resources and other tenants' data may be affected, and the host process can lose integrity or availability. These are consequences of host-level execution, not merely unauthorized access to a database.
-
-## Remediation
-
-The maintainer lists vm2 3.11.7 as the patched release for versions 3.11.3–3.11.6. Upgrade affected deployments and review broad builtin grants. Native extension authority should not be treated as safely confined simply because the JavaScript-facing module is read-only.
-
-### Defensive configuration example
-
-For code that needs neither module imports nor nested VMs, this example uses vm2's documented restrictive settings:
-
-```javascript
-const { NodeVM } = require('vm2');
-
-const sandbox = new NodeVM({
-  require: false,
-  nesting: false,
-});
+```js
+builtins.set(key, vm => vm.readonly(hostRequire(key)));
 ```
 
-The example removes features rather than patching the SQLite integration. It is not a substitute for upgrading, and an in-process JavaScript sandbox should not be treated as operating-system isolation.
+Read-only wrapping prevents property assignment. It does not remove dangerous callable capabilities.
+
+### Impact
+
+This is a sandbox escape to arbitrary native code execution. The native code runs inside the Node.js host process with the operating-system identity and privileges of that process, beyond all vm2 JavaScript, module, and proxy restrictions.
+
+- reads application secrets, credentials, environment variables, and files available to the host account;
+- modifies application data or executable files and establishes persistence;
+- accesses internal services using the host's network identity;
+- steals other tenants' data from the same process;
+- terminates or corrupts the host process; and
+- performs any other operating-system action permitted to the host account.
+
+The realistic affected workflow is a plugin platform, automation service, notebook, build service, or multi-tenant code runner that stores attacker-supplied package contents and evaluates the package's JavaScript in `NodeVM` while allowing `node:sqlite` or all builtins. The attacker does not need pre-existing host execution, a writable database, or a command-execution builtin.
