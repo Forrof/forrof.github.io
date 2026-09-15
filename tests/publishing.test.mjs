@@ -25,6 +25,10 @@ test('a clean build excludes drafts and renders a complete credited advisory fro
   for (const file of readdirSync(join(scratch, 'src/content/cves'))) {
     if (file.endsWith('.md')) unlinkSync(join(scratch, 'src/content/cves', file));
   }
+  // Isolate listed entries while retaining the two hidden legacy articles.
+  for (const file of readdirSync(join(scratch, 'src/content/entries'))) {
+    if (file.endsWith('.md') && !['free-boost.md', 'geometrydash.md'].includes(file)) unlinkSync(join(scratch, 'src/content/entries', file));
+  }
 
   // These clearly synthetic records exist only inside the isolated test directory.
   writeFileSync(join(scratch, 'src/content/entries/test-draft.md'), `---

@@ -33,9 +33,11 @@ test('all public routes render complete HTML without relying on JavaScript', () 
   assert.equal(documents.get('404.html').querySelector('meta[name="robots"]').content, 'noindex');
 });
 
-test('the cleared entries page preserves article URLs, artwork, and the separate CVE archive', () => {
-  assert.equal(homepage.querySelectorAll('.ff-entry').length, 0);
-  assert.equal(homepage.querySelector('main .ff-empty').textContent, 'Entries will appear here.');
+test('the entries page lists the new article while keeping removed posts and CVEs out', () => {
+  const links = [...homepage.querySelectorAll('.ff-entry h2 a')];
+  assert.deepEqual(links.map((link) => link.getAttribute('href')), ['/entries/is-freezing-ram-a-thing/']);
+  assert.equal(links[0].textContent, 'Is freezing RAM a thing?????');
+  assert.equal(homepage.querySelector('main .ff-empty'), null);
   for (const id of ['free-boost', 'geometrydash']) {
     assert.equal(homepage.querySelector(`a[href="/entries/${id}/"]`), null);
     assert.ok(documents.get(`entries/${id}/index.html`).querySelector('.ff-prose'));
@@ -43,6 +45,42 @@ test('the cleared entries page preserves article URLs, artwork, and the separate
   assert.equal(homepage.querySelector('main a[href^="/cves/"], main .ff-status'), null);
   assert.ok(homepage.querySelector('nav a[href="/cves/"]'));
   assert.ok(homepage.querySelector('.ff-disclosure-counter'));
+});
+
+test('the new freezing-RAM entry preserves the supplied writing and renders its images, math, and references', () => {
+  const id = 'is-freezing-ram-a-thing';
+  const document = documents.get(`entries/${id}/index.html`);
+  assert.ok(document);
+  assert.equal(document.querySelector('h1').textContent, 'Is freezing RAM a thing?????');
+  assert.equal(document.querySelector('.ff-byline time').getAttribute('datetime'), '2026-09-15');
+  const markdown = readFileSync(new URL(`src/content/entries/${id}.md`, root), 'utf8').split('---\n').slice(2).join('---\n').trim();
+  // Author text is unchanged apart from title metadata, image/caption markup, and disclaimer labels.
+  assert.equal(createHash('sha256').update(markdown).digest('hex'), '4e149b038fc61ad06eaa6399aba2cb18834300370c15c0f42408af070dfcbe5a');
+  assert.equal(document.querySelector('.ff-image-caption').textContent, '^|me fr');
+  const expectedMath = [...markdown.matchAll(/\$\$([\s\S]*?)\$\$|\$([^$\n]+)\$/g)].map((match) => (match[1] ?? match[2]).trim());
+  const renderedMath = [...document.querySelectorAll('.katex annotation[encoding="application/x-tex"]')].map((element) => element.textContent.trim());
+  assert.deepEqual(renderedMath, expectedMath);
+  assert.equal(document.querySelectorAll('.katex-display').length, 4);
+  assert.equal(document.querySelector('.katex-error, .ff-prose script'), null);
+  assert.equal(document.querySelectorAll('.ff-prose table').length, 3);
+  assert.equal(document.querySelectorAll('[data-footnotes] ol > li').length, 4);
+  assert.ok(document.querySelector('a[href="https://ro.ecu.edu.au/adf/162/"]'));
+  const images = [
+    ['FrozonoHacker.png', 1254, 1254, '388cfa3b6c46eea3784b80246a63099cf86ff3dc2c9a1f5b4ed56f46e580bf03'],
+    ['BrainBoom.jpg', 1000, 562, '3278b5f3cb9409b0fd6b04c0eaaca8ac25b39f485ad04745adcc11d007bde35b'],
+  ];
+  for (const [name, width, height, digest] of images) {
+    const path = `images/${id}/${name}`;
+    const image = document.querySelector(`.ff-prose img[src="/${path}"]`);
+    assert.equal(Number(image.getAttribute('width')), width);
+    assert.equal(Number(image.getAttribute('height')), height);
+    assert.equal(image.getAttribute('loading'), 'lazy');
+    assert.equal(image.getAttribute('decoding'), 'async');
+    assert.equal(image.parentElement.getAttribute('href'), `/${path}`);
+    assert.equal(createHash('sha256').update(readFileSync(new URL(`public/${path}`, root))).digest('hex'), digest);
+    assert.deepEqual(readFileSync(new URL(path, dist)), readFileSync(new URL(`public/${path}`, root)));
+  }
+  assert.ok(readFileSync(new URL('sitemap-0.xml', dist), 'utf8').includes(`https://forrof.github.io/entries/${id}/`));
 });
 
 test('every internal page, asset, and heading link resolves in the build', () => {

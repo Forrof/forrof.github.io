@@ -3,6 +3,8 @@ import sitemap from '@astrojs/sitemap';
 import autolinkHeadings from 'rehype-autolink-headings';
 import { unified, rehypeHeadingIds } from '@astrojs/markdown-remark';
 import evidenceImages from './src/lib/rehype-images.mjs';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 export default defineConfig({
   site: 'https://forrof.github.io',
@@ -16,7 +18,8 @@ export default defineConfig({
     shikiConfig: { theme: 'github-dark-dimmed', wrap: true },
     processor: unified({
       smartypants: false,
-      rehypePlugins: [evidenceImages, rehypeHeadingIds, [autolinkHeadings, { behavior: 'wrap', properties: { className: ['heading-anchor'] } }]],
+      remarkPlugins: [remarkMath],
+      rehypePlugins: [[rehypeKatex, { trust: false }], evidenceImages, rehypeHeadingIds, [autolinkHeadings, { behavior: 'wrap', properties: { className: ['heading-anchor'] } }]],
     }),
   },
 });
