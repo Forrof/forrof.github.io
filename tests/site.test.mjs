@@ -55,7 +55,7 @@ test('the freezing-RAM entry preserves the updated writing and renders its image
   assert.equal(document.querySelector('.ff-byline time').getAttribute('datetime'), '2026-09-15');
   const markdown = readFileSync(new URL(`src/content/entries/${id}.md`, root), 'utf8').split('---\n').slice(2).join('---\n').trim();
   // Author text is unchanged apart from title metadata, image/caption markup, and disclaimer labels.
-  assert.equal(createHash('sha256').update(markdown).digest('hex'), '512d3a9e41d86c8aeb8a7695b8cf0daa375fb1d35da22056272a74f28b2a5d4a');
+  assert.equal(createHash('sha256').update(markdown).digest('hex'), '8bfb90b841e5230ffaa94d6de074fb9389bb3bd9b54327d74db6b9f6ac60c320');
   assert.equal(document.querySelector('.ff-image-caption').textContent, '^|me fr');
   assert.ok(document.querySelector('.ff-prose').textContent.includes('Photos of the real experiment (Obviously not real):'));
   const expectedMath = [...markdown.matchAll(/\$\$([\s\S]*?)\$\$|\$([^$\n]+)\$/g)].map((match) => (match[1] ?? match[2]).trim());
@@ -64,7 +64,8 @@ test('the freezing-RAM entry preserves the updated writing and renders its image
   assert.equal(document.querySelectorAll('.katex-display').length, 4);
   assert.equal(document.querySelector('.katex-error, .ff-prose script'), null);
   assert.equal(document.querySelectorAll('.ff-prose table').length, 3);
-  assert.equal(document.querySelectorAll('[data-footnotes] ol > li').length, 4);
+  assert.equal(document.querySelectorAll('[data-footnotes] ol > li').length, 6);
+  assert.ok(document.getElementById('8-but-modern-memory-encryption-changes-the-game'));
   assert.ok(document.querySelector('a[href="https://ro.ecu.edu.au/adf/162/"]'));
   const images = [
     ['FrozonoHacker.png', 1254, 1254, '388cfa3b6c46eea3784b80246a63099cf86ff3dc2c9a1f5b4ed56f46e580bf03'],

@@ -27,12 +27,12 @@ After trying to understand the science behind this, I can explain at a high leve
 > **Disclaimer**
 >I'm not an electrical engineer
 
-So, where does RAM store the data? The answer to that is nowhere, really. RAM stores data as electrical charge in capacitors, which represent 1's and 0's depending on whether they have charge or not.
+So, where does DRAM store the data? Unlike persistent storage, DRAM represents data temporarily as electrical charge inside tiny memory cells.
 
 <a href="/images/is-freezing-ram-a-thing/capa.jpg" target="_blank" rel="noopener noreferrer" class="ff-image-link" aria-label="Open full-size image: Capa"><img src="/images/is-freezing-ram-a-thing/capa.jpg" alt="Capa" width="550" height="481" loading="lazy" decoding="async" /></a>
 
 
-A charged and an uncharged capacitor represent two distinguishable states. The memory system interprets those states as binary data.
+A higher and a lower charge state represent two distinguishable states. The memory system interprets those states as binary data. A charged state does not universally mean `1`, though; the logical value depends on how the particular cell is organized.
 
 $$
 Q = C V
@@ -47,15 +47,15 @@ where:
 | $V$ | Voltage across the capacitor |
 
 
-These capacitors might seem like the best components ever, but they are not. They leak charge over time, so the voltage goes down.
+These capacitors might seem like the best components ever, but they are not. The stored charge gradually leaks away through several semiconductor leakage paths, so the voltage difference that represents the stored state decreases over time.
 
-That is why the **D** in DRAM means *dynamic*: the memory controller must repeatedly read and restore—or **refresh**—the cells while the system is operating.
+That is why the **D** in DRAM means *dynamic*: the memory controller periodically commands the DRAM to **refresh** its rows, allowing the chip's internal sensing circuitry to detect and restore the stored charge.
 
 ---
 
 ## 2. Why losing power isn't the same as erasing data
 
-When power disappears, the memory controller can no longer refresh the DRAM. However, the storage capacitors are not necessarily shorted to ground or deliberately overwritten. They simply begin losing their existing charge through leakage paths.
+When power disappears, the memory controller can no longer keep the DRAM refreshed. However, the storage capacitors are not necessarily shorted to ground or deliberately overwritten. Their existing charge simply begins to decay through leakage paths.
 
 That creates a short period during which some cells can still be interpreted correctly.
 
@@ -76,7 +76,9 @@ where:
 > **Disclaimer**
 >This equation is a simplification, but it makes the relationship clear.
 
-In the paper I saw, Halderman and colleagues demonstrated this experimentally in *Lest We Remember*. They found that ordinary DRAM often retained useful information for several seconds at normal temperatures. When cooled, it retained data far longer. At approximately $-50^\circ\text{C}$, fewer than 1% of bits decayed after ten minutes in their reported tests. With liquid nitrogen, one experiment showed only about 0.17% decay after an hour.[^halderman]
+In the paper I saw, Halderman and colleagues demonstrated this experimentally in *Lest We Remember*. They found that ordinary DRAM often retained useful information for several seconds at normal operating temperatures. When cooled, it retained data far longer. At approximately $-50^\circ\text{C}$, fewer than 1% of bits decayed after ten minutes in their reported tests. With liquid nitrogen, one experiment showed only about 0.17% decay after an hour.[^halderman]
+
+So yeah, you can technically move a powered-off DIMM and recover some of what was in it—but it isn't as simple as plugging it into another PC and opening some files. The remaining contents have to be acquired before decay or hardware initialization destroys too much of the data.
 
 <a href="/images/is-freezing-ram-a-thing/Luigui.jpg" target="_blank" rel="noopener noreferrer" class="ff-image-link" aria-label="Open full-size image: Luigui"><img src="/images/is-freezing-ram-a-thing/Luigui.jpg" alt="Luigui" width="800" height="774" loading="lazy" decoding="async" /></a>
 
@@ -92,7 +94,7 @@ The total leakage from a DRAM cell comes from several physical mechanisms, inclu
 - trap-assisted leakage; and
 - at very low temperatures, mechanisms such as tunnelling.
 
-Several of these processes are **temperature-dependent**. Higher temperatures give charge carriers more thermal energy, increasing the probability that they escape the storage node. Cooling reduces that activity and therefore reduces leakage.
+Several of these processes are **temperature-dependent**. Higher temperatures give charge carriers more thermal energy, increasing the probability that charge escapes the storage node. Cooling reduces that activity and therefore reduces leakage.
 
 
 $$
@@ -110,20 +112,20 @@ where $E_a$ is an effective activation energy, $k_B$ is Boltzmann's constant, an
 
 The equations should not be taken as a universal law for every DRAM cell. Real chips contain billions of cells with manufacturing variations, multiple leakage paths, and changing dominant mechanisms.
 
-Basically, what this means is that low temperatures reduce the amount of charge leakage, resulting in capacitors staying charged for longer and retaining more voltage, making the "data" survive longer.
+Basically, what this means is that low temperatures reduce charge leakage, allowing the difference between the cell's charge states to remain distinguishable for longer. That makes the "data" survive longer.
 
 <a href="/images/is-freezing-ram-a-thing/CoolRam.jpg" target="_blank" rel="noopener noreferrer" class="ff-image-link" aria-label="Open full-size image: CoolRam"><img src="/images/is-freezing-ram-a-thing/CoolRam.jpg" alt="CoolRam" width="750" height="751" loading="lazy" decoding="async" /></a>
 
 
 ---
 
-## 4. Memory decay is not random
+## 4. Memory decay is not simply random
 
 If every bit immediately became a random `0` or `1`, recovery would be trash. Experiments instead show two helpful properties:
 
 ### Cells decay at different rates
 
-Tiny manufacturing differences mean that some cells retain charge longer than others. Decay develops progressively across a module rather than appearing everywhere at once.
+Tiny manufacturing differences mean that some cells retain their state longer than others. Decay develops progressively across a module rather than appearing everywhere at once.
 
 ### Many cells decay toward a preferred state
 
@@ -132,6 +134,8 @@ Depending on their physical organization, cells often settle toward a predictabl
 So a damaged image can be closer to:
 
 > **original data + patterned bit errors**
+
+rather than completely random garbage.
 
 ---
 
@@ -158,6 +162,8 @@ Their test system used **1 GB of DDR3 non-ECC memory**. They compared an uncoole
 | Freezing spray | About $-40^\circ\text{C}$ | 96.45% |
 | Ice | About $10^\circ\text{C}$ | 99.71% |
 
+These percentages should not be interpreted as universal retention rates for DDR3. They are results from this particular experimental setup, and retention behavior can vary significantly between memory modules, systems, timings, and acquisition methods.
+
 The authors also reported recovering TrueCrypt-related encryption material from cooled-memory images.[^gupta]
 
 Photos of the real experiment (Obviously not real):
@@ -169,9 +175,31 @@ Photos of the real experiment (Obviously not real):
 
 ## 7. Does this still matter with DDR3 and DDR4?
 
-Modern memory controllers may **scramble** the data written to memory. This is mainly done to improve electrical behavior. (It solves problematic bit patterns or something like that...)
+Modern memory controllers may **scramble** the data written to memory. This is mainly done to improve electrical behavior, such as reducing problematic signal patterns and electrical noise. Scrambling is **not encryption**.
 
-Bauer, Gruhn, and Freiling showed in 2016 that Intel DDR3 scrambling could be reversed with a small amount of known plaintext, enabling reconstruction of acquired memory images.[^bauer] In 2017, Yitbarek and colleagues analyzed memory scramblers in newer Intel systems and demonstrated that scrambling did not provide cryptographic confidentiality against cold-boot analysis.[^yitbarek]
+Bauer, Gruhn, and Freiling showed in 2016 that Intel DDR3 scrambling could be reversed with a small amount of known plaintext, enabling reconstruction of acquired memory images.[^bauer]
+
+In 2017, Yitbarek and colleagues analyzed the enhanced DDR4 memory scrambler used in Intel Skylake processors and demonstrated that it still did not provide cryptographic confidentiality against cold-boot attacks.[^yitbarek]
+
+---
+
+## 8. But modern memory encryption changes the game
+
+Memory scrambling should not be confused with **cryptographic memory encryption**.
+
+Some modern processors support technologies that encrypt the contents of DRAM using keys kept inside the processor. Examples include Intel Total Memory Encryption (**TME**) and AMD Secure Memory Encryption / Transparent Secure Memory Encryption (**SME/TSME**).[^intel-tme][^amd-sme]
+
+With these protections enabled, physically recovering the contents of the DIMMs does not automatically reveal the original plaintext data, because what is stored in external memory is encrypted.
+
+That means:
+
+> **cold-boot attacks are still a real physical phenomenon, but whether they are useful against a modern system depends heavily on the hardware, firmware, memory-encryption features, and system configuration.**
+
+So no, freezing RAM is not some ancient computer myth.
+
+But also no, putting every modern RAM stick in a freezer does not magically dump everyone's encryption keys.
+
+Tragic.
 
 ---
 
@@ -187,6 +215,10 @@ Bauer, Gruhn, and Freiling showed in 2016 that Intel DDR3 scrambling could be re
 
 [^nist]: National Institute of Standards and Technology, “[Advanced Encryption Standard (AES), FIPS 197](https://csrc.nist.gov/pubs/fips/197/final),” updated 2023.
 
+[^intel-tme]: Intel, “[Intel Total Memory Encryption](https://www.intel.com/content/dam/www/central-libraries/us/en/documents/white-paper-intel-tme.pdf),” white paper.
+
+[^amd-sme]: AMD, “[Enhance Your Cloud Security with AMD EPYC Hardware Memory Encryption](https://www.amd.com/content/dam/amd/en/documents/epyc-business-docs/white-papers/cloud-security-epyc-hardware-memory-encryption.pdf),” white paper.
+
 ### Editorial note
 
-The physical explanation in this article is grounded primarily in Halderman et al.'s experimental characterization of DRAM remanence. Gupta and Nisbet provide the applied forensic comparison of cooling methods. The DDR3- and DDR4-era papers show why memory scrambling should not be confused with cryptographic memory protection.
+The physical explanation in this article is grounded primarily in Halderman et al.'s experimental characterization of DRAM remanence. Gupta and Nisbet provide the applied forensic comparison of cooling methods. The DDR3- and DDR4-era papers show why memory scrambling should not be confused with cryptographic memory protection. Modern hardware memory-encryption technologies further change the practical threat model by encrypting data stored in external memory.
