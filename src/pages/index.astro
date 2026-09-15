@@ -4,6 +4,7 @@ import EntryRow from '../components/EntryRow.astro';
 import { publishedEntries } from '../lib/content';
 const entries = await publishedEntries();
 const items = entries
+  .filter(({ data }) => data.showInIndex)
   .map(({ id, data }) => ({ ...data, href: `/entries/${id}/` }))
   .sort((a, b) => b.published.localeCompare(a.published) || a.title.localeCompare(b.title));
 ---

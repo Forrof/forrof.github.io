@@ -19,6 +19,7 @@ const shared = {
 
 export const entrySchema = z.object({
     ...shared,
+    showInIndex: z.boolean().default(true),
     type: z.enum(['entry', 'writeup']).default('entry'),
     platform: z.string().optional(),
     category: z.string().optional(),

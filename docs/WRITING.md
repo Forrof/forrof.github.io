@@ -16,6 +16,8 @@ Images live under `public/` but URLs omit that directory:
 
 Keep sensitive material out of screenshots. Existing writeup images and raw Markdown keep their original `/writeups/…` addresses.
 
+Entries appear on the homepage by default. Set `showInIndex: false` to remove an entry from that list without deleting its article, images, or stable URL. Restore it by setting the flag to `true` or removing the field. This is only a listing preference: the article remains public and stays in the sitemap. Free Boost and geometryDash currently use this setting, leaving the Entries page clear for new posts.
+
 ## Drafts and privacy
 
 Set `draft: true` to exclude a record from all generated pages and indexes, including the local site. Set it to `false` when ready to preview the finished page locally. Then run `npm run validate` before publishing.

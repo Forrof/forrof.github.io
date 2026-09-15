@@ -2,6 +2,7 @@
 title: geometryDash
 summary: Decoding a Geometry Dash save file and following the trail to GDBrowser.
 published: "2025-11"
+showInIndex: false
 type: writeup
 platform: CTF
 category: Forensics

@@ -35,6 +35,15 @@ draft: true
 ---
 DRAFT_FIXTURE_MUST_NEVER_RENDER
 `);
+  for (const [id, date] of [['test-older-entry', '2026-09-14'], ['test-newer-entry', '2026-09-15']]) {
+    writeFileSync(join(scratch, `src/content/entries/${id}.md`), `---
+title: ${id}
+summary: Synthetic entry publication test.
+published: "${date}"
+---
+PUBLIC_ENTRY_FIXTURE_BODY
+`);
+  }
   const advisory = `---
 title: Synthetic advisory fixture
 summary: Isolated publication test, not a real CVE.
@@ -81,8 +90,12 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   function assertEntriesOnly() {
     const document = parseHTML(readFileSync(join(output, 'index.html'), 'utf8')).document;
     const links = [...document.querySelectorAll('main .ff-entry h2 a')];
-    assert.ok(links.length > 0, 'Existing entries remain visible');
+    assert.deepEqual(links.map((link) => link.textContent), ['test-newer-entry', 'test-older-entry'], 'New entries appear by default, newest first');
     for (const link of links) assert.ok(link.getAttribute('href').startsWith('/entries/'));
+    for (const id of ['free-boost', 'geometrydash']) {
+      assert.equal(document.querySelector(`a[href="/entries/${id}/"]`), null, `${id}: removed from index`);
+      assert.ok(existsSync(join(output, `entries/${id}/index.html`)), `${id}: direct URL preserved`);
+    }
     assert.equal(document.querySelector('main a[href^="/cves/"], main .ff-status'), null);
     assert.doesNotMatch(document.querySelector('main').textContent, /Synthetic advisory fixture|Private draft fixture|DRAFT_FIXTURE_MUST_NEVER_RENDER/);
   }

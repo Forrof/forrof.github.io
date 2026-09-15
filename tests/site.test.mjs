@@ -26,11 +26,6 @@ test('all public routes render complete HTML without relying on JavaScript', () 
     const ids = [...doc.querySelectorAll('[id]')].map((element) => element.id);
     assert.equal(new Set(ids).size, ids.length, `${file}: unique IDs`);
   }
-  const titles = [...homepage.querySelectorAll('.ff-entry h2')].map((heading) => heading.textContent);
-  assert.ok(titles.includes('geometryDash') && titles.includes('Free Boost'));
-  assert.ok(titles.indexOf('geometryDash') < titles.indexOf('Free Boost'));
-  const dates = [...homepage.querySelectorAll('.ff-entry time')].map((time) => time.getAttribute('datetime'));
-  assert.deepEqual(dates, [...dates].sort().reverse());
   const cves = documents.get('cves/index.html');
   if (!cves.querySelector('.ff-entry')) assert.match(cves.querySelector('main').textContent, /Advisories will appear here/);
   const projects = documents.get('projects/index.html');
@@ -38,10 +33,13 @@ test('all public routes render complete HTML without relying on JavaScript', () 
   assert.equal(documents.get('404.html').querySelector('meta[name="robots"]').content, 'noindex');
 });
 
-test('the entries page lists only entries and keeps advisories in the CVE archive', () => {
-  const links = [...homepage.querySelectorAll('.ff-entry h2 a')];
-  assert.ok(links.length > 0);
-  for (const link of links) assert.ok(link.getAttribute('href').startsWith('/entries/'));
+test('the cleared entries page preserves article URLs, artwork, and the separate CVE archive', () => {
+  assert.equal(homepage.querySelectorAll('.ff-entry').length, 0);
+  assert.equal(homepage.querySelector('main .ff-empty').textContent, 'Entries will appear here.');
+  for (const id of ['free-boost', 'geometrydash']) {
+    assert.equal(homepage.querySelector(`a[href="/entries/${id}/"]`), null);
+    assert.ok(documents.get(`entries/${id}/index.html`).querySelector('.ff-prose'));
+  }
   assert.equal(homepage.querySelector('main a[href^="/cves/"], main .ff-status'), null);
   assert.ok(homepage.querySelector('nav a[href="/cves/"]'));
   assert.ok(homepage.querySelector('.ff-disclosure-counter'));

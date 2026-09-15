@@ -2,6 +2,7 @@
 title: Free Boost
 summary: Following a packet capture through a fake Discord Nitro offer to a PowerShell token stealer.
 published: "2024-11"
+showInIndex: false
 type: writeup
 platform: HackTheBox
 category: Forensics

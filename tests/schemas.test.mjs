@@ -8,10 +8,15 @@ test('dates preserve known precision and reject impossible dates', () => {
   for (const date of ['2025-02-29', '2026-13', '2026-04-31', 'yesterday', '2026-9-1']) assert.equal(dateSchema.safeParse(date).success, false);
 });
 
-test('entry metadata is validated and draft status is explicit', () => {
+test('entry metadata validates draft status and independent index visibility', () => {
   const base = { title: 'Test only', summary: 'Fixture', published: '2026-09', tags: [] };
   assert.equal(entrySchema.parse(base).draft, false);
   assert.equal(entrySchema.parse({ ...base, draft: true }).draft, true);
+  assert.equal(entrySchema.parse(base).showInIndex, true);
+  const hidden = entrySchema.parse({ ...base, showInIndex: false });
+  assert.equal(hidden.showInIndex, false);
+  assert.equal(hidden.draft, false);
+  assert.equal(entrySchema.safeParse({ ...base, showInIndex: 'false' }).success, false);
   assert.equal(entrySchema.safeParse({ ...base, published: undefined }).success, false);
   assert.equal(entrySchema.safeParse({ ...base, type: 'unrecognized' }).success, false);
 });
