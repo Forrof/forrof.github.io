@@ -207,7 +207,7 @@ test('published output contains no source templates or private configuration', (
   assert.doesNotMatch(styles, /fonts\.googleapis|fonts\.gstatic/);
 });
 
-test('the seven verified public advisories have credited details and visible CVE status', () => {
+test('the eight verified public advisories have credited details and visible CVE status', () => {
   const verified = [
     ['goshs-labs/goshs', 'GHSA-2q29-798w-6qcp'],
     ['patriksimek/vm2', 'GHSA-98xx-8mx4-x7cm'],
@@ -216,6 +216,7 @@ test('the seven verified public advisories have credited details and visible CVE
     ['patriksimek/vm2', 'GHSA-6w8r-xxw2-g3hx'],
     ['doobidoo/mcp-memory-service', 'GHSA-5p27-64mv-pr73'],
     ['flytohub/flyto-core', 'GHSA-wmwj-g59x-c8px'],
+    ['seaweedfs/seaweedfs', 'GHSA-3j72-rgq3-c2j7'],
   ];
   const sitemap = readFileSync(new URL('sitemap-0.xml', dist), 'utf8');
   for (const [repository, identifier] of verified) {
@@ -261,6 +262,44 @@ test('the seven verified public advisories have credited details and visible CVE
   assert.ok(oauth.querySelector('#precondition-and-what-it-means-for-severity'));
 });
 
+test('NIST assignments map to the existing vm2 URLs and update all disclosure counters', () => {
+  // Each NVD record references this exact public repository advisory (verified 2026-09-20).
+  const assignments = [
+    ['CVE-2026-92938', 'ghsa-6w8r-xxw2-g3hx'],
+    ['CVE-2026-92939', 'ghsa-46pr-c5wc-xffx'],
+    ['CVE-2026-92940', 'ghsa-h85j-hv3c-qfgq'],
+    ['CVE-2026-92941', 'ghsa-98xx-8mx4-x7cm'],
+  ];
+  const archive = documents.get('cves/index.html');
+  assert.equal(archive.querySelectorAll('.ff-entry').length, 8);
+  assert.equal(archive.querySelectorAll('.ff-cve-id').length, assignments.length);
+  for (const [cve, id] of assignments) {
+    const detail = documents.get(`cves/${id}/index.html`);
+    const source = `https://nvd.nist.gov/vuln/detail/${cve}`;
+    assert.equal(detail.querySelector(`.ff-facts a[href="${source}"]`).textContent, `${cve} ↗`);
+    assert.ok(detail.querySelector(`.ff-reference-list a[href="${source}"]`));
+    assert.ok(detail.querySelector('.ff-facts time[datetime="2026-09-20"]'));
+    assert.match(detail.querySelector('.ff-facts').textContent, /Confirmed, published, CVE assigned/);
+    const row = archive.querySelector(`a[href="/cves/${id}/"]`).closest('.ff-entry');
+    assert.equal(row.querySelector('.ff-cve-id').getAttribute('href'), source);
+    assert.equal(row.querySelector('.ff-cve-id').textContent, `${cve} ↗`);
+    assert.equal(row.querySelector('.ff-status').textContent, 'Status: Confirmed, published, CVE assigned');
+    assert.doesNotMatch(row.querySelector('h2').textContent, /CVE-|GHSA-/);
+  }
+  const seaweed = documents.get('cves/ghsa-3j72-rgq3-c2j7/index.html');
+  assert.match(seaweed.querySelector('.ff-facts').textContent, /Confirmed, published, waiting for CVE/);
+  assert.match(seaweed.querySelector('.ff-facts').textContent, /4\.24 through 4\.42/);
+  assert.match(seaweed.querySelector('.ff-facts').textContent, /Not specified in the published advisory/);
+  assert.match(seaweed.querySelector('.ff-facts').textContent, /Critical · 9\.3/);
+  assert.equal(seaweed.querySelector('.ff-byline time').getAttribute('datetime'), '2026-09-18');
+  for (const route of ['index.html', 'cves/index.html', 'projects/index.html']) {
+    const counter = documents.get(route).querySelector('.ff-disclosure-counter');
+    for (const [key, expected] of Object.entries({ assigned: '04', pending: '04', published: '08' })) {
+      assert.equal(counter.querySelector(`[data-count="${key}"]`).textContent, expected, `${route}: ${key}`);
+    }
+  }
+});
+
 test('source explanation and remediation snippets render intact as static code', () => {
   for (const file of readdirSync(new URL('src/content/cves/', root)).filter((file) => file.endsWith('.md'))) {
     const source = readFileSync(new URL(`src/content/cves/${file}`, root), 'utf8');
@@ -278,9 +317,13 @@ test('source explanation and remediation snippets render intact as static code',
 
 
 test('approved verbatim Description excerpts retain their verified wording', () => {
-  // Checked against the public repository advisory API on 2026-09-15.
+  // Original seven checked against the public API on 2026-09-15; SeaweedFS on 2026-09-20.
   // These snapshots cover selected safe passages, not the omitted full descriptions.
   const verified = [
+    [
+      "ghsa-3j72-rgq3-c2j7",
+      "e7b3bb30a3341a0f439878cbebbb9bcdb8288b595abd33c72f3009ddd66fa07c"
+    ],
     [
       "ghsa-2q29-798w-6qcp",
       "2e87dbfddaabbe11d3137619d195ef1bef491132e8f41aab193b943f0d1ae20d"

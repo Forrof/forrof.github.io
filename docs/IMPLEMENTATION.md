@@ -1,4 +1,4 @@
-# Implementation handoff — updated 15 September 2026
+# Implementation handoff — updated 20 September 2026
 
 Implemented the approved design on `codex/redesign`. Public release to `forrof.github.io` was authorized on 14 September 2026. The **Validate and publish** workflow records deployment status for the release commit.
 
@@ -19,12 +19,16 @@ Implemented the approved design on `codex/redesign`. Public release to `forrof.g
 
 `npm run validate` checks types, builds the site, and runs the test suite. Coverage includes the real animation controller, reduced motion, saved pause, internal links/assets/anchors, original image bytes and article code, schemas, and public output boundaries. A separate temporary build verifies draft exclusion and complete advisories using clearly synthetic fixtures, including a GHSA transitioning from unassigned to an assigned CVE without changing its URL. Caches are project-local, release builds force a fresh content sync, and a regression check confirms that temporary builds cannot alter the production content cache. Removing the last advisory is also checked across successive builds.
 
-The site now includes seven public GHSA records, alongside three article pages, bringing the total to fourteen generated HTML pages. On 15 September 2026, all seven repository advisory API endpoints returned HTTP 200 without authentication, with published state, reporter credit for forrof, and no assigned CVE. Each record uses the published advisory's title and includes a verification date, linked source, reported affected/fixed versions, source-qualified severity, and selected original Description passages. Every retained passage was compared with the public source before publication, and offline snapshot checks protect the approved wording. The conflicting versions and severity assessments in the goshs advisory are explicitly distinguished. OAuth default-state limitations and documented workarounds are retained. No private advisories or exploit reproductions were added.
+The site now includes eight public GHSA records, alongside three article pages, bringing the total to fifteen generated HTML pages. On 20 September 2026, the public SeaweedFS advisory GHSA-3j72-rgq3-c2j7 was verified without authentication, with published state and reporter credit for forrof. It has no assigned CVE or specified patched release. Its selected non-operational passages were compared verbatim with the public Description; exploit and reproduction details remain omitted.
+
+NIST NVD's public API confirmed four vm2 assignments through explicit repository-advisory references: CVE-2026-92938 → GHSA-6w8r-xxw2-g3hx, CVE-2026-92939 → GHSA-46pr-c5wc-xffx, CVE-2026-92940 → GHSA-h85j-hv3c-qfgq, and CVE-2026-92941 → GHSA-98xx-8mx4-x7cm. All four NVD records were published on 17 September 2026. The GitHub repository advisory CVE fields were still empty on verification, so NVD references establish these assignments. NVD's deferred enrichment status is separate from CVE assignment. The site now counts four assigned, four pending, and eight published disclosures automatically.
+
+Each record retains its descriptive title and stable GHSA URL, linked credit, reported affected/fixed versions, and source-qualified severity. CVE identifiers link to NVD from both archive rows and detail facts. Existing Description passages and their snapshot checks remain unchanged. The conflicting versions and severity assessments in the goshs advisory are explicitly distinguished; OAuth limitations and workarounds remain intact. No private advisories or exploit reproductions were added.
 
 Browser-based responsive/keyboard QA was not performed in this implementation turn. The inline design was reviewed previously; the production page uses its responsive layout rules. Visual review of the actual build is still useful before publication.
 
 ## Publication
 
-Publication uses GitHub Actions from `main`, preserving the legacy `gh-pages` branch for rollback. The README documents future publication and rollback. Public GHSAs without CVEs display “Confirmed, published, waiting for CVE”; later assignments can be added without changing their descriptive titles or public URLs. Identifiers remain in the detail facts. Status is verified at editing time, not updated automatically.
+Publication uses GitHub Actions from `main`, preserving the legacy `gh-pages` branch for rollback. The README documents future publication and rollback. Public GHSAs without CVEs display “Confirmed, published, waiting for CVE”; later assignments can be added without changing their descriptive titles or public URLs. Assigned CVEs appear as NVD links in archive rows and detail facts. Status is verified at editing time, not updated automatically.
 
 The old React application, modal renderer, shader background, and Tailwind/CRA configuration were removed from the active branch. They remain recoverable from Git history; original writeup assets were not removed.

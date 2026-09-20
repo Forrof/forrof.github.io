@@ -19,7 +19,7 @@ const cve = assignedCve(data);
     <div class="ff-byline ff-meta"><span>forrof</span><time datetime={data.published}>{fullDate(data.published)}</time><span>[advisory]</span>{data.updated && <span>updated <time datetime={data.updated}>{fullDate(data.updated)}</time></span>}</div>
     <dl class="ff-facts">
       <dt>Status</dt><dd>{advisoryStatus(data)}</dd>
-      {cve && <><dt>CVE</dt><dd>{cve}</dd></>}
+      {cve && <><dt>CVE</dt><dd><a href={`https://nvd.nist.gov/vuln/detail/${cve}`}>{cve} ↗</a></dd></>}
       {data.identifier.startsWith('GHSA-') && <><dt>Advisory</dt><dd><a href={data.creditSource}>{data.identifier} ↗</a></dd></>}
       <dt>Product</dt><dd>{data.product}</dd>
       <dt>Affected</dt><dd>{data.affected}</dd>

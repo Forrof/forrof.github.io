@@ -2,9 +2,10 @@
 title: vm2 3.11.6 exposes host HTTPS credentials and TLS traffic through globalAgent
 summary: Access to a shared HTTPS agent can expose host credentials and connection data across the sandbox boundary.
 published: "2026-08-24"
-updated: "2026-09-15"
+updated: "2026-09-20"
 identifier: GHSA-h85j-hv3c-qfgq
-verified: "2026-09-15"
+cve: CVE-2026-92940
+verified: "2026-09-20"
 product: vm2
 creditSource: https://github.com/patriksimek/vm2/security/advisories/GHSA-h85j-hv3c-qfgq
 affected: ">= 3.11.3, <= 3.11.6"
@@ -14,6 +15,8 @@ severity:
   system: CVSS v3.1
   source: https://github.com/patriksimek/vm2/security/advisories/GHSA-h85j-hv3c-qfgq
 references:
+  - label: NIST NVD CVE-2026-92940 record
+    url: https://nvd.nist.gov/vuln/detail/CVE-2026-92940
   - label: Published vm2 advisory and reporter credit
     url: https://github.com/patriksimek/vm2/security/advisories/GHSA-h85j-hv3c-qfgq
   - label: vm2 configuration documentation

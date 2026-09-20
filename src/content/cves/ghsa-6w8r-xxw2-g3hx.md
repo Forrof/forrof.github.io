@@ -2,9 +2,10 @@
 title: vm2 3.11.6 allows a sandboxed plugin to execute native code through node:sqlite
 summary: The SQLite integration exposes native extension loading to sandboxed plugins with builtin access.
 published: "2026-08-24"
-updated: "2026-09-15"
+updated: "2026-09-20"
 identifier: GHSA-6w8r-xxw2-g3hx
-verified: "2026-09-15"
+cve: CVE-2026-92938
+verified: "2026-09-20"
 product: vm2
 creditSource: https://github.com/patriksimek/vm2/security/advisories/GHSA-6w8r-xxw2-g3hx
 affected: ">= 3.11.3, <= 3.11.6"
@@ -14,6 +15,8 @@ severity:
   system: CVSS v3.1
   source: https://github.com/patriksimek/vm2/security/advisories/GHSA-6w8r-xxw2-g3hx
 references:
+  - label: NIST NVD CVE-2026-92938 record
+    url: https://nvd.nist.gov/vuln/detail/CVE-2026-92938
   - label: Published vm2 advisory and reporter credit
     url: https://github.com/patriksimek/vm2/security/advisories/GHSA-6w8r-xxw2-g3hx
   - label: vm2 configuration documentation

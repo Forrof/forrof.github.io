@@ -2,9 +2,10 @@
 title: vm2 3.11.6 crypto builtin loads attacker native code through setEngine
 summary: The crypto integration exposes native-code loading capabilities beyond the intended sandbox permissions.
 published: "2026-08-24"
-updated: "2026-09-15"
+updated: "2026-09-20"
 identifier: GHSA-46pr-c5wc-xffx
-verified: "2026-09-15"
+cve: CVE-2026-92939
+verified: "2026-09-20"
 product: vm2
 creditSource: https://github.com/patriksimek/vm2/security/advisories/GHSA-46pr-c5wc-xffx
 affected: ">= 3.11.3, <= 3.11.6"
@@ -14,6 +15,8 @@ severity:
   system: CVSS v3.1
   source: https://github.com/patriksimek/vm2/security/advisories/GHSA-46pr-c5wc-xffx
 references:
+  - label: NIST NVD CVE-2026-92939 record
+    url: https://nvd.nist.gov/vuln/detail/CVE-2026-92939
   - label: Published vm2 advisory and reporter credit
     url: https://github.com/patriksimek/vm2/security/advisories/GHSA-46pr-c5wc-xffx
   - label: vm2 configuration documentation
