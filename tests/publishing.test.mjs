@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
+import { constants, cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -19,7 +19,11 @@ test('a clean build excludes drafts and renders a complete credited advisory fro
   const scratch = mkdtempSync(join(tmpdir(), 'forrof-publishing-test-'));
   context.after(() => rmSync(scratch, { recursive: true, force: true }));
   for (const path of ['src', 'public', 'astro.config.mjs', 'package.json', 'tsconfig.json']) cpSync(join(repository, path), join(scratch, path), { recursive: true });
-  symlinkSync(join(repository, 'node_modules'), join(scratch, 'node_modules'), 'dir');
+  // Keep Astro and its virtual stylesheet modules inside the fixture root.
+  // An external node_modules symlink breaks ClientRouter CSS resolution on Linux.
+  cpSync(join(repository, 'node_modules'), join(scratch, 'node_modules'), {
+    recursive: true, verbatimSymlinks: true, mode: constants.COPYFILE_FICLONE,
+  });
 
   // Exercise the configured radio without publishing sample music to the real site.
   const radioTracks = [
@@ -90,8 +94,8 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   const pending = advisory.replace('CVE-2099-99999', 'GHSA-2345-6789-cfgh').replace('identifier:', 'verified: "2026-09-15"\nidentifier:');
   writeFileSync(join(scratch, 'src/content/cves/test-pending.md'), pending);
   writeFileSync(join(scratch, 'src/content/cves/test-pending-draft.md'), pending.replace('GHSA-2345-6789-cfgh', 'GHSA-2345-6789-cfgj').replace('title:', 'draft: true\ntitle:'));
-  const astroPackage = JSON.parse(readFileSync(join(repository, 'node_modules/astro/package.json'), 'utf8'));
-  const build = spawnSync(process.execPath, [join(repository, 'node_modules/astro', astroPackage.bin.astro), 'build'], {
+  const astroPackage = JSON.parse(readFileSync(join(scratch, 'node_modules/astro/package.json'), 'utf8'));
+  const build = spawnSync(process.execPath, [join(scratch, 'node_modules/astro', astroPackage.bin.astro), 'build'], {
     cwd: scratch, encoding: 'utf8', timeout: 60_000, env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' },
   });
   assert.equal(build.status, 0, build.stdout + build.stderr);
