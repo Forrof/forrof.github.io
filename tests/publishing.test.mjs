@@ -23,7 +23,7 @@ test('a clean build excludes drafts and renders a complete credited advisory fro
 
   // Exercise the configured radio without publishing sample music to the real site.
   const radioTracks = [
-    { title: 'First <test> track', artist: 'Fixture artist', src: '/audio/test-first.wav' },
+    { title: 'First <test> track', artist: 'Fixture artist', credit: 'Remix by <test> artist', artistUrl: 'https://example.com/artist', src: '/audio/test-first.wav' },
     { title: 'Second test track', artist: 'Fixture artist', src: '/audio/test-second.wav' },
   ];
   writeFileSync(join(scratch, 'src/data/radio.json'), JSON.stringify(radioTracks));
@@ -104,6 +104,9 @@ PUBLIC_ADVISORY_FIXTURE_BODY
     assert.equal(radio.hidden, true, 'Controls require enhancement before becoming interactive');
     assert.equal(radio.querySelector('[data-radio-title]').textContent, radioTracks[0].title);
     assert.equal(radio.querySelector('[data-radio-title] test'), null, 'Track text is escaped');
+    assert.equal(radio.querySelector('[data-radio-credit]').textContent, radioTracks[0].credit);
+    assert.equal(radio.querySelector('[data-radio-credit] test'), null, 'Credit text is escaped');
+    assert.equal(radio.querySelector('[data-radio-artist-link]').getAttribute('href'), radioTracks[0].artistUrl);
     const audio = radio.querySelector('audio');
     assert.equal(audio.hasAttribute('src'), false);
     assert.equal(audio.hasAttribute('autoplay'), false);

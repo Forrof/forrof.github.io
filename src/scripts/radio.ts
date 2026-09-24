@@ -11,6 +11,8 @@ export function initRadio(root: HTMLElement) {
   const trackButton = root.querySelector<HTMLButtonElement>('[data-radio-track]');
   const title = root.querySelector<HTMLElement>('[data-radio-title]');
   const artist = root.querySelector<HTMLElement>('[data-radio-artist]');
+  const credit = root.querySelector<HTMLElement>('[data-radio-credit]');
+  const artistLink = root.querySelector<HTMLAnchorElement>('[data-radio-artist-link]');
   const seek = root.querySelector<HTMLInputElement>('[data-radio-seek]');
   const volume = root.querySelector<HTMLInputElement>('[data-radio-volume]');
   const time = root.querySelector<HTMLElement>('[data-radio-time]');
@@ -73,6 +75,13 @@ export function initRadio(root: HTMLElement) {
     audio!.load();
     title!.textContent = choices[index].dataset.title!;
     artist!.textContent = choices[index].dataset.artist!;
+    if (credit) credit.textContent = choices[index].dataset.credit || `Music by ${artist!.textContent}`;
+    if (artistLink) {
+      const url = choices[index].dataset.artistUrl;
+      if (url) artistLink.setAttribute('href', url);
+      else artistLink.removeAttribute('href');
+      artistLink.hidden = !url;
+    }
     trackButton!.setAttribute('aria-label', `Choose track; selected ${title!.textContent} by ${artist!.textContent}`);
     choices.forEach((choice, position) => {
       if (position === index) choice.setAttribute('aria-current', 'true');

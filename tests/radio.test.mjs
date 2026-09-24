@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseHTML } from 'linkedom';
@@ -12,7 +12,8 @@ function harness() {
     <button data-radio-toggle>[play]</button>
     <button data-radio-track aria-expanded="false"><span data-radio-title>First</span><span data-radio-artist>Artist</span></button>
     <input data-radio-seek value="0" disabled><input data-radio-volume value="25"><span data-radio-time></span>
-    <ol data-radio-list hidden><li><button data-radio-choice data-src="/audio/first.mp3" data-title="First" data-artist="Artist" aria-current="true"></button></li><li><button data-radio-choice data-src="/audio/second.mp3" data-title="Second" data-artist="Another"></button></li></ol>
+    <ol data-radio-list hidden><li><button data-radio-choice data-src="/audio/first.mp3" data-title="First" data-artist="Artist" data-credit="Remix by Artist" data-artist-url="https://example.com/artist" aria-current="true"></button></li><li><button data-radio-choice data-src="/audio/second.mp3" data-title="Second" data-artist="Another"></button></li></ol>
+    <p><span data-radio-credit>Remix by Artist</span><a data-radio-artist-link href="https://example.com/artist">artist</a></p>
     <p data-radio-status hidden></p><audio data-radio-audio preload="none"></audio>
   </section>`);
   globalThis.window = window;
@@ -52,6 +53,10 @@ test('radio stays silent and fetch-free until Play, including track selection', 
   assert.equal(page.get('list').hidden, false);
   page.choices[1].click();
   assert.equal(page.get('title').textContent, 'Second');
+  assert.equal(page.get('artist').textContent, 'Another');
+  assert.equal(page.get('credit').textContent, 'Music by Another');
+  assert.equal(page.get('artist-link').hidden, true);
+  assert.equal(page.get('artist-link').hasAttribute('href'), false);
   assert.equal(page.get('list').hidden, true);
   assert.equal(page.audio.getAttribute('src'), null);
   assert.equal(page.plays(), 0);
@@ -63,6 +68,9 @@ test('radio stays silent and fetch-free until Play, including track selection', 
   assert.equal(page.audio.paused, true);
   assert.equal(page.root.dataset.state, 'paused');
   page.choices[0].click();
+  assert.equal(page.get('credit').textContent, 'Remix by Artist');
+  assert.equal(page.get('artist-link').hidden, false);
+  assert.equal(page.get('artist-link').getAttribute('href'), 'https://example.com/artist');
   assert.equal(page.plays(), 1);
   assert.equal(page.audio.getAttribute('src'), null);
   page.cleanup();
@@ -164,18 +172,30 @@ test('playlist validation requires unique local audio files and complete metadat
   const track = { title: ' Track ', artist: ' Artist ', src: '/audio/track.mp3' };
   assert.deepEqual(loadRadioTracks([], scratch), []);
   assert.equal(loadRadioTracks([track], scratch)[0].title, 'Track');
-  for (const src of ['https://example.com/song.mp3', '//example.com/song.mp3', '/audio/../track.mp3', '/audio/%2e%2e/track.mp3', '/audio/song.html', '/audio/missing.mp3']) assert.throws(() => loadRadioTracks([{ ...track, src }], scratch));
+  for (const src of ['https://example.com/song.mp3', '//example.com/song.mp3', '/audio/../track.mp3', '/audio/%2e%2e/track.mp3', '/audio/song.html', '/audio/missing.mp3', '/audio/%2Ftrack.mp3', '/audio/%5Ctrack.mp3', '/audio/%00track.mp3', '/audio/track.mp3?download=1', '/audio/track.mp3#fragment', '/audio/%ZZ.mp3', '/audio/.hidden.mp3', '/audio/%74rack.mp3']) assert.throws(() => loadRadioTracks([{ ...track, src }], scratch));
+  const originalName = "L'amour (remix).mp3";
+  writeFileSync(join(scratch, 'audio', originalName), Buffer.from('test-only audio fixture'));
+  assert.equal(loadRadioTracks([{ ...track, src: `/audio/${encodeURIComponent(originalName)}`, credit: 'Remix by Artist', artistUrl: 'https://example.com/artist' }], scratch)[0].credit, 'Remix by Artist');
+  for (const artistUrl of ['javascript:alert(1)', 'http://example.com/artist', '/artist']) assert.throws(() => loadRadioTracks([{ ...track, artistUrl }], scratch));
+  assert.throws(() => loadRadioTracks([{ ...track, credit: '' }], scratch));
   assert.throws(() => loadRadioTracks([{ ...track, artist: '' }], scratch));
   assert.throws(() => loadRadioTracks([track, track], scratch));
   writeFileSync(join(scratch, 'audio/empty.mp3'), '');
   assert.throws(() => loadRadioTracks([{ ...track, src: '/audio/empty.mp3' }], scratch));
 });
 
-test('empty radio is omitted and styling honors motion and small-screen preferences', () => {
+test('configured radio renders credited tracks without autoplay and respects motion preferences', () => {
   const tracks = JSON.parse(readFileSync(new URL('../src/data/radio.json', import.meta.url), 'utf8'));
   for (const route of ['index.html', 'cves/index.html', 'projects/index.html', 'entries/is-freezing-ram-a-thing/index.html']) {
     const document = parseHTML(readFileSync(new URL(`../dist/${route}`, import.meta.url), 'utf8')).document;
     if (!tracks.length) assert.equal(document.querySelector('[data-radio]'), null);
+    else {
+      const radio = document.querySelector('[data-radio]');
+      assert.ok(radio, route);
+      assert.equal(radio.querySelector('[data-radio-artist]').textContent, tracks[0].artist);
+      assert.equal(radio.querySelector('[data-radio-credit]').textContent, tracks[0].credit ?? `Music by ${tracks[0].artist}`);
+      assert.deepEqual([...radio.querySelectorAll('[data-radio-choice]')].map((button) => ({ title: button.dataset.title, artist: button.dataset.artist, src: button.dataset.src })), tracks.map(({ title, artist, src }) => ({ title, artist, src })));
+    }
     for (const audio of document.querySelectorAll('audio')) {
       assert.equal(audio.hasAttribute('autoplay'), false);
       assert.equal(audio.hasAttribute('src'), false);
@@ -188,4 +208,18 @@ test('empty radio is omitted and styling honors motion and small-screen preferen
   assert.match(css, /\[data-motion="off"\] \.ff-radio-meter span\s*\{ animation-play-state: paused/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{ \.site \.ff-radio-meter span \{ animation: none/);
   assert.ok(css.includes('@container (max-width: 24rem)'));
+});
+
+test('the supplied mixtape preserves every audio file and credits its remixer', () => {
+  const tracks = loadRadioTracks();
+  const uploaded = readdirSync(new URL('../public/audio/', import.meta.url)).filter((file) => file.endsWith('.mp3')).sort();
+  assert.equal(tracks.length, 13);
+  assert.deepEqual(tracks.map(({ src }) => decodeURIComponent(src.slice('/audio/'.length))).sort(), uploaded);
+  assert.equal(tracks[0].title, 'Blancanieves x Stand Up');
+  assert.equal(tracks.at(-1).title, 'Domingo x SSX');
+  for (const track of tracks) {
+    assert.equal(track.artist, 'Sevillano');
+    assert.equal(track.credit, 'VHS Mixtape · Remix by Sevillano');
+    assert.deepEqual(readFileSync(new URL(`../dist${track.src}`, import.meta.url)), readFileSync(new URL(`../public${track.src}`, import.meta.url)), track.title);
+  }
 });

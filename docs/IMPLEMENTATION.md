@@ -1,4 +1,4 @@
-# Implementation handoff — updated 20 September 2026
+# Implementation handoff — updated 24 September 2026
 
 Implemented the approved design on `codex/redesign`. Public release to `forrof.github.io` was authorized on 14 September 2026. The **Validate and publish** workflow records deployment status for the release commit.
 
@@ -14,6 +14,7 @@ Implemented the approved design on `codex/redesign`. Public release to `forrof.g
 - Validated content schemas, writing guide/templates, source-qualified CVE fields, and no public editing endpoint.
 - Advisory pages include selected verbatim passages from the public GitHub Description, with linked attribution and an explicit omission notice. Non-operational source explanations and remediation snippets retain their wording; generated summaries and illustrative examples have been removed. Section headings use blue and subheadings violet, with tested text contrast and print colors.
 - GitHub Actions validation and deployment configuration restricted to `main`, with pinned action revisions. Existing `gh-pages` remains the rollback copy.
+- Opt-in radio above the footer, now configured with the 13 supplied Sevillano / VHS Mixtape MP3s in embedded track order. Original filenames and bytes are preserved; encoded local URLs support spaces and punctuation. Artist and remix credits remain visible and follow track selection. Optional verified artist-profile links are supported without loading embeds or external assets. No audio source is set before Play, and navigation never resumes playback automatically.
 
 ## Validation
 

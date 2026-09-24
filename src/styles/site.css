@@ -256,6 +256,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid #9eb9f2; outline-offs
 .site .ff-radio-tracks button { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .25rem 1rem; width: 100%; color: var(--ff-subheading); overflow-wrap: anywhere; }
 .site .ff-radio-tracks button[aria-current="true"] { border-left: 2px solid var(--ff-accent); padding-left: .75rem; }
 .site .ff-radio-status { color: var(--ff-subheading); margin-top: 1rem; }
+.site .ff-radio-credit { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin: .75rem 0 0; color: var(--ff-muted); font-size: .75rem; }
+.site .ff-radio-credit a { color: var(--ff-accent); }
 @keyframes ff-radio-pulse { from { transform: scaleY(.4); } to { transform: scaleY(1); } }
 @media (prefers-reduced-motion: reduce) { .site .ff-radio-meter span { animation: none; } }
 @container (max-width: 42.5rem) {

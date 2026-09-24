@@ -50,17 +50,21 @@ Add one JSON file to `src/content/projects/`, following an existing file. Set `k
 
 ## Radio tracks
 
-Put audio you own or have permission to publish in `public/audio/`. Prefer MP3 for broad playback support. Use simple filenames with letters, numbers, dots, hyphens, or underscores (no spaces).
+Put audio you own or have permission to publish in `public/audio/`. Prefer MP3 for broad playback support. Simple filenames are easiest, but original names with spaces or punctuation are supported: URL-encode the filename in `src` (for example, a space becomes `%20`), not the `/audio/` prefix. Filenames cannot contain slashes, backslashes, control characters, URL suffixes, or begin with a dot.
 
 Then add its title, artist, and public path to `src/data/radio.json`, in playback order:
 
 ```json
 [
-  { "title": "Track title", "artist": "Artist name", "src": "/audio/track-name.mp3" }
+  { "title": "Track title", "artist": "Artist name", "credit": "Album · Remix by Artist name", "artistUrl": "https://example.com/artist", "src": "/audio/track-name.mp3" }
 ]
 ```
 
-The playlist is currently empty (`[]`), so the radio is omitted from every page. Once configured, it appears above the footer on entries, CVEs, and projects. Adding files alone does not list them; add their metadata too. Missing or empty files and invalid paths fail the build. Never put private audio under `public/`: it is publicly accessible even when unlisted.
+The playlist contains the 13 uploaded Sevillano tracks from **VHS Mixtape**, in their embedded track-number order (2–14; track 1 was not supplied). Titles, artist, and album credit come from their ID3 metadata. Original filenames and audio bytes are unchanged. The player credits the artist beneath the selected title and in every queue row, with a separate “VHS Mixtape · Remix by Sevillano” line. No official profile URL has been supplied, so none is guessed.
+
+`credit` and `artistUrl` are optional. Use `credit` to identify the album or remix role accurately, and `artistUrl` only for a verified HTTPS artist profile. Without custom credit, the player shows “Music by [artist]”. Credits update with the selected track. Attribution is not a substitute for permission to publish the audio.
+
+The radio appears above the footer on entries, CVEs, and projects; an empty playlist (`[]`) omits it. Adding files alone does not list them; add their metadata too. Missing or empty files and invalid paths fail the build. Never put private audio under `public/`: it is publicly accessible even when unlisted.
 
 The custom controls provide play/pause, seeking, volume, and a track list opened by clicking the title. Audio has no source until the visitor presses Play: no autoplay, background fetch, external embeds, or saved playback state. After that opt-in, playback advances through the queue and stops at the last track. Selecting another track while paused does not start it. Ordinary page navigation stops playback; returning to a page never resumes it automatically. Decorative bars move only during playback and respect the site's motion setting and reduced-motion preference.
 

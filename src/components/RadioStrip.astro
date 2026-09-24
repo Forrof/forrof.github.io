@@ -17,8 +17,9 @@ const first = tracks[0];
     <label class="ff-radio-volume">vol<input data-radio-volume type="range" min="0" max="100" step="1" value="25" aria-label="Radio volume" aria-valuetext="25%" /></label>
   </div>
   <ol class="ff-radio-tracks" id="radio-tracks" data-radio-list hidden>
-    {tracks.map((track, index) => <li><button type="button" data-radio-choice data-src={track.src} data-title={track.title} data-artist={track.artist} aria-current={index === 0 ? 'true' : undefined}><span>{track.title}</span><span class="ff-radio-artist">{track.artist}</span></button></li>)}
+    {tracks.map((track, index) => <li><button type="button" data-radio-choice data-src={track.src} data-title={track.title} data-artist={track.artist} data-credit={track.credit} data-artist-url={track.artistUrl} aria-current={index === 0 ? 'true' : undefined}><span>{track.title}</span><span class="ff-radio-artist">{track.artist}</span></button></li>)}
   </ol>
+  <p class="ff-radio-credit"><span data-radio-credit>{first.credit ?? `Music by ${first.artist}`}</span><a data-radio-artist-link href={first.artistUrl} hidden={!first.artistUrl} target="_blank" rel="noopener noreferrer">artist ↗</a></p>
   <p class="ff-radio-status" data-radio-status role="status" aria-live="polite" hidden></p>
   <audio data-radio-audio preload="none" hidden></audio>
 </section>}
