@@ -3,7 +3,7 @@ import { loadRadioTracks } from '../lib/radio';
 const tracks = loadRadioTracks();
 const first = tracks[0];
 ---
-{first && <section class="ff-radio" data-radio data-state="idle" aria-label="forrof radio" hidden>
+{first && <section class="ff-radio" data-radio data-state="idle" aria-label="forrof radio" transition:persist="forrof-radio" hidden>
   <div class="ff-radio-bar">
     <span class="ff-radio-brand">forrof <span>/ radio</span><span class="ff-radio-meter" aria-hidden="true"><span>▂</span><span>▆</span><span>▄</span><span>█</span><span>▃</span></span></span>
     <button class="ff-radio-toggle" data-radio-toggle type="button" aria-label="Play radio">[play]</button>

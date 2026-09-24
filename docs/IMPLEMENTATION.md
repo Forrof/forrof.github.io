@@ -14,7 +14,7 @@ Implemented the approved design on `codex/redesign`. Public release to `forrof.g
 - Validated content schemas, writing guide/templates, source-qualified CVE fields, and no public editing endpoint.
 - Advisory pages include selected verbatim passages from the public GitHub Description, with linked attribution and an explicit omission notice. Non-operational source explanations and remediation snippets retain their wording; generated summaries and illustrative examples have been removed. Section headings use blue and subheadings violet, with tested text contrast and print colors.
 - GitHub Actions validation and deployment configuration restricted to `main`, with pinned action revisions. Existing `gh-pages` remains the rollback copy.
-- Opt-in radio above the footer, now configured with the 13 supplied Sevillano / VHS Mixtape MP3s in embedded track order. Original filenames and bytes are preserved; encoded local URLs support spaces and punctuation. Artist and remix credits remain visible and follow track selection. Optional verified artist-profile links are supported without loading embeds or external assets. No audio source is set before Play, and navigation never resumes playback automatically.
+- Opt-in radio above the footer, now configured with the 13 supplied Sevillano / VHS Mixtape MP3s in embedded track order. Original filenames and bytes are preserved; encoded local URLs support spaces and punctuation. Artist and remix credits remain visible and follow track selection. Optional verified artist-profile links are supported without loading embeds or external assets. No audio source is set before Play. Astro's ClientRouter keeps the whole radio mounted across internal navigation with `transition:persist`, retaining playback, position, volume, and queue state. Page artwork is cleaned up and initialized on navigation without reinitializing the radio. A full document reload or exit stops playback and never auto-resumes.
 
 ## Validation
 
@@ -26,7 +26,7 @@ NIST NVD's public API confirmed four vm2 assignments through explicit repository
 
 Each record retains its descriptive title and stable GHSA URL, linked credit, reported affected/fixed versions, and source-qualified severity. CVE identifiers link to NVD from both archive rows and detail facts. Existing Description passages and their snapshot checks remain unchanged. The conflicting versions and severity assessments in the goshs advisory are explicitly distinguished; OAuth limitations and workarounds remain intact. No private advisories or exploit reproductions were added.
 
-Browser-based responsive/keyboard QA was not performed in this implementation turn. The inline design was reviewed previously; the production page uses its responsive layout rules. Visual review of the actual build is still useful before publication.
+The persistent radio was verified in the local browser across entries, CVEs, projects, an article, and Back/Forward navigation. Playback time kept advancing without resetting, volume stayed unchanged, paused playback remained paused, and track selection still worked after navigation. Automated lifecycle tests also cover retaining the same audio element, avoiding duplicate handlers, and preserving silence before opt-in. A full responsive/keyboard audit was not repeated in this update.
 
 ## Publication
 

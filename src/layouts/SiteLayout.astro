@@ -1,5 +1,6 @@
 ---
 import '../styles/site.css';
+import { ClientRouter } from 'astro:transitions';
 import MarginArt from '../components/MarginArt.astro';
 import MastheadArt from '../components/MastheadArt.astro';
 import RadioStrip from '../components/RadioStrip.astro';
@@ -16,7 +17,7 @@ const canonical = new URL(Astro.url.pathname === '/404/' ? '/404.html' : Astro.u
 const navigation = [{ label: 'entries', href: '/' }, { label: 'cves', href: '/cves/' }, { label: 'projects', href: '/projects/' }];
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,6 +32,7 @@ const navigation = [{ label: 'entries', href: '/' }, { label: 'cves', href: '/cv
     <meta property="og:type" content={reading ? 'article' : 'website'} />
     <meta property="og:url" content={canonical} />
     <title>{pageTitle}</title>
+    <ClientRouter fallback="swap" />
   </head>
   <body>
     <div class="site" id="forrof-site" data-reading={String(reading)} data-motion="off">
@@ -57,13 +59,8 @@ const navigation = [{ label: 'entries', href: '/' }, { label: 'cves', href: '/cv
       </div>
     </div>
     <script>
-      import { initArt } from '../scripts/art';
-      import { initRadio } from '../scripts/radio';
-      const root = document.getElementById('forrof-site');
-      if (root) {
-        initArt(root);
-        root.querySelectorAll<HTMLElement>('[data-radio]').forEach(initRadio);
-      }
+      import { initSite } from '../scripts/site';
+      initSite();
     </script>
   </body>
 </html>

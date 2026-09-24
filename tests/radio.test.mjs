@@ -6,17 +6,19 @@ import { join } from 'node:path';
 import { parseHTML } from 'linkedom';
 import { initRadio, formatTime } from '../src/scripts/radio.ts';
 import { loadRadioTracks } from '../src/lib/radio.ts';
+import { initSite } from '../src/scripts/site.ts';
 
-function harness() {
-  const { window, document } = parseHTML(`<section data-radio data-state="idle" hidden>
+function harness({ site = false } = {}) {
+  const { window, document } = parseHTML(`<html><head></head><body><div id="forrof-site"><section data-radio data-state="idle" hidden>
     <button data-radio-toggle>[play]</button>
     <button data-radio-track aria-expanded="false"><span data-radio-title>First</span><span data-radio-artist>Artist</span></button>
     <input data-radio-seek value="0" disabled><input data-radio-volume value="25"><span data-radio-time></span>
     <ol data-radio-list hidden><li><button data-radio-choice data-src="/audio/first.mp3" data-title="First" data-artist="Artist" data-credit="Remix by Artist" data-artist-url="https://example.com/artist" aria-current="true"></button></li><li><button data-radio-choice data-src="/audio/second.mp3" data-title="Second" data-artist="Another"></button></li></ol>
     <p><span data-radio-credit>Remix by Artist</span><a data-radio-artist-link href="https://example.com/artist">artist</a></p>
     <p data-radio-status hidden></p><audio data-radio-audio preload="none"></audio>
-  </section>`);
+  </section></div></body></html>`);
   globalThis.window = window;
+  globalThis.document = document;
   const root = document.querySelector('[data-radio]');
   const audio = root.querySelector('audio');
   const get = (name) => root.querySelector(`[data-radio-${name}]`);
@@ -28,14 +30,27 @@ function harness() {
   audio.play = () => { plays++; audio.paused = false; return playResult(); };
   audio.pause = () => { if (!audio.paused) { audio.paused = true; emit('pause'); } };
   audio.load = () => { loads++; audio.currentTime = 0; audio.duration = NaN; audio.error = null; audio.ended = false; audio.paused = true; emit('emptied'); };
-  const cleanup = initRadio(root);
+  const cleanup = site ? initSite() : initRadio(root);
+  if (site) document.dispatchEvent(new window.Event('astro:page-load'));
   return {
-    root, audio, window, get, emit, cleanup,
+    root, audio, window, document, get, emit, cleanup,
     choices: [...root.querySelectorAll('[data-radio-choice]')],
     plays: () => plays, loads: () => loads,
     result(fn) { playResult = fn; },
     async clickPlay() { get('toggle').click(); await Promise.resolve(); },
     input(name, value) { get(name).value = String(value); get(name).dispatchEvent(new window.Event('input')); },
+    navigate(keepRadio = true) {
+      document.dispatchEvent(new window.Event('astro:before-swap'));
+      const oldPage = document.getElementById('forrof-site');
+      const nextPage = document.createElement('div');
+      nextPage.id = 'forrof-site';
+      document.body.append(nextPage);
+      // Model the router carrying the existing element to the incoming page.
+      if (keepRadio) nextPage.append(root);
+      oldPage.remove();
+      document.dispatchEvent(new window.Event('astro:after-swap'));
+      document.dispatchEvent(new window.Event('astro:page-load'));
+    },
   };
 }
 
@@ -104,6 +119,55 @@ test('radio seek, time, volume, queue, and end-of-queue states work', async () =
   page.cleanup();
 });
 
+test('page lifecycle keeps the playing or paused radio intact without duplicate handlers', async () => {
+  const page = harness({ site: true });
+  page.choices[1].click();
+  await page.clickPlay();
+  page.audio.duration = 240;
+  page.audio.currentTime = 73;
+  page.input('volume', 67);
+  page.emit('timeupdate');
+  const source = page.audio.getAttribute('src');
+  const loads = page.loads();
+  page.get('track').click();
+  for (let visit = 0; visit < 3; visit++) {
+    page.navigate();
+    assert.equal(page.document.querySelector('[data-radio]'), page.root);
+    assert.equal(page.document.querySelector('audio'), page.audio);
+    assert.equal(page.audio.paused, false);
+    assert.equal(page.audio.currentTime, 73);
+    assert.equal(page.audio.volume, .67);
+    assert.equal(page.audio.getAttribute('src'), source);
+    assert.equal(page.get('title').textContent, 'Second');
+    assert.equal(page.get('list').hidden, false);
+    assert.equal(page.get('credit').textContent, 'Music by Another');
+    assert.equal(page.plays(), 1);
+    assert.equal(page.loads(), loads);
+  }
+  await page.clickPlay();
+  assert.equal(page.audio.paused, true, 'One click pauses: no duplicate listeners');
+  page.navigate();
+  assert.equal(page.audio.paused, true);
+  assert.equal(page.audio.currentTime, 73);
+  assert.equal(page.plays(), 1);
+  await page.clickPlay();
+  assert.equal(page.plays(), 2);
+  page.navigate(false);
+  assert.equal(page.audio.paused, true, 'Removing the radio disposes its old controller');
+  page.cleanup();
+});
+
+test('internal navigation never opts a silent visitor into audio', () => {
+  const page = harness({ site: true });
+  page.navigate();
+  page.navigate();
+  assert.equal(page.plays(), 0);
+  assert.equal(page.loads(), 0);
+  assert.equal(page.audio.hasAttribute('src'), false);
+  assert.equal(page.audio.paused, true);
+  page.cleanup();
+});
+
 test('cancelled and stale play promises cannot restart the radio', async () => {
   const page = harness();
   let resolvePlay;
@@ -120,7 +184,7 @@ test('cancelled and stale play promises cannot restart the radio', async () => {
   page.cleanup();
 });
 
-test('failed playback is recoverable and navigation never resumes audio', async () => {
+test('failed playback is recoverable and leaving the document never auto-resumes audio', async () => {
   const page = harness();
   page.result(() => Promise.reject(new Error('Unavailable')));
   await page.clickPlay();
@@ -192,6 +256,9 @@ test('configured radio renders credited tracks without autoplay and respects mot
     else {
       const radio = document.querySelector('[data-radio]');
       assert.ok(radio, route);
+      assert.equal(radio.getAttribute('data-astro-transition-persist'), 'forrof-radio');
+      assert.equal(document.querySelector('meta[name="astro-view-transitions-enabled"]').getAttribute('content'), 'true');
+      assert.equal(document.querySelector('meta[name="astro-view-transitions-fallback"]').getAttribute('content'), 'swap');
       assert.equal(radio.querySelector('[data-radio-artist]').textContent, tracks[0].artist);
       assert.equal(radio.querySelector('[data-radio-credit]').textContent, tracks[0].credit ?? `Music by ${tracks[0].artist}`);
       assert.deepEqual([...radio.querySelectorAll('[data-radio-choice]')].map((button) => ({ title: button.dataset.title, artist: button.dataset.artist, src: button.dataset.src })), tracks.map(({ title, artist, src }) => ({ title, artist, src })));

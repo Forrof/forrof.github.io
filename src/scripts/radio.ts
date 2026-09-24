@@ -138,6 +138,8 @@ export function initRadio(root: HTMLElement) {
     state('error');
     message('Track unavailable. Press play to retry, or choose another.');
   }, options);
+  // Internal ClientRouter navigation keeps this document alive. Only a full exit
+  // or reload pauses playback; opening a fresh page never resumes it automatically.
   window.addEventListener('pagehide', pause, options);
   progress();
   root.dataset.ready = 'true';
