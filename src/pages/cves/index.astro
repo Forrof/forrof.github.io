@@ -3,9 +3,23 @@ import SiteLayout from '../../layouts/SiteLayout.astro';
 import EntryRow from '../../components/EntryRow.astro';
 import { publishedCves } from '../../lib/content';
 import { assignedCve, advisoryStatus } from '../../lib/advisories';
-const cves = await publishedCves();
+const disclosures = await publishedCves();
+const groups = [
+  { id: 'assigned-cves', title: 'CVEs', type: 'cve', description: 'Public disclosures with an assigned CVE identifier.', records: disclosures.filter(({ data }) => assignedCve(data)) },
+  { id: 'advisories', title: 'Advisories', type: 'advisory', description: 'Published advisories without an assigned CVE identifier.', records: disclosures.filter(({ data }) => !assignedCve(data)) },
+];
+const number = (value: number) => String(value).padStart(2, '0');
 ---
-<SiteLayout title="cves" section="cves" description="Public vulnerability disclosures credited to forrof.">
-  <div class="ff-section-head"><h1><span aria-hidden="true">/</span> cves</h1><span class="ff-meta">public disclosures</span></div>
-  {cves.length ? cves.map(({ data }, index) => <EntryRow {...data} cve={assignedCve(data)} status={advisoryStatus(data)} href={`/cves/${data.identifier.toLowerCase()}/`} type="advisory" index={cves.length - index} />) : <p class="ff-empty">Advisories will appear here.</p>}
+<SiteLayout title="cves & advisories" section="cves" description="Assigned CVEs and public security advisories credited to forrof.">
+  <div class="ff-section-head"><h1><span aria-hidden="true">/</span> cves &amp; advisories</h1><span class="ff-meta">{number(disclosures.length)} public disclosures</span></div>
+  <nav class="ff-disclosure-nav" aria-label="Disclosure categories">
+    {groups.map((group) => <a href={`#${group.id}`}>{group.title} <span>{number(group.records.length)}</span></a>)}
+  </nav>
+  {groups.map((group) => <section class="ff-disclosure-group" aria-labelledby={group.id}>
+    <header class="ff-disclosure-heading">
+      <h2 id={group.id}>{group.title} <span class="ff-meta">[{number(group.records.length)}]</span></h2>
+      <p class="ff-meta">{group.description}</p>
+    </header>
+    {group.records.length ? group.records.map(({ data }, index) => <EntryRow {...data} cve={assignedCve(data)} status={advisoryStatus(data)} href={`/cves/${data.identifier.toLowerCase()}/`} type={group.type} headingLevel="h3" index={group.records.length - index} />) : <p class="ff-empty">{group.type === 'cve' ? 'No assigned CVEs yet.' : 'No advisories awaiting a CVE.'}</p>}
+  </section>)}
 </SiteLayout>

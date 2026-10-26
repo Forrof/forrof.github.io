@@ -128,6 +128,18 @@ PUBLIC_ADVISORY_FIXTURE_BODY
         assert.equal(Number(document.querySelector(`.ff-disclosure-counter [data-count="${key}"]`).textContent), value, `${page}: ${key}`);
       }
     }
+    const archive = parseHTML(readFileSync(join(output, 'cves/index.html'), 'utf8')).document;
+    for (const [id, count, type] of [['assigned-cves', expected.assigned, '[cve]'], ['advisories', expected.pending, '[advisory]']]) {
+      const group = archive.querySelector(`section[aria-labelledby="${id}"]`);
+      assert.ok(group);
+      assert.equal(group.querySelectorAll('.ff-entry').length, count);
+      assert.equal(Boolean(group.querySelector('.ff-empty')), count === 0);
+      assert.ok(group.querySelector('h2').textContent.includes(`[${String(count).padStart(2, '0')}]`));
+      for (const row of group.querySelectorAll('.ff-entry')) {
+        assert.ok(row.querySelector('h3 a'));
+        assert.equal(row.querySelector('.ff-type').textContent, type);
+      }
+    }
   }
   function assertEntriesOnly() {
     const document = parseHTML(readFileSync(join(output, 'index.html'), 'utf8')).document;
@@ -187,7 +199,7 @@ PUBLIC_ADVISORY_FIXTURE_BODY
   assert.doesNotMatch(assignedDetail.querySelector('main').textContent, /waiting for CVE/);
   const archive = parseHTML(readFileSync(join(output, 'cves/index.html'), 'utf8')).document;
   const assignedRow = archive.querySelector('a[href="/cves/ghsa-2345-6789-cfgh/"]').closest('.ff-entry');
-  assert.equal(assignedRow.querySelector('h2').textContent, 'Synthetic advisory fixture');
+  assert.equal(assignedRow.querySelector('h3').textContent, 'Synthetic advisory fixture');
   assert.equal(assignedRow.querySelector('.ff-status').textContent, 'Status: Confirmed, published, CVE assigned');
   assert.deepEqual(cacheSnapshot(), originalCache, 'Assignment build must not modify the parent content cache');
 

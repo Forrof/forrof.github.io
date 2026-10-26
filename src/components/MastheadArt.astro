@@ -17,7 +17,7 @@ const number = (value: number) => String(value).padStart(2, '0');
         <dd data-count="assigned">{number(counts.assigned)}</dd>
       </div>
       <div class="ff-tally">
-        <dt>pending CVE</dt>
+        <dt>advisories<br /><span class="ff-counter-note">pending CVE</span></dt>
         <dd data-count="pending">{number(counts.pending)}</dd>
       </div>
     </dl>

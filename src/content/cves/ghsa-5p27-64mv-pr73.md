@@ -4,7 +4,7 @@ summary: In the affected OAuth configuration, client registration restrictions a
 published: "2026-08-23"
 updated: "2026-09-15"
 identifier: GHSA-5p27-64mv-pr73
-verified: "2026-09-15"
+verified: "2026-10-26"
 product: mcp-memory-service
 creditSource: https://github.com/doobidoo/mcp-memory-service/security/advisories/GHSA-5p27-64mv-pr73
 affected: ">= 10.20.0, < 11.8.2"

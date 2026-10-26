@@ -16,7 +16,7 @@ const cve = assignedCve(data);
   <a class="ff-back" href="/cves/">← all disclosures</a>
   <article class="ff-article ff-advisory">
     <h1>{data.title}</h1>
-    <div class="ff-byline ff-meta"><span>forrof</span><time datetime={data.published}>{fullDate(data.published)}</time><span>[advisory]</span>{data.updated && <span>updated <time datetime={data.updated}>{fullDate(data.updated)}</time></span>}</div>
+    <div class="ff-byline ff-meta"><span>forrof</span><time datetime={data.published}>{fullDate(data.published)}</time><span>{cve ? '[cve]' : '[advisory]'}</span>{data.updated && <span>updated <time datetime={data.updated}>{fullDate(data.updated)}</time></span>}</div>
     <dl class="ff-facts">
       <dt>Status</dt><dd>{advisoryStatus(data)}</dd>
       {cve && <><dt>CVE</dt><dd><a href={`https://nvd.nist.gov/vuln/detail/${cve}`}>{cve} ↗</a></dd></>}

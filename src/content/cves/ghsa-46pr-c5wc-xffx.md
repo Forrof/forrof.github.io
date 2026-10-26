@@ -5,7 +5,7 @@ published: "2026-08-24"
 updated: "2026-09-20"
 identifier: GHSA-46pr-c5wc-xffx
 cve: CVE-2026-92939
-verified: "2026-09-20"
+verified: "2026-10-26"
 product: vm2
 creditSource: https://github.com/patriksimek/vm2/security/advisories/GHSA-46pr-c5wc-xffx
 affected: ">= 3.11.3, <= 3.11.6"

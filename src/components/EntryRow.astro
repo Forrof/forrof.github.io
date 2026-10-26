@@ -1,13 +1,13 @@
 ---
 import { displayDate } from '../lib/content';
-interface Props { title: string; href: string; summary: string; published: string; type: string; tags: string[]; index: number; status?: string; cve?: string }
-const { title, href, summary, published, type, tags, index, status, cve } = Astro.props;
+interface Props { title: string; href: string; summary: string; published: string; type: string; tags: string[]; index: number; status?: string; cve?: string; headingLevel?: 'h2' | 'h3' }
+const { title, href, summary, published, type, tags, index, status, cve, headingLevel: Heading = 'h2' } = Astro.props;
 ---
 <article class="ff-entry">
   <span class="ff-index" aria-hidden="true">{String(index).padStart(2, '0')}</span>
   <div>
     <div class="ff-title-row">
-      <h2><a href={href}>{title}</a></h2>
+      <Heading><a href={href}>{title}</a></Heading>
       <span class="ff-leader" aria-hidden="true"></span>
       <time class="ff-meta" datetime={published}>{displayDate(published)}</time>
     </div>

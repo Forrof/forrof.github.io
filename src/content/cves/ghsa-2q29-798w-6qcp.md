@@ -4,7 +4,7 @@ summary: The TFTP service can modify existing files despite the server's deletio
 published: "2026-08-23"
 updated: "2026-09-15"
 identifier: GHSA-2q29-798w-6qcp
-verified: "2026-09-15"
+verified: "2026-10-26"
 product: goshs
 creditSource: https://github.com/goshs-labs/goshs/security/advisories/GHSA-2q29-798w-6qcp
 affected: "1.2.4 and 1.2.5 (listed; see version note)"

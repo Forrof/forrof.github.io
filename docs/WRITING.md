@@ -42,6 +42,12 @@ If source fields disagree, preserve the discrepancy in a clear note instead of i
 
 The artwork's disclosure counter is calculated from published records on each build: assigned CVEs, advisories still pending a CVE, and the total published. Drafts never contribute. Adding a publicly confirmed `cve` moves that record from pending to assigned after the next publication; no counter values need manual editing.
 
+The `/cves/` archive has two server-rendered sections: **CVEs** for records with an assigned identifier and **Advisories** for the remaining public records. Each finding appears once, with category totals and newest-first ordering within each section. An assignment automatically moves the record between sections while retaining its GHSA URL. Article and list category labels follow the same assignment. Both CVEs and unassigned advisories remain excluded from Entries.
+
+When auditing credits, search the GitHub Advisory Database with `credit:Forrof` and also inspect public repository advisories: newly published or unassigned records may not appear in the central database. Follow every page of results and verify each candidate through the unauthenticated repository API. Notifications can identify repositories to check, but never establish public visibility by themselves. Require published state and public forrof credit; exclude private reports and do not count a global-database mirror as another finding. A missing CVE in a repository record does not cancel an assignment independently confirmed by NVD or the global database.
+
+The four records added on 26 October 2026 use explicitly labeled summaries with linked primary sources and shared-credit acknowledgments. Do not label a rewritten summary as a verbatim Description. Existing verbatim excerpts are preserved.
+
 The advisory automatically appears in the CVE archive only. The main entry index lists entries and writeups, while retaining the shared disclosure counter in its artwork. The template supplies technical-body headings; the page adds references and the optional disclosure timeline.
 
 ## GitHub projects

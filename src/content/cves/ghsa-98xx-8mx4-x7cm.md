@@ -5,7 +5,7 @@ published: "2026-08-24"
 updated: "2026-09-20"
 identifier: GHSA-98xx-8mx4-x7cm
 cve: CVE-2026-92941
-verified: "2026-09-20"
+verified: "2026-10-26"
 product: vm2
 creditSource: https://github.com/patriksimek/vm2/security/advisories/GHSA-98xx-8mx4-x7cm
 affected: ">= 3.11.3, <= 3.11.6"

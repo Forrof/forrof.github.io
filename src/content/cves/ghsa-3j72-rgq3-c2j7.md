@@ -3,7 +3,7 @@ title: SeaweedFS 4.42 inline GCS credentials allow unauthenticated SSRF with res
 summary: Unauthenticated access to the volume server gRPC port can bypass outbound destination protections and expose internal service responses.
 published: "2026-09-18"
 identifier: GHSA-3j72-rgq3-c2j7
-verified: "2026-09-20"
+verified: "2026-10-26"
 product: SeaweedFS
 creditSource: https://github.com/seaweedfs/seaweedfs/security/advisories/GHSA-3j72-rgq3-c2j7
 affected: "4.24 through 4.42"

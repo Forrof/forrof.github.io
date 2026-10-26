@@ -4,7 +4,7 @@ summary: Execution API callers can bypass module and permission restrictions, po
 published: "2026-09-01"
 updated: "2026-09-15"
 identifier: GHSA-wmwj-g59x-c8px
-verified: "2026-09-15"
+verified: "2026-10-26"
 product: flyto-core
 creditSource: https://github.com/flytohub/flyto-core/security/advisories/GHSA-wmwj-g59x-c8px
 affected: ">= 2.2.2, < 2.31.1"

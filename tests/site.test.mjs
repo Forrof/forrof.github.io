@@ -27,7 +27,7 @@ test('all public routes render complete HTML without relying on JavaScript', () 
     assert.equal(new Set(ids).size, ids.length, `${file}: unique IDs`);
   }
   const cves = documents.get('cves/index.html');
-  if (!cves.querySelector('.ff-entry')) assert.match(cves.querySelector('main').textContent, /Advisories will appear here/);
+  if (!cves.querySelector('.ff-entry')) assert.match(cves.querySelector('main').textContent, /No assigned CVEs yet/);
   const projects = documents.get('projects/index.html');
   for (const name of ['FFind', 'DiffSearchVuln', 'Vol2Installer']) assert.ok(projects.querySelector('main').textContent.includes(name));
   assert.equal(documents.get('404.html').querySelector('meta[name="robots"]').content, 'noindex');
@@ -189,7 +189,7 @@ test('artwork counters are accessible, server-rendered, and match the public arc
     assert.equal(counter.getAttribute('role'), 'group');
     assert.equal(counter.getAttribute('aria-label'), 'Public disclosure counts');
     assert.equal(counter.closest('[aria-hidden="true"], [hidden]'), null, `${file}: counts must not be decorative`);
-    assert.deepEqual([...counter.querySelectorAll('dt')].map((term) => term.textContent), ['CVEs assigned', 'pending CVE']);
+    assert.deepEqual([...counter.querySelectorAll('dt')].map((term) => term.textContent), ['CVEs assigned', 'advisoriespending CVE']);
     for (const [key, value] of Object.entries(expected)) {
       assert.equal(counter.querySelector(`[data-count="${key}"]`).textContent, String(value).padStart(2, '0'), `${file}: ${key}`);
     }
@@ -207,7 +207,7 @@ test('published output contains no source templates or private configuration', (
   assert.doesNotMatch(styles, /fonts\.googleapis|fonts\.gstatic/);
 });
 
-test('the eight verified public advisories have credited details and visible CVE status', () => {
+test('the original eight public advisories retain their credited details and visible CVE status', () => {
   const verified = [
     ['goshs-labs/goshs', 'GHSA-2q29-798w-6qcp'],
     ['patriksimek/vm2', 'GHSA-98xx-8mx4-x7cm'],
@@ -248,7 +248,7 @@ test('the eight verified public advisories have credited details and visible CVE
     const status = assigned ? 'Confirmed, published, CVE assigned' : 'Confirmed, published, waiting for CVE';
     assert.ok(detail.querySelector('.ff-facts').textContent.includes(status), identifier);
     const row = documents.get('cves/index.html').querySelector(`a[href="${route}"]`)?.closest('.ff-entry');
-    assert.equal(row?.querySelector('h2')?.textContent, title, `CVE archive: title for ${identifier}`);
+    assert.equal(row?.querySelector('h3')?.textContent, title, `CVE archive: title for ${identifier}`);
     assert.equal(row?.querySelector('.ff-status')?.textContent, `Status: ${status}`, `CVE archive: ${identifier}`);
     assert.equal(homepage.querySelector(`a[href="${route}"]`), null, `Entries exclude ${identifier}`);
     assert.ok(sitemap.includes(`https://forrof.github.io${route}`), identifier);
@@ -263,7 +263,7 @@ test('the eight verified public advisories have credited details and visible CVE
 });
 
 test('NIST assignments map to the existing vm2 URLs and update all disclosure counters', () => {
-  // Each NVD record references this exact public repository advisory (verified 2026-09-20).
+  // Original NVD mappings were checked on 2026-09-20; public GitHub assignments rechecked 2026-10-26.
   const assignments = [
     ['CVE-2026-92938', 'ghsa-6w8r-xxw2-g3hx'],
     ['CVE-2026-92939', 'ghsa-46pr-c5wc-xffx'],
@@ -271,20 +271,20 @@ test('NIST assignments map to the existing vm2 URLs and update all disclosure co
     ['CVE-2026-92941', 'ghsa-98xx-8mx4-x7cm'],
   ];
   const archive = documents.get('cves/index.html');
-  assert.equal(archive.querySelectorAll('.ff-entry').length, 8);
-  assert.equal(archive.querySelectorAll('.ff-cve-id').length, assignments.length);
+  assert.equal(archive.querySelectorAll('.ff-entry').length, 12);
+  assert.equal(archive.querySelectorAll('.ff-cve-id').length, 7);
   for (const [cve, id] of assignments) {
     const detail = documents.get(`cves/${id}/index.html`);
     const source = `https://nvd.nist.gov/vuln/detail/${cve}`;
     assert.equal(detail.querySelector(`.ff-facts a[href="${source}"]`).textContent, `${cve} ↗`);
     assert.ok(detail.querySelector(`.ff-reference-list a[href="${source}"]`));
-    assert.ok(detail.querySelector('.ff-facts time[datetime="2026-09-20"]'));
+    assert.ok(detail.querySelector('.ff-facts time[datetime="2026-10-26"]'));
     assert.match(detail.querySelector('.ff-facts').textContent, /Confirmed, published, CVE assigned/);
     const row = archive.querySelector(`a[href="/cves/${id}/"]`).closest('.ff-entry');
     assert.equal(row.querySelector('.ff-cve-id').getAttribute('href'), source);
     assert.equal(row.querySelector('.ff-cve-id').textContent, `${cve} ↗`);
     assert.equal(row.querySelector('.ff-status').textContent, 'Status: Confirmed, published, CVE assigned');
-    assert.doesNotMatch(row.querySelector('h2').textContent, /CVE-|GHSA-/);
+    assert.doesNotMatch(row.querySelector('h3').textContent, /CVE-|GHSA-/);
   }
   const seaweed = documents.get('cves/ghsa-3j72-rgq3-c2j7/index.html');
   assert.match(seaweed.querySelector('.ff-facts').textContent, /Confirmed, published, waiting for CVE/);
@@ -294,10 +294,72 @@ test('NIST assignments map to the existing vm2 URLs and update all disclosure co
   assert.equal(seaweed.querySelector('.ff-byline time').getAttribute('datetime'), '2026-09-18');
   for (const route of ['index.html', 'cves/index.html', 'projects/index.html']) {
     const counter = documents.get(route).querySelector('.ff-disclosure-counter');
-    for (const [key, expected] of Object.entries({ assigned: '04', pending: '04', published: '08' })) {
+    for (const [key, expected] of Object.entries({ assigned: '07', pending: '05', published: '12' })) {
       assert.equal(counter.querySelector(`[data-count="${key}"]`).textContent, expected, `${route}: ${key}`);
     }
   }
+});
+
+test('CVEs and unassigned advisories have separate accessible sections without duplicate disclosures', () => {
+  const archive = documents.get('cves/index.html');
+  const groups = [
+    ['assigned-cves', 7, '[cve]'],
+    ['advisories', 5, '[advisory]'],
+  ];
+  const links = [];
+  for (const [id, count, type] of groups) {
+    const section = archive.querySelector(`section[aria-labelledby="${id}"]`);
+    assert.ok(section);
+    assert.equal(section.querySelector(`#${id}`).tagName, 'H2');
+    assert.ok(archive.querySelector(`nav[aria-label="Disclosure categories"] a[href="#${id}"]`));
+    assert.equal(section.querySelectorAll('.ff-entry').length, count);
+    assert.ok(section.querySelector('h2').textContent.includes(`[${String(count).padStart(2, '0')}]`));
+    for (const row of section.querySelectorAll('.ff-entry')) {
+      const link = row.querySelector('h3 a');
+      assert.ok(link);
+      links.push(link.getAttribute('href'));
+      assert.equal(row.querySelector('.ff-type').textContent, type);
+      assert.equal(Boolean(row.querySelector('.ff-cve-id')), id === 'assigned-cves');
+      const detail = documents.get(`${link.getAttribute('href').slice(1)}index.html`);
+      assert.ok(detail.querySelector('.ff-byline').textContent.includes(type));
+      assert.ok(detail.querySelector('.ff-facts time[datetime="2026-10-26"]'));
+    }
+    const dates = [...section.querySelectorAll('.ff-title-row time')].map((time) => time.getAttribute('datetime'));
+    assert.deepEqual(dates, [...dates].sort().reverse());
+  }
+  assert.equal(links.length, 12);
+  assert.equal(new Set(links).size, 12);
+});
+
+test('new Mautic and Yamcs records match their public reporter credits and assignments', () => {
+  // Anonymous repository API responses verified on 2026-10-26, including shared reporter credits.
+  const records = [
+    ['mautic/mautic', 'GHSA-mxjf-pghx-h299', 'CVE-2026-115188', '2026-10-26', 'Remote Code Execution in Campaign Import', '7.2.2'],
+    ['mautic/mautic', 'GHSA-h7pm-79gc-8867', 'CVE-2026-115189', '2026-10-26', 'Twig Sandbox Escape in Theme Templates', '5.2.12, 6.0.10, 7.2.2'],
+    ['mautic/mautic', 'GHSA-wfhm-289v-79vp', 'CVE-2026-115194', '2026-10-26', 'Arbitrary File Read via Path Traversal in Asset API', '5.2.12, 6.0.10, 7.2.2'],
+    ['yamcs/yamcs', 'GHSA-wqq5-5w4p-m569', null, '2026-10-01', 'Instance reconfiguration allows YAML structure injection through template arguments', '5.13.6'],
+  ];
+  const sitemap = readFileSync(new URL('sitemap-0.xml', dist), 'utf8');
+  for (const [repository, identifier, cve, published, title, fixed] of records) {
+    const route = `/cves/${identifier.toLowerCase()}/`;
+    const detail = documents.get(`${route.slice(1)}index.html`);
+    const source = `https://github.com/${repository}/security/advisories/${identifier}`;
+    assert.equal(detail.querySelector('h1').textContent, title);
+    assert.equal(detail.querySelector('.ff-byline time').getAttribute('datetime'), published);
+    assert.ok(detail.querySelector(`.ff-facts a[href="${source}"]`));
+    assert.ok(detail.querySelector(`.ff-reference-list a[href="${source}"]`));
+    assert.ok(detail.querySelector(`.ff-prose blockquote a[href="${source}"]`));
+    assert.match(detail.querySelector('.ff-prose blockquote').textContent, /credits forrof alongside other researchers.*not a verbatim copy/);
+    assert.ok(detail.querySelector('.ff-facts').textContent.includes(fixed));
+    assert.equal(detail.querySelector('.ff-facts a[href^="https://nvd.nist.gov/"]')?.textContent ?? null, cve ? `${cve} ↗` : null);
+    for (const heading of ['description', 'summary', 'impact']) assert.ok(detail.getElementById(heading));
+    assert.equal(detail.querySelector('#poc, .ff-prose script'), null);
+    assert.equal(homepage.querySelector(`main a[href="${route}"]`), null);
+    assert.ok(sitemap.includes(`https://forrof.github.io${route}`));
+  }
+  const yamcs = documents.get('cves/ghsa-wqq5-5w4p-m569/index.html');
+  assert.match(yamcs.querySelector('.ff-prose').textContent, /Code-execution impact depends on available templates and installed services/);
+  assert.doesNotMatch(yamcs.querySelector('.ff-facts').textContent, /CVE-2026-55559/);
 });
 
 test('source explanation and remediation snippets render intact as static code', () => {
