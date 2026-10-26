@@ -1,6 +1,6 @@
 {
   "name": "Vol2Installer",
-  "description": "A simple installer for Volatility2 that takes care of the dependencies and setup.",
+  "description": "Automates Volatility 2 setup on Debian and Ubuntu, including legacy Python dependencies, forensic libraries, and shell configuration for memory analysis.",
   "repository": "https://github.com/Forrof/Vol2Installer",
   "language": "Python",
   "kind": "original",

@@ -5,6 +5,7 @@ Implemented the approved design on `codex/redesign`. Public release to `forrof.g
 ## Included
 
 - Static entry index and individual article URLs, separate CVE archive/detail template, projects, 404, sitemap, and canonical metadata. The entry index contains only entries and writeups; advisories remain exclusively in the CVE archive.
+- Projects refreshed from public GitHub metadata and READMEs on 26 October: Órbita, FFind, DiffSearchVuln, and Vol2Installer. Descriptions and language labels reflect verified functionality; Órbita has a separate live-game link. Optional live-site URLs must use HTTPS, and both project actions open in a new tab so the archive's radio remains available. Upstream forks and the archive's own source repository are not listed as selected original projects.
 - Original rotating iris/knot and margin artwork, server-rendered fallbacks, remembered pause, reduced-motion handling, and offscreen/background suspension.
 - A monospace disclosure counter sits between the two masthead artworks on wide layouts and beneath them on narrow layouts. Counts are derived from public records, exclude drafts, and remain readable without JavaScript; decorative art stays hidden from assistive technology while the counts are accessible.
 - Locally bundled IBM Plex Mono, IBM Plex Sans, and Literata, with their font licenses.

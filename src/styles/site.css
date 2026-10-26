@@ -138,7 +138,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid #9eb9f2; outline-offs
     .site .ff-article-tail { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; border-top: 1px solid var(--ff-line); padding-top: 22px; margin-top: 30px; font-size: 13px; }
     .site .ff-article-tail a { color: var(--ff-accent); }
     .site .ff-empty { border-top: 1px solid var(--ff-line); padding: 42px 0 74px; font: 400 1.0625rem/1.65 var(--ff-reading); color: var(--ff-muted); }
-    .site .ff-project-link { color: var(--ff-accent); font-size: 0.8125rem; display: inline-block; margin-top: 17px; }
+    .site .ff-project-links { display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; margin-top: 17px; }
+    .site .ff-project-link { color: var(--ff-accent); font-size: 0.8125rem; display: inline-flex; align-items: center; min-height: 2.75rem; }
     .site[data-detail="minimal"] .ff-index,
     .site[data-detail="minimal"] .ff-leader,
     .site[data-detail="minimal"] .ff-corner { display: none; }

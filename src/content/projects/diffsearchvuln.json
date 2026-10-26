@@ -1,7 +1,8 @@
 {
   "name": "DiffSearchVuln",
+  "description": "A macOS-first patch-diffing workbench for authorized vulnerability research. Compares Apple Silicon Mach-O binaries with Ghidra and presents changed functions and patch evidence in a native app.",
   "repository": "https://github.com/Forrof/DiffSearchVuln",
-  "language": "Python",
+  "language": "Python · Swift",
   "kind": "original",
   "order": 2
 }

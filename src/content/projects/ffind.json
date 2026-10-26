@@ -1,6 +1,6 @@
 {
   "name": "FFind",
-  "description": "Self-hosted static malware analysis for analyst-reviewed YARA and Falcon LogScale detection content.",
+  "description": "Local static analysis of Windows PE files, with native and managed decompilation, persistent case evidence, and analyst-reviewed Falcon LogScale and YARA detections. Submitted binaries are not executed.",
   "repository": "https://github.com/Forrof/FFind",
   "language": "Python",
   "kind": "original",

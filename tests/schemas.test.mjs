@@ -36,6 +36,11 @@ test('project URLs and ownership type are constrained', () => {
   assert.equal(projectSchema.safeParse(fixture).success, true);
   assert.equal(projectSchema.safeParse({ ...fixture, repository: 'https://github.com.evil.invalid/project' }).success, false);
   assert.equal(projectSchema.safeParse({ ...fixture, kind: undefined }).success, false);
+  assert.equal(projectSchema.parse({ ...fixture, website: 'https://example.com/game/' }).website, 'https://example.com/game/');
+  assert.equal(projectSchema.parse(fixture).website, undefined);
+  for (const website of ['javascript:alert(1)', 'http://example.com', '/game/', 'not a URL']) {
+    assert.equal(projectSchema.safeParse({ ...fixture, website }).success, false, website);
+  }
 });
 
 test('public GHSAs can await a CVE without inventing an identifier or changing their route key', () => {

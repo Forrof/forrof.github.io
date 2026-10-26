@@ -49,6 +49,7 @@ export const projectSchema = z.object({
     name: z.string().min(1),
     description: z.string().optional(),
     repository: z.url({ protocol: /^https?$/ }).refine((url) => new URL(url).hostname === 'github.com', 'Use a GitHub repository URL'),
+    website: z.url({ protocol: /^https$/ }).optional(),
     language: z.string().min(1),
     kind: z.enum(['original', 'fork', 'contribution']),
     order: z.number().int().nonnegative(),

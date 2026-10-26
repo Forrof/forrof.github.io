@@ -1,0 +1,9 @@
+{
+  "name": "Órbita",
+  "description": "A Spanish-language word and culture game where rarer answers earn more points. Daily missions, timed rounds, and a space-exploration theme, playable directly in the browser.",
+  "repository": "https://github.com/Forrof/orbita",
+  "website": "https://forrof.github.io/orbita/",
+  "language": "JavaScript · Python",
+  "kind": "original",
+  "order": 0
+}

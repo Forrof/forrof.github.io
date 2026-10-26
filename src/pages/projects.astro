@@ -4,7 +4,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 ---
 <SiteLayout title="projects" section="projects" description="Selected GitHub projects by forrof.">
-  <div class="ff-section-head"><h1><span aria-hidden="true">/</span> projects</h1><span class="ff-meta">selected repositories</span></div>
+  <div class="ff-section-head"><h1><span aria-hidden="true">/</span> projects</h1><span class="ff-meta">{String(projects.length).padStart(2, '0')} selected repositories</span></div>
   {projects.map(({ data }, index) => <article class="ff-entry">
     <span class="ff-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
     <div>
@@ -14,7 +14,10 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
       </div>
       {data.description && <p class="ff-summary">{data.description}</p>}
       {data.kind !== 'original' && <span class="ff-meta">[{data.kind}]</span>}
-      <a class="ff-project-link" href={data.repository} target="_blank" rel="noopener noreferrer">view repository ↗</a>
+      <div class="ff-project-links">
+        <a class="ff-project-link" href={data.repository} target="_blank" rel="noopener noreferrer" aria-label={`View ${data.name} on GitHub (opens in a new tab)`}>view repository ↗</a>
+        {data.website && <a class="ff-project-link" href={data.website} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${data.name} live site (opens in a new tab)`}>live site ↗</a>}
+      </div>
     </div>
   </article>)}
 </SiteLayout>

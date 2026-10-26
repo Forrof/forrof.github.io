@@ -52,7 +52,9 @@ The advisory automatically appears in the CVE archive only. The main entry index
 
 ## GitHub projects
 
-Add one JSON file to `src/content/projects/`, following an existing file. Set `kind` to `original`, `fork`, or `contribution` accurately. `order` controls placement. Descriptions are optional: leave them out when none is verified. Project information is intentionally committed, so the site does not depend on the GitHub API being available when a visitor arrives.
+Add one JSON file to `src/content/projects/`, following an existing file. Set `kind` to `original`, `fork`, or `contribution` accurately. `order` controls placement. Descriptions are optional: leave them out when none is verified. An optional HTTPS `website` adds a separate live-site link; verify it belongs to the project instead of treating a fork's upstream homepage as your deployment. Repository and live-site links open in a new tab, keeping the archive and its music open. Project information is intentionally committed, so the site does not depend on the GitHub API being available when a visitor arrives.
+
+On 26 October 2026 the selection was refreshed from public repository metadata, language statistics, and READMEs: Órbita, FFind, DiffSearchVuln, and Vol2Installer. Órbita links to its published game; FFind and DiffSearchVuln descriptions reflect their current static-analysis and native patch-diffing features. MeshCentral is an upstream fork and this archive's own repository is not included in the selected original projects.
 
 ## Radio tracks
 

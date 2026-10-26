@@ -29,8 +29,44 @@ test('all public routes render complete HTML without relying on JavaScript', () 
   const cves = documents.get('cves/index.html');
   if (!cves.querySelector('.ff-entry')) assert.match(cves.querySelector('main').textContent, /No assigned CVEs yet/);
   const projects = documents.get('projects/index.html');
-  for (const name of ['FFind', 'DiffSearchVuln', 'Vol2Installer']) assert.ok(projects.querySelector('main').textContent.includes(name));
+  for (const name of ['Órbita', 'FFind', 'DiffSearchVuln', 'Vol2Installer']) assert.ok(projects.querySelector('main').textContent.includes(name));
   assert.equal(documents.get('404.html').querySelector('meta[name="robots"]').content, 'noindex');
+});
+
+test('projects reflect the selected public originals and expose only verified live-site links', () => {
+  const document = documents.get('projects/index.html');
+  const rows = [...document.querySelectorAll('main .ff-entry')];
+  const expected = [
+    ['Órbita', 'orbita', 'JavaScript · Python'],
+    ['FFind', 'FFind', 'Python'],
+    ['DiffSearchVuln', 'DiffSearchVuln', 'Python · Swift'],
+    ['Vol2Installer', 'Vol2Installer', 'Python'],
+  ];
+  assert.equal(rows.length, expected.length);
+  assert.match(document.querySelector('.ff-section-head').textContent, /04 selected repositories/);
+  for (const [index, row] of rows.entries()) {
+    const [name, repository, language] = expected[index];
+    const title = row.querySelector('h2 a');
+    assert.equal(title.textContent, name);
+    assert.equal(title.getAttribute('href'), `https://github.com/Forrof/${repository}`);
+    assert.equal(row.querySelector('.ff-title-row .ff-meta').textContent, language);
+    assert.ok(row.querySelector('.ff-summary').textContent.length > 30);
+    const repositoryLink = row.querySelector('.ff-project-links a');
+    assert.equal(repositoryLink.getAttribute('href'), title.getAttribute('href'));
+    assert.ok(repositoryLink.getAttribute('aria-label').includes(name));
+    for (const link of row.querySelectorAll('a')) {
+      assert.equal(link.getAttribute('target'), '_blank');
+      assert.equal(link.getAttribute('rel'), 'noopener noreferrer');
+    }
+    assert.equal(row.querySelectorAll('.ff-project-links a').length, index === 0 ? 2 : 1);
+  }
+  const live = rows[0].querySelector('a[href="https://forrof.github.io/orbita/"]');
+  assert.ok(live);
+  assert.match(live.getAttribute('aria-label'), /Órbita.*new tab/);
+  assert.match(rows[1].querySelector('.ff-summary').textContent, /Submitted binaries are not executed/);
+  assert.match(rows[2].querySelector('.ff-summary').textContent, /patch-diffing.*Mach-O/);
+  assert.match(rows[3].querySelector('.ff-summary').textContent, /Debian and Ubuntu/);
+  assert.equal(document.querySelector('main a[href="https://github.com/Forrof/MeshCentral"], main a[href="https://github.com/Forrof/forrof.github.io"]'), null);
 });
 
 test('the entries page lists the new article while keeping removed posts and CVEs out', () => {
@@ -97,6 +133,9 @@ test('every internal page, asset, and heading link resolves in the build', () =>
       const value = element.getAttribute('href') ?? element.getAttribute('src');
       const url = new URL(value, base);
       if (url.origin !== base.origin) continue;
+      // Órbita is a separate Pages deployment on the same host, verified live on 2026-10-26.
+      // Exempt only its explicit project action; all archive routes/assets remain checked.
+      if (element.matches('.ff-project-links a') && url.href === 'https://forrof.github.io/orbita/') continue;
       const path = decodeURIComponent(url.pathname).replace(/^\//, '');
       let target = new URL(path || 'index.html', dist);
       if (existsSync(target) && statSync(target).isDirectory()) target = new URL('index.html', target.href.endsWith('/') ? target : `${target.href}/`);
