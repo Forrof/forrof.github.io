@@ -310,7 +310,7 @@ test('NIST assignments map to the existing vm2 URLs and update all disclosure co
     ['CVE-2026-92941', 'ghsa-98xx-8mx4-x7cm'],
   ];
   const archive = documents.get('cves/index.html');
-  assert.equal(archive.querySelectorAll('.ff-entry').length, 12);
+  assert.equal(archive.querySelectorAll('.ff-entry').length, 13);
   assert.equal(archive.querySelectorAll('.ff-cve-id').length, 7);
   for (const [cve, id] of assignments) {
     const detail = documents.get(`cves/${id}/index.html`);
@@ -333,7 +333,7 @@ test('NIST assignments map to the existing vm2 URLs and update all disclosure co
   assert.equal(seaweed.querySelector('.ff-byline time').getAttribute('datetime'), '2026-09-18');
   for (const route of ['index.html', 'cves/index.html', 'projects/index.html']) {
     const counter = documents.get(route).querySelector('.ff-disclosure-counter');
-    for (const [key, expected] of Object.entries({ assigned: '07', pending: '05', published: '12' })) {
+    for (const [key, expected] of Object.entries({ assigned: '07', pending: '06', published: '13' })) {
       assert.equal(counter.querySelector(`[data-count="${key}"]`).textContent, expected, `${route}: ${key}`);
     }
   }
@@ -343,7 +343,7 @@ test('CVEs and unassigned advisories have separate accessible sections without d
   const archive = documents.get('cves/index.html');
   const groups = [
     ['assigned-cves', 7, '[cve]'],
-    ['advisories', 5, '[advisory]'],
+    ['advisories', 6, '[advisory]'],
   ];
   const links = [];
   for (const [id, count, type] of groups) {
@@ -361,13 +361,46 @@ test('CVEs and unassigned advisories have separate accessible sections without d
       assert.equal(Boolean(row.querySelector('.ff-cve-id')), id === 'assigned-cves');
       const detail = documents.get(`${link.getAttribute('href').slice(1)}index.html`);
       assert.ok(detail.querySelector('.ff-byline').textContent.includes(type));
-      assert.ok(detail.querySelector('.ff-facts time[datetime="2026-10-26"]'));
+      const verified = link.getAttribute('href') === '/cves/ghsa-mfgm-4p7x-3ccr/' ? '2026-11-26' : '2026-10-26';
+      assert.ok(detail.querySelector(`.ff-facts time[datetime="${verified}"]`));
     }
     const dates = [...section.querySelectorAll('.ff-title-row time')].map((time) => time.getAttribute('datetime'));
     assert.deepEqual(dates, [...dates].sort().reverse());
   }
-  assert.equal(links.length, 12);
-  assert.equal(new Set(links).size, 12);
+  assert.equal(links.length, 13);
+  assert.equal(new Set(links).size, 13);
+});
+
+test('the newly published Argo CD advisory has verified credit, versions, and pending status', () => {
+  const id = 'ghsa-mfgm-4p7x-3ccr';
+  const route = `/cves/${id}/`;
+  const source = 'https://github.com/argoproj/argo-cd/security/advisories/GHSA-mfgm-4p7x-3ccr';
+  const detail = documents.get(`cves/${id}/index.html`);
+  assert.ok(detail);
+  assert.match(detail.querySelector('h1').textContent, /^Repository create with upsert/);
+  assert.doesNotMatch(detail.querySelector('h1').textContent, /GHSA-|CVE-/);
+  assert.equal(detail.querySelector('.ff-byline time').getAttribute('datetime'), '2026-11-24');
+  assert.ok(detail.querySelector('.ff-facts time[datetime="2026-11-26"]'));
+  for (const selector of ['.ff-facts', '.ff-reference-list', '.ff-prose blockquote']) {
+    assert.ok(detail.querySelector(`${selector} a[href="${source}"]`));
+  }
+  assert.match(detail.querySelector('.ff-prose blockquote').textContent, /credits forrof alongside other researchers.*not a verbatim copy/);
+  const facts = detail.querySelector('.ff-facts').textContent;
+  assert.match(facts, /Confirmed, published, waiting for CVE/);
+  assert.match(facts, /v2: >= 2\.14\.0; v3: >= 3\.0\.0, < 3\.4\.15 \|\| >= 3\.5\.0, < 3\.5\.9 \|\| >= 3\.6\.0, < 3\.6\.3/);
+  assert.match(facts, /3\.4\.15, 3\.5\.9, 3\.6\.3; no v2 patch listed/);
+  assert.match(facts, /High · 7\.7/);
+  assert.equal(detail.querySelector('.ff-facts a[href^="https://nvd.nist.gov/"]'), null);
+  for (const heading of ['description', 'impact', 'patches', 'workarounds']) assert.ok(detail.getElementById(heading));
+  assert.match(detail.querySelector('.ff-prose').textContent, /built-in read-only role is not sufficient/);
+  assert.match(detail.querySelector('.ff-prose').textContent, /source hydrator and a successful connection test/);
+  const archive = documents.get('cves/index.html');
+  const section = archive.querySelector('section[aria-labelledby="advisories"]');
+  assert.equal(section.querySelector('h3 a').getAttribute('href'), route);
+  assert.equal(archive.querySelectorAll(`h3 a[href="${route}"]`).length, 1);
+  assert.equal(homepage.querySelector(`main a[href="${route}"]`), null);
+  assert.ok(readFileSync(new URL('sitemap-0.xml', dist), 'utf8').includes(`https://forrof.github.io${route}`));
+  assert.equal(documents.has('cves/ghsa-j329-jw7j-rxjm/index.html'), false, 'Do not list an advisory without verified public forrof credit');
 });
 
 test('new Mautic and Yamcs records match their public reporter credits and assignments', () => {

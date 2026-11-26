@@ -48,6 +48,8 @@ When auditing credits, search the GitHub Advisory Database with `credit:Forrof` 
 
 The four records added on 26 October 2026 use explicitly labeled summaries with linked primary sources and shared-credit acknowledgments. Do not label a rewritten summary as a verbatim Description. Existing verbatim excerpts are preserved.
 
+The 26 November 2026 refresh adds the public Argo CD record `GHSA-mfgm-4p7x-3ccr`, with accepted shared reporter credit and no assigned CVE. Its labeled summary distinguishes the affected v2 package (no patched release listed) from the patched v3 release lines. Notification emails are discovery leads only: do not copy mail bodies, private report identifiers, or credit invitations into public content. A missing public credit must be resolved before adding a record.
+
 The advisory automatically appears in the CVE archive only. The main entry index lists entries and writeups, while retaining the shared disclosure counter in its artwork. The template supplies technical-body headings; the page adds references and the optional disclosure timeline.
 
 ## GitHub projects
